@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'url';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -10,8 +12,8 @@ const nextConfig = {
     unoptimized: true,
   },
   output: 'standalone',
-  // Add workspaceDir to explicitly specify the project root
-  workspaceDir: __dirname,
+  // Replace __dirname with ESM-compatible approach
+  workspaceDir: fileURLToPath(new URL('.', import.meta.url)),
 }
 
 export default nextConfig
