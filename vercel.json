@@ -2,6 +2,5 @@
   "version": 2,
   "buildCommand": "pnpm install && pnpm run build",
   "devCommand": "pnpm run dev",
-  "rootDirectory": ".",
   "outputDirectory": ".next"
 }
