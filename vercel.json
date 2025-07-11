@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm install && pnpm run build",
+  "devCommand": "pnpm run dev",
+  "startCommand": "pnpm run start",
+  "rootDirectory": ".",
+  "outputDirectory": ".next"
+}
