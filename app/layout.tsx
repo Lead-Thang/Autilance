@@ -28,17 +28,16 @@ export const metadata: Metadata = {
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
   ],
-  generator: 'v0.dev'
 }
 
 
 import type React from "react"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/hooks/use-theme"
-import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from "../hooks/use-theme"
+import { Toaster } from "../components/ui/toaster"
 import { SessionProvider } from "next-auth/react"
-import { Providers } from "@/components/Providers"
+import { Providers } from "../components/Providers"
 
 const inter = Inter({ subsets: ["latin"] })
 

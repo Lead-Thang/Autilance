@@ -9,13 +9,14 @@ import {
   Loader2, Mail, Lock, Eye, EyeOff
 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { Button } from "../../../components/ui/button"
+import { Input } from "../../../components/ui/input"
+// 使用更明确的相对路径导入 Label 组件
+import { Label } from "../../../components/ui/label"
+import { Separator } from "../../../components/ui/separator"
+import { Alert, AlertDescription } from "../../../components/ui/alert"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
+import { ThemeToggle } from "../../../components/theme-toggle"
 
 export default function SignInPage() {
   const [email, setEmail] = useState("")
@@ -141,7 +142,7 @@ export default function SignInPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
                   disabled={isLoading}
@@ -158,7 +159,7 @@ export default function SignInPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                   placeholder="Please enter your password"
                   required
                   disabled={isLoading}

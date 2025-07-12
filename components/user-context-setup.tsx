@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "../components/ui/button"
+import { Input } from "../components/ui/input"
+import { Label } from "../components/ui/label"
+import { Badge } from "../components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -13,8 +13,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import type { UserContext } from "@/hooks/use-ai-chat"
+} from "../components/ui/dialog"
+import type { UserContext } from "../hooks/use-ai-chat"
+import { useAIChat } from "../hooks/use-ai-chat"
 import { Settings, Plus, X } from "lucide-react"
 
 interface UserContextSetupProps {

@@ -1,4 +1,4 @@
-import { mistralAI } from "@/lib/mistral"
+import { mistralAI } from "../lib/mistral"
 
 export interface StoreComponent {
   id: string

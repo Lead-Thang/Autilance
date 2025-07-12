@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-import { ThemeProvider } from "@/hooks/use-theme"
-import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from "../hooks/use-theme"
+import { Toaster } from "../components/ui/toaster"
 import { SessionProvider } from "next-auth/react"
 
 export default function ClientLayout({

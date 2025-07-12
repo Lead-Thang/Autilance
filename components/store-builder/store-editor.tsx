@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useCallback, type ReactElement, type MouseEvent } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { type StoreComponent, type StoreData, storeAI } from "@/lib/store-ai";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Textarea } from "../../components/ui/textarea";
+import { Badge } from "../../components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { type StoreComponent, type StoreData, storeAI } from "../../lib/store-ai";
 import { ComponentEditor } from "./component-editor";
 import StorePreview from "./store-preview";
 import { Eye, Edit, Save, Sparkles, Palette, Layout, Settings, Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";

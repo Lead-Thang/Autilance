@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, Fragment, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "../../components/ui/button"
+import { Card, CardContent } from "../../components/ui/card"
 import Head from 'next/head'
-import { StoreData, StoreComponent } from '@/lib/store-ai';
+import { StoreData, StoreComponent } from '../../lib/store-ai';
 
 interface StorePreviewProps {
   store: StoreData;

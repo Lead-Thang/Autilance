@@ -1,16 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
+import { Button } from "../../../components/ui/button"
+import { Input } from "../../../components/ui/input"
+import { Label } from "../../../components/ui/label"
+import { Textarea } from "../../../components/ui/textarea"
+import { Switch } from "../../../components/ui/switch"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
+import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar"
+import { Badge } from "../../../components/ui/badge"
+import { Separator } from "../../../components/ui/separator"
 import {
   User,
   Building,
@@ -28,7 +28,7 @@ import {
   EyeOff,
   Plus,
 } from "lucide-react"
-import { useTheme } from "@/hooks/use-theme"
+import { useTheme } from "../../../hooks/use-theme"
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
@@ -273,7 +273,7 @@ export default function SettingsPage() {
                   <Switch
                     id="email-notifications"
                     checked={notifications.email}
-                    onCheckedChange={(checked) => setNotifications({ ...notifications, email: checked })}
+                    onCheckedChange={(checked: boolean) => setNotifications({ ...notifications, email: checked })}
                   />
                 </div>
 
@@ -285,7 +285,7 @@ export default function SettingsPage() {
                   <Switch
                     id="push-notifications"
                     checked={notifications.push}
-                    onCheckedChange={(checked) => setNotifications({ ...notifications, push: checked })}
+                    onCheckedChange={(checked: boolean) => setNotifications({ ...notifications, push: checked })}
                   />
                 </div>
 
@@ -297,7 +297,7 @@ export default function SettingsPage() {
                   <Switch
                     id="marketing-notifications"
                     checked={notifications.marketing}
-                    onCheckedChange={(checked) => setNotifications({ ...notifications, marketing: checked })}
+                    onCheckedChange={(checked: boolean) => setNotifications({ ...notifications, marketing: checked })}
                   />
                 </div>
               </div>
@@ -315,7 +315,7 @@ export default function SettingsPage() {
                   <Switch
                     id="cert-notifications"
                     checked={notifications.certifications}
-                    onCheckedChange={(checked) => setNotifications({ ...notifications, certifications: checked })}
+                    onCheckedChange={(checked: boolean) => setNotifications({ ...notifications, certifications: checked })}
                   />
                 </div>
 
@@ -327,7 +327,7 @@ export default function SettingsPage() {
                   <Switch
                     id="app-notifications"
                     checked={notifications.applications}
-                    onCheckedChange={(checked) => setNotifications({ ...notifications, applications: checked })}
+                    onCheckedChange={(checked: boolean) => setNotifications({ ...notifications, applications: checked })}
                   />
                 </div>
               </div>

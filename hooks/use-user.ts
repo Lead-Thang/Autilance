@@ -9,6 +9,8 @@ interface User {
   avatar?: string
   role: string
   joinDate: Date
+  displayName?: string
+  provider?: string
 }
 
 export function useUser() {
@@ -28,6 +30,8 @@ export function useUser() {
           avatar: "/placeholder.svg?height=40&width=40",
           role: "Professional",
           joinDate: new Date("2024-01-15"),
+          displayName: "johndoe",
+          provider: "email"
         })
       } catch (error) {
         console.error("Error loading user:", error)

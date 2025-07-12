@@ -1,10 +1,19 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { StoreData } from "./store-ai"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
-
+export async function getUserByEmail(email: string) {
+  // Simulate a database lookup
+  const users = [
+    { id: "1", email: "user1@example.com" },
+    { id: "2", email: "user2@example.com" },
+    { id: "3", email: "user3@example.com" },
+  ]
+  return users.find(user => user.email === email) || null
+}
 export function generateSitemap(store: StoreData): string {
   const baseUrl = store.seo.canonicalUrl || `https://${store.domain}.autilance.com`
   

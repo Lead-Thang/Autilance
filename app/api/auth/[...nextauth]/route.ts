@@ -1,6 +1,5 @@
-import NextAuth from "next-auth"
-import { authOptions } from "@/lib/auth"
+import NextAuth, { NextAuthOptions } from "next-auth"
+import { authOptions } from "d:\\Autilance\\lib\\auth"
 
-const handler = NextAuth(authOptions)
-
-export { handler as GET, handler as POST }
+export default NextAuth(authOptions)
+import GoogleProvider from "next-auth/providers/google"

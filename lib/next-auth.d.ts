@@ -9,5 +9,14 @@ declare module "next-auth" {
   }
   interface User {
     id: string
+    role?: "user" | "admin"
+    password?: string
+  }
+  interface NextAuthOptions {
+    providers: any[]
+    session: any
+    secret: string | undefined
+    pages: any
+    callbacks: any
   }
 }
