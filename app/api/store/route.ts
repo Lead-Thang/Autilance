@@ -2,7 +2,7 @@
 "use server"
 
 import { NextRequest } from "next/server"
-import { StoreData } from "@/lib/store-ai"
+import { StoreData } from "../../../lib/store-ai"
 
 const stores = new Map<string, StoreData>() // In-memory for demo
 

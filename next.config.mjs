@@ -11,9 +11,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  output: 'standalone',
-  // Replace __dirname with ESM-compatible approach
-  workspaceDir: fileURLToPath(new URL('.', import.meta.url)),
+  output: 'standalone'
 }
 
 export default nextConfig
