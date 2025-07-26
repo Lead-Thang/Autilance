@@ -53,8 +53,47 @@ export function UserContextSetup({ context, onContextUpdate }: UserContextSetupP
   const [isOpen, setIsOpen] = useState(false)
   const [localContext, setLocalContext] = useState<UserContext>(context)
   const [newGoal, setNewGoal] = useState("")
+  const [selectedProfileId, setSelectedProfileId] = useState("default")
+  const [profiles, setProfiles] = useState<UserContext[]>([context])
+
+  // TODO: Load and save profiles from persistent storage
+
+  const handleProfileChange = (profileId: string) => {
+    setSelectedProfileId(profileId)
+    const profile = profiles.find((p, index) => index.toString() === profileId) || context
+    setLocalContext(profile)
+  }
+
+  const saveProfile = () => {
+    setProfiles((prev) => {
+      const updated = [...prev]
+      const index = parseInt(selectedProfileId)
+      if (index >= 0 && index < updated.length) {
+        updated[index] = localContext
+      } else {
+        updated.push(localContext)
+        setSelectedProfileId((updated.length - 1).toString())
+      }
+      return updated
+    })
+  }
+
+  const addNewProfile = () => {
+    const newProfile: UserContext = {}
+    setProfiles((prev) => [...prev, newProfile])
+    setSelectedProfileId(profiles.length.toString())
+    setLocalContext(newProfile)
+  }
+
+  const deleteProfile = (profileId: string) => {
+    const index = parseInt(profileId)
+    setProfiles((prev) => prev.filter((_, i) => i !== index))
+    setSelectedProfileId("default")
+    setLocalContext(context)
+  }
 
   const handleSave = () => {
+    saveProfile()
     onContextUpdate(localContext)
     setIsOpen(false)
   }
@@ -91,6 +130,30 @@ export function UserContextSetup({ context, onContextUpdate }: UserContextSetupP
             Help our AI assistants understand your business and communication preferences for more relevant responses.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Profile Selector and Management */}
+        <div className="mb-4 flex items-center space-x-2">
+          <select
+            className="border rounded px-3 py-1 text-sm"
+            value={selectedProfileId}
+            onChange={(e) => handleProfileChange(e.target.value)}
+          >
+            <option value="default">Default Profile</option>
+            {profiles.map((profile, index) => (
+              <option key={index} value={index.toString()}>
+                {profile.name || `Profile ${index + 1}`}
+              </option>
+            ))}
+          </select>
+          <Button size="sm" onClick={addNewProfile}>
+            <Plus className="h-4 w-4" />
+          </Button>
+          {selectedProfileId !== "default" && (
+            <Button size="sm" variant="destructive" onClick={() => deleteProfile(selectedProfileId)}>
+              Delete
+            </Button>
+          )}
+        </div>
 
         <div className="space-y-6 py-4">
           <div className="space-y-2">

@@ -16,10 +16,32 @@ import {
   SidebarMenuSubItem,
 } from "../components/ui/sidebar"
 
+import { DollarSign, Store, Users, ShoppingCart } from "lucide-react"
+
+export const navMain = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Store,
+  },
+  {
+    title: "Make Money",
+    url: "/dashboard/make-money",
+    icon: DollarSign,
+    items: [
+      { title: "Investments", url: "/dashboard/investment" },
+      { title: "Partnerships", url: "/dashboard/partnerships" },
+      { title: "Selling & Buying", url: "/dashboard/marketplace" },
+      { title: "Store Management", url: "/dashboard/storefront" },
+    ],
+  },
+  // ... other nav items
+]
+
 export function NavMain({
-  items,
+  items = navMain,
 }: {
-  items: {
+  items?: {
     title: string
     url: string
     icon?: LucideIcon

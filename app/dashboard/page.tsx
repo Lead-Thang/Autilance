@@ -1,8 +1,8 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
+import { Button } from "../../components/ui/button"
+import { Progress } from "../../components/ui/progress"
 import {
   TrendingUp,
   Users,
@@ -15,8 +15,8 @@ import {
   Award,
   BarChart3,
 } from "lucide-react"
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
+import { SidebarProvider, SidebarTrigger } from "../../components/ui/sidebar"
+import { AppSidebar } from "../../components/app-sidebar"
 
 export default function DashboardPage() {
   const stats = [

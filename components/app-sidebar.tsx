@@ -13,13 +13,14 @@ import {
   CheckSquare,
   User,
   Sparkles,
+  DollarSign
 } from "lucide-react"
 
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { NavMain } from "../components/nav-main"
+import { NavProjects } from "../components/nav-projects"
+import { NavSecondary } from "../components/nav-secondary"
+import { NavUser } from "../components/nav-user"
+import { ThemeToggle } from "../components/theme-toggle"
 import {
   Sidebar,
   SidebarContent,
@@ -28,7 +29,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "../components/ui/sidebar"
 
 const data = {
   user: {
@@ -75,6 +76,29 @@ const data = {
       ],
     },
     {
+      title: "Job Descriptions",
+      url: "/dashboard/jd",
+      icon: CheckSquare,
+      items: [
+        {
+          title: "Browse JDs",
+          url: "/dashboard/jd",
+        },
+        {
+          title: "My JDs",
+          url: "/dashboard/jd?tab=my-jds",
+        },
+        {
+          title: "Verifications",
+          url: "/dashboard/jd?tab=verifications",
+        },
+        {
+          title: "Create JD",
+          url: "/dashboard/jd?tab=create",
+        },
+      ],
+    },
+    {
       title: "AI Assistant",
       url: "/dashboard/assistant",
       icon: Bot,
@@ -94,21 +118,25 @@ const data = {
       ],
     },
     {
-      title: "Store Builder",
-      url: "/dashboard/storefront",
-      icon: Store,
+      title: "Make Money",
+      url: "/dashboard/make-money",
+      icon: DollarSign,
       items: [
         {
-          title: "My Stores",
+          title: "Investments",
+          url: "/dashboard/investment",
+        },
+        {
+          title: "Partnerships",
+          url: "/dashboard/partnerships",
+        },
+        {
+          title: "Selling & Buying",
+          url: "/dashboard/marketplace",
+        },
+        {
+          title: "Store Management",
           url: "/dashboard/storefront",
-        },
-        {
-          title: "Templates",
-          url: "/dashboard/storefront/templates",
-        },
-        {
-          title: "Analytics",
-          url: "/dashboard/storefront/analytics",
         },
       ],
     },

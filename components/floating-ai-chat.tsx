@@ -3,14 +3,14 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { AIProviderSelector } from "@/components/ai-provider-selector"
-import { useAIChat } from "@/hooks/use-ai-chat"
-import { getProviderById } from "@/lib/ai-providers"
+import { Button } from "../components/ui/button"
+import { Input } from "../components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
+import { Badge } from "../components/ui/badge"
+import { ScrollArea } from "../components/ui/scroll-area"
+import { AIProviderSelector } from "../components/ai-provider-selector"
+import { useAIChat } from "../hooks/use-ai-chat"
+import { getProviderById } from "../lib/ai-providers"
 import { MessageCircle, X, Send, Minimize2, Maximize2, User, Sparkles } from "lucide-react"
 
 export function FloatingAIChat() {

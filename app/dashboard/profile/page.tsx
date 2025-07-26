@@ -7,9 +7,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avat
 import { Separator } from "../../../components/ui/separator"
 import { useUser } from "../../../hooks/use-user"
 import { MapPin, Globe, Calendar, Award, Star, Eye, Share, Edit, Mail, CheckCircle } from "lucide-react"
+import { useState } from "react"
 
 export default function ProfilePage() {
   const { user, isLoading } = useUser()
+  const [currentContextIndex, setCurrentContextIndex] = useState(0)
+  const [userContexts, setUserContexts] = useState([
+    { name: "Professional" },
+    { name: "Personal" },
+    { name: "Freelance" }
+  ])
+
+  const switchUserContext = (index: number) => {
+    setCurrentContextIndex(index)
+    // Additional context switching logic could be added here
+  }
 
   if (isLoading) {
     return (
@@ -29,7 +41,23 @@ export default function ProfilePage() {
           <h1 className="text-3xl font-bold">My Profile</h1>
           <p className="text-gray-600">Your professional profile and achievements</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-4 items-center">
+          {/* Profile Selector Dropdown */}
+          <select
+            className="border rounded px-3 py-1 text-sm"
+            value={currentContextIndex}
+            onChange={(e) => {
+              const selectedIndex = Number(e.target.value)
+              switchUserContext(selectedIndex)
+            }}
+          >
+            {userContexts.map((profile, index) => (
+              <option key={index} value={index}>
+                {profile.name || `Profile ${index + 1}`}
+              </option>
+            ))}
+          </select>
+
           <Button variant="outline">
             <Eye className="w-4 h-4 mr-2" />
             Preview

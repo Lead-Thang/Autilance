@@ -23,7 +23,10 @@ import {
   CheckCircle,
 } from "lucide-react"
 
+import React from "react";
+
 export default function FeedPage() {
+  const [companyName, setCompanyName] = useState("");
   const [activeTab, setActiveTab] = useState("explore")
 
   return (
@@ -193,7 +196,7 @@ export default function FeedPage() {
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold">TechCorp Inc.</h3>
+                        <h3 className="font-semibold">{companyName || "TechCorp Inc."}</h3>
                         <Badge className="bg-green-100 text-green-800">Company</Badge>
                       </div>
                       <p className="text-sm text-gray-600">6 hours ago</p>
@@ -504,8 +507,8 @@ export default function FeedPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Job Opportunities</CardTitle>
-                <CardDescription>Companies posting what they want from employees</CardDescription>
+                <CardTitle>Partnership Opportunities</CardTitle>
+                <CardDescription>Team's requirements</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="p-4 border rounded-lg">
@@ -554,7 +557,7 @@ export default function FeedPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Learning Opportunities</CardTitle>
+                <CardTitle>Knowledge Requirements</CardTitle>
                 <CardDescription>Skills companies want - start learning today</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

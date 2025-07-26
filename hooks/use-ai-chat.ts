@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
-import { generateAIResponse } from "@/lib/ai-providers"
+import { generateAIResponse } from "../lib/ai-providers"
 
 export interface ChatMessage {
   id: string
@@ -23,13 +23,16 @@ export function useAIChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [currentProvider, setCurrentProvider] = useState("mistral")
-  const [userContext, setUserContext] = useState<UserContext>({})
+  const [userContexts, setUserContexts] = useState<UserContext[]>([{}])
+  const [currentContextIndex, setCurrentContextIndex] = useState(0)
+  const userContext = userContexts[currentContextIndex]
 
   // Load persisted data on mount
   useEffect(() => {
     const savedMessages = localStorage.getItem("ai-chat-messages")
-    const savedContext = localStorage.getItem("ai-chat-context")
+    const savedContexts = localStorage.getItem("ai-chat-contexts")
     const savedProvider = localStorage.getItem("ai-chat-provider")
+    const savedContextIndex = localStorage.getItem("ai-chat-context-index")
 
     if (savedMessages) {
       try {
@@ -45,12 +48,17 @@ export function useAIChat() {
       }
     }
 
-    if (savedContext) {
+    if (savedContexts) {
       try {
-        setUserContext(JSON.parse(savedContext))
+        const parsedContexts = JSON.parse(savedContexts)
+        setUserContexts(parsedContexts)
       } catch (error) {
-        console.error("Failed to load user context:", error)
+        console.error("Failed to load user contexts:", error)
       }
+    }
+
+    if (savedContextIndex) {
+      setCurrentContextIndex(parseInt(savedContextIndex))
     }
 
     if (savedProvider) {
@@ -65,10 +73,15 @@ export function useAIChat() {
     }
   }, [messages])
 
-  // Persist context
+  // Persist contexts
   useEffect(() => {
-    localStorage.setItem("ai-chat-context", JSON.stringify(userContext))
-  }, [userContext])
+    localStorage.setItem("ai-chat-contexts", JSON.stringify(userContexts))
+  }, [userContexts])
+
+  // Persist current context index
+  useEffect(() => {
+    localStorage.setItem("ai-chat-context-index", currentContextIndex.toString())
+  }, [currentContextIndex])
 
   // Persist provider
   useEffect(() => {
@@ -120,7 +133,7 @@ export function useAIChat() {
         setIsLoading(false)
       }
     },
-    [messages, currentProvider, userContext, isLoading],
+    [messages, currentProvider, userContexts, currentContextIndex, isLoading],
   )
 
   const clearChat = useCallback(() => {
@@ -132,9 +145,19 @@ export function useAIChat() {
     setCurrentProvider(providerId)
   }, [])
 
+  const switchUserContext = useCallback((index: number) => {
+    if (index >= 0 && index < userContexts.length) {
+      setCurrentContextIndex(index)
+    }
+  }, [userContexts])
+
   const updateUserContext = useCallback((updates: Partial<UserContext>) => {
-    setUserContext((prev) => ({ ...prev, ...updates }))
-  }, [])
+    setUserContexts((prev) => {
+      const updated = [...prev]
+      updated[currentContextIndex] = { ...updated[currentContextIndex], ...updates }
+      return updated
+    })
+  }, [currentContextIndex])
 
   return {
     messages,

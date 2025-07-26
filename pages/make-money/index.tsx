@@ -11,13 +11,13 @@ async function getJobs() {
 
 export default function JobsPage() {
   const { data: session } = useSession();
-  const { data: jobs, isLoading } = useQuery({ queryKey: ["jobs"], queryFn: getJobs });
+  const { data: jobs, isLoading } = useQuery({ queryKey: ["Make money"], queryFn: getJobs });
 
   if (isLoading) return <div>Loading...</div>;
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Job Opportunities</h1>
+      <h1 className="text-3xl font-bold mb-6">Money Making Opportunities</h1>
       {session?.user ? (
         <div className="grid gap-4">
           {jobs?.map((job: { id: string; title: string; company: string }) => (
@@ -29,7 +29,7 @@ export default function JobsPage() {
           ))}
         </div>
       ) : (
-        <p>Please sign in to view jobs.</p>
+        <p>Please sign in to view available job offers!</p>
       )}
     </div>
   );

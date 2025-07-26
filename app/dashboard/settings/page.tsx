@@ -41,6 +41,12 @@ export default function SettingsPage() {
     applications: true,
   })
 
+  const [companyName, setCompanyName] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [companyDescription, setCompanyDescription] = useState("");
+  const [companySize, setCompanySize] = useState("");
+  const [foundedYear, setFoundedYear] = useState("");
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -56,7 +62,7 @@ export default function SettingsPage() {
           <TabsTrigger value="company">Company</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="billing">Billing</TabsTrigger>
+          <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
 
@@ -193,11 +199,11 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="companyName">Company Name</Label>
-                  <Input id="companyName" placeholder="Your Company Inc." />
+                  <Input id="companyName" placeholder="Your Company Inc." value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="industry">Industry</Label>
-                  <Input id="industry" placeholder="Technology, Healthcare, etc." />
+                  <Input id="industry" placeholder="Technology, Healthcare, etc." value={industry} onChange={(e) => setIndustry(e.target.value)} />
                 </div>
               </div>
 
@@ -207,17 +213,19 @@ export default function SettingsPage() {
                   id="companyDescription"
                   placeholder="Describe your company and what certifications you offer..."
                   rows={4}
+                  value={companyDescription}
+                  onChange={(e) => setCompanyDescription(e.target.value)}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="companySize">Company Size</Label>
-                  <Input id="companySize" placeholder="1-10, 11-50, 51-200, etc." />
+                  <Input id="companySize" placeholder="1-10, 11-50, 51-200, etc." value={companySize} onChange={(e) => setCompanySize(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="founded">Founded Year</Label>
-                  <Input id="founded" placeholder="2020" />
+                  <Input id="founded" placeholder="2020" value={foundedYear} onChange={(e) => setFoundedYear(e.target.value)} />
                 </div>
               </div>
 
@@ -454,7 +462,7 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="billing" className="space-y-6">
+        <TabsContent value="payment" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">

@@ -1,3 +1,4 @@
+// tsconfig.json
 {
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -19,6 +20,7 @@
       }
     ],
     "paths": {
+      "@/*": ["./src/*", "./*"],
       "@tanstack/react-query": ["./node_modules/@tanstack/react-query"]
     }
   },

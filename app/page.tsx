@@ -24,6 +24,7 @@ import {
   Star,
   Rocket,
   Brain,
+  DollarSign,
 } from "lucide-react"
 
 const features = [
@@ -68,6 +69,13 @@ const features = [
     description: "Bank-level security with AI-powered threat detection and data protection protocols.",
     color: "from-indigo-500 to-purple-500",
     href: "/dashboard/settings",
+  },
+  {
+    icon: DollarSign,
+    title: "Make Money",
+    description: "Consolidated money-making features including investments, partnerships, marketplace, and store management.",
+    color: "from-green-600 to-emerald-600",
+    href: "/dashboard/make-money",
   },
 ]
 

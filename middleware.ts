@@ -3,6 +3,11 @@ import { getToken } from "next-auth/jwt"
 import { NextResponse, NextRequest } from "next/server"
 
 export async function middleware(req: NextRequest) {
+  // Skip authentication check for auth routes
+  if (req.nextUrl.pathname.startsWith("/auth")) {
+    return NextResponse.next()
+  }
+
   const token = await getToken({ req })
 
   if (!token) {
