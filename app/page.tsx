@@ -2,14 +2,15 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
 import { Badge } from "../components/ui/badge"
 import { Input } from "../components/ui/input"
 import { ThemeToggle } from "../components/theme-toggle"
 import { FloatingAIChat } from "../components/floating-ai-chat"
-import { useSession } from "next-auth/react"
+import { createBrowserClient } from "@supabase/ssr"
+import { Session } from "@supabase/supabase-js"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -117,7 +118,14 @@ const stats = [
 ]
 
 export default function HomePage() {
-  const { data: session } = useSession()
+  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  const [session, setSession] = useState<Session | null>(null)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+  }, [])
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
+import { createClient } from "@/lib/supabase/server"
 import { db } from "@/lib/db"
 import { z } from "zod"
 
@@ -9,9 +9,10 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession()
+    const supabase = createClient()
+    const { data: { session }, error } = await supabase.auth.getSession()
     
-    if (!session?.user) {
+    if (!session?.user || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -65,9 +66,10 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession()
+    const supabase = createClient()
+    const { data: { session }, error } = await supabase.auth.getSession()
     
-    if (!session?.user) {
+    if (!session?.user || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

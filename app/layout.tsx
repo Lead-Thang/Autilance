@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next"
-
 export const metadata: Metadata = {
   title: "Autilance - AI-Powered Business Ecosystem",
   description:
@@ -33,8 +32,6 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
   ],
 }
-
-
 import type React from "react"
 import { Inter } from "next/font/google"
 import "./globals.css"

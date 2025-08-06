@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { signIn } from "next-auth/react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -50,15 +50,20 @@ export default function SignUpPage() {
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
       // After successful signup, sign in the user
-      const result = await signIn("credentials", {
+      const supabase = createClientComponentClient()
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        redirect: false,
+        options: {
+          data: {
+            full_name: name
+          }
+        }
       })
 
-      if (result?.error) {
-        setError("Account creation failed. Please try again.")
-      } else {
+      if (error) {
+        setError(error.message || "Account creation failed. Please try again.")
+      } else if (data.user) {
         router.push("/dashboard")
       }
     } catch (error) {
@@ -71,18 +76,19 @@ export default function SignUpPage() {
 const handleGoogleSignUp = async () => {
   setIsLoading(true);
   try {
-    const result = await signIn("google", { callbackUrl: "/dashboard", redirect: false });
+    const supabase = createClientComponentClient()
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      });
 
-    if (result?.error) {
-      console.error("Google sign-up error:", result.error);
-      setError(`Google sign-up failed: ${result.error}`);
-    } else if (result?.url) {
-      // Successful sign-in, redirect manually
-      router.push(result.url);
-    } else {
-      // Unexpected result
-      console.error("Unexpected sign-in result:", result);
-      setError("An unexpected error occurred. Please try again.");
+    if (error) {
+      console.error("Google sign-up error:", error);
+      setError(error.message || "Google sign-up failed");
+    } else if (data.url) {
+      router.push(data.url);
     }
   } catch (error) {
     console.error("Google sign-up error:", error);

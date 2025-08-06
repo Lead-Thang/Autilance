@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
+import { createClient } from "@/lib/supabase/server"
 import { db } from "@/lib/db"
 import { z } from "zod"
 
@@ -59,9 +59,10 @@ export async function GET(req: NextRequest) {
 // POST create a new job description
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession()
+    const supabase = createClient()
+    const { data: { session }, error } = await supabase.auth.getSession()
     
-    if (!session?.user) {
+    if (!session?.user || error) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

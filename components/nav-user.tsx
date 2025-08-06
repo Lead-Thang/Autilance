@@ -1,6 +1,9 @@
 "use client"
 
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
+import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles, Chrome } from "lucide-react"
+
+const supabase = createClient()
 
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar"
 import {
@@ -13,7 +16,16 @@ import {
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "../components/ui/sidebar"
-import { signOut } from "next-auth/react"
+const handleGoogleSignIn = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/dashboard`
+    }
+  });
+
+  if (error) console.error('Google sign-in error:', error);
+};
 
 export function NavUser({
   user,
@@ -98,11 +110,18 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="hover:bg-destructive/10 text-destructive focus:text-destructive"
+              onClick={handleGoogleSignIn}
+              className="hover:bg-primary/10 flex gap-2"
+            >
+              <Chrome className="text-blue-500" />
+              Continue with Google
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => supabase.auth.signOut()}
+              className="hover:bg-primary/10 flex gap-2 text-destructive"
             >
               <LogOut />
-              Log out
+              Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

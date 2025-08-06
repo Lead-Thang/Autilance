@@ -36,7 +36,7 @@ Autilance is a reverse job board where companies list the skills, knowledge, beh
 - **Frontend**: Next.js, React, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes
 - **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: NextAuth.js
+- **Authentication**: Supabase
 - **File Storage**: UploadThing
 - **UI Components**: Shadcn UI
 

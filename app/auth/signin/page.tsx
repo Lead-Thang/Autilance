@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
-import { signIn } from "next-auth/react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -35,13 +35,13 @@ export default function SignInPage() {
     setError("")
 
     try {
-      const result = await signIn("credentials", {
+      const supabase = createClientComponentClient()
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password,
-        redirect: false,
+        password
       })
 
-      if (result?.error) {
+      if (error) {
         setError("Invalid credentials. Please try again.")
       } else {
         router.push("/dashboard")
@@ -58,15 +58,18 @@ export default function SignInPage() {
     setError("")
 
     try {
-      const result = await signIn("google", {
-        callbackUrl: "/dashboard",
-        redirect: false,
+      const supabase = createClientComponentClient()
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
       })
 
-      if (result?.error) {
-        setError(`Google sign-in failed: ${result.error}`)
-      } else if (result?.url) {
-        router.push(result.url)
+      if (error) {
+        setError(`Google sign-in failed: ${error}`)
+      } else if (data?.url) {
+        router.push(data.url)
       } else {
         setError("Unexpected error. Try again.")
       }

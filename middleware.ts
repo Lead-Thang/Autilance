@@ -1,23 +1,20 @@
-// middleware.ts
-import { getToken } from "next-auth/jwt"
-import { NextResponse, NextRequest } from "next/server"
 
-export async function middleware(req: NextRequest) {
-  // Skip authentication check for auth routes
-  if (req.nextUrl.pathname.startsWith("/auth")) {
-    return NextResponse.next()
-  }
+import { type NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase/middleware'
 
-  const token = await getToken({ req })
+export async function middleware(request: NextRequest) {
+  return await updateSession(request)
+}
 
-  if (!token) {
-    return NextResponse.redirect(new URL("/auth/signin", req.url))
-  }
-
-  // Example: Restrict admin dashboard
-  if (req.nextUrl.pathname.startsWith("/admin") && token.role !== "admin") {
-    return NextResponse.redirect(new URL("/unauthorized", req.url))
-  }
-
-  return NextResponse.next()
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * Feel free to modify this pattern to include more paths.
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }
