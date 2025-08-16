@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from 'react'
 import { Folder, Forward, MoreHorizontal, Trash2, type LucideIcon } from "lucide-react"
 
 import {
@@ -30,6 +31,28 @@ export function NavProjects({
 }) {
   const { isMobile } = useSidebar()
 
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  const handleOpenChange = (open: boolean) => {
+    try {
+      if (open) {
+        const trigger = document.getElementById('nav-projects-trigger')
+        if (!trigger || typeof trigger.getBoundingClientRect !== 'function') {
+          console.error('Nav projects trigger element not found or not a DOM element')
+          return false
+        }
+      }
+      return true
+    } catch (err) {
+      console.error('Nav projects open change error:', err)
+      return false
+    }
+  }
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/80">Projects</SidebarGroupLabel>
@@ -45,32 +68,35 @@ export function NavProjects({
                 <span className="font-medium">{item.name}</span>
               </a>
             </SidebarMenuButton>
-            <DropdownMenu>
+            <DropdownMenu onOpenChange={handleOpenChange}>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuAction showOnHover className="hover:bg-primary/10">
+                <SidebarMenuAction id="nav-projects-trigger" showOnHover className="hover:bg-primary/10">
                   <MoreHorizontal />
                   <span className="sr-only">More</span>
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-48 rounded-lg"
-                side={isMobile ? "bottom" : "right"}
-                align={isMobile ? "end" : "start"}
-              >
-                <DropdownMenuItem className="hover:bg-primary/10">
-                  <Folder className="text-muted-foreground" />
-                  <span>View Project</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-primary/10">
-                  <Forward className="text-muted-foreground" />
-                  <span>Share Project</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="hover:bg-destructive/10 text-destructive">
-                  <Trash2 className="text-destructive" />
-                  <span>Delete Project</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
+              {isClient && (
+                <DropdownMenuContent
+                  className="w-48 rounded-lg"
+                  side={isMobile ? "bottom" : "right"}
+                  align={isMobile ? "end" : "start"}
+                  
+                >
+                  <DropdownMenuItem className="hover:bg-primary/10">
+                    <Folder className="text-muted-foreground" />
+                    <span>View Project</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="hover:bg-primary/10">
+                    <Forward className="text-muted-foreground" />
+                    <span>Share Project</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="hover:bg-destructive/10 text-destructive">
+                    <Trash2 className="text-destructive" />
+                    <span>Delete Project</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              )}
             </DropdownMenu>
           </SidebarMenuItem>
         ))}

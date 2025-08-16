@@ -1,11 +1,11 @@
 "use client"
 
+import { useState, useEffect } from 'react'
 import { createClient } from "@/lib/supabase/client"
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles, Chrome } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar"
 
 const supabase = createClient()
-
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu"
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "../components/ui/sidebar"
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
 const handleGoogleSignIn = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -38,12 +38,35 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
 
+  const [isOpen, setIsOpen] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  const handleOpenChange = (open: boolean) => {
+    try {
+      if (open) {
+        const trigger = document.getElementById('nav-user-trigger')
+        if (!trigger || typeof trigger.getBoundingClientRect !== 'function') {
+          console.error('Nav user trigger element not found or not a DOM element')
+          return
+        }
+      }
+      setIsOpen(open)
+    } catch (err) {
+      console.error('Nav user open change error:', err)
+    }
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={handleOpenChange}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
+              id="nav-user-trigger"
               size="lg"
               className="data-[state=open]:bg-primary/10 hover:bg-primary/10 transition-all duration-200 animate-lift"
             >
@@ -63,67 +86,69 @@ export function NavUser({
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-                  <AvatarFallback className="rounded-lg bg-primary/10 text-primary">
-                    {user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+          {isClient && (
+            <DropdownMenuContent
+              className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+              side={isMobile ? "bottom" : "right"}
+              align="end"
+              sideOffset={4}
+            >
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+                    <AvatarFallback className="rounded-lg bg-primary/10 text-primary">
+                      {user.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">{user.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                  </div>
                 </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem className="hover:bg-primary/10">
-                <Sparkles className="text-primary" />
-                Upgrade to Pro
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem className="hover:bg-primary/10">
+                  <Sparkles className="text-primary" />
+                  Upgrade to Pro
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem className="hover:bg-primary/10">
+                  <BadgeCheck />
+                  Account
+                </DropdownMenuItem>
+                <DropdownMenuItem className="hover:bg-primary/10">
+                  <CreditCard />
+                  Billing
+                </DropdownMenuItem>
+                <DropdownMenuItem className="hover:bg-primary/10">
+                  <Bell />
+                  Notifications
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleGoogleSignIn}
+                className="hover:bg-primary/10 flex gap-2"
+              >
+                <Chrome className="text-blue-500" />
+                Continue with Google
               </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem className="hover:bg-primary/10">
-                <BadgeCheck />
-                Account
+              <DropdownMenuItem
+                onClick={() => supabase.auth.signOut()}
+                className="hover:bg-primary/10 flex gap-2 text-destructive"
+              >
+                <LogOut />
+                Sign Out
               </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-primary/10">
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-primary/10">
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={handleGoogleSignIn}
-              className="hover:bg-primary/10 flex gap-2"
-            >
-              <Chrome className="text-blue-500" />
-              Continue with Google
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => supabase.auth.signOut()}
-              className="hover:bg-primary/10 flex gap-2 text-destructive"
-            >
-              <LogOut />
-              Sign Out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+            </DropdownMenuContent>
+          )}
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>

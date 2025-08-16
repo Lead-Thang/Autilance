@@ -11,12 +11,13 @@ import { ScrollArea } from "../components/ui/scroll-area"
 import { AIProviderSelector } from "../components/ai-provider-selector"
 import { useAIChat } from "../hooks/use-ai-chat"
 import { getProviderById } from "../lib/ai-providers"
-import { MessageCircle, X, Send, Minimize2, Maximize2, User, Sparkles } from "lucide-react"
+import { MessageCircle, X, Send, Minimize2, Maximize2, User, Sparkles, XCircle } from "lucide-react"
 
 export function FloatingAIChat() {
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [input, setInput] = useState("")
+  const [error, setError] = useState<Error | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -42,6 +43,23 @@ export function FloatingAIChat() {
   }
 
   const provider = getProviderById(currentProvider)
+
+  if (error) {
+    console.error('FloatingAIChat error:', error)
+    return (
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          onClick={() => {
+            setError(null)
+            setIsOpen(true)
+          }}
+          className="w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+        >
+          <X className="w-6 h-6 text-white" />
+        </Button>
+      </div>
+    )
+  }
 
   if (!isOpen) {
     return (
