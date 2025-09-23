@@ -168,16 +168,18 @@ export function NavMain({
                     }`}
                   >
                     <Link href={item.url} className="flex items-center gap-2 animate-lift">
-                      {item.icon && <item.icon className="size-4" />}
-                      <span className="font-medium">{item.title}</span>
+                      {item.icon && <item.icon className="size-4 shrink-0" />}
+                      <span className="font-medium group-data-[collapsible=icon]:hidden"> 
+                        {item.title}
+                      </span>
                       {item.items && (
-                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
                       )}
                     </Link>
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 {item.items && (
-                  <CollapsibleContent>
+                  <CollapsibleContent className="group-data-[collapsible=icon]:hidden">
                     <SidebarMenuSub>
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>

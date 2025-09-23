@@ -54,8 +54,8 @@ export function NavProjects({
   }
 
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/80">Projects</SidebarGroupLabel>
+    <SidebarGroup>
+      <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/80 group-data-[collapsible=icon]:hidden">Projects</SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
@@ -64,13 +64,15 @@ export function NavProjects({
               className="transition-all duration-200 hover:bg-primary/10 hover:text-primary animate-lift"
             >
               <a href={item.url} className="flex items-center gap-2">
-                <item.icon className="size-4" />
-                <span className="font-medium">{item.name}</span>
+                <item.icon className="size-4 shrink-0" />
+                <span className="font-medium group-data-[collapsible=icon]:hidden">
+                  {item.name}
+                </span>
               </a>
             </SidebarMenuButton>
             <DropdownMenu onOpenChange={handleOpenChange}>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuAction id="nav-projects-trigger" showOnHover className="hover:bg-primary/10">
+                <SidebarMenuAction id="nav-projects-trigger" showOnHover className="hover:bg-primary/10 group-data-[collapsible=icon]:hidden">
                   <MoreHorizontal />
                   <span className="sr-only">More</span>
                 </SidebarMenuAction>

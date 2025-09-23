@@ -11,6 +11,8 @@ export const companySchema = z.object({
   industry: z.string().optional(),
   size: z.string().optional(),
   location: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
@@ -24,6 +26,9 @@ export const jdSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().optional(),
   isPublic: z.boolean().default(true),
+  location: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
   
@@ -163,3 +168,39 @@ export const courseSchema = z.object({
 })
 
 export type Course = z.infer<typeof courseSchema>
+
+// Store Schema
+export const storeSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  name: z.string(),
+  domain: z.string(),
+  components: z.array(z.any()).optional(),
+  theme: z.object({
+    primaryColor: z.string(),
+    secondaryColor: z.string(),
+    fontFamily: z.string(),
+    layout: z.string(),
+  }).optional(),
+  seo: z.object({
+    title: z.string(),
+    description: z.string(),
+    keywords: z.array(z.string()),
+  }).optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+})
+
+export type Store = z.infer<typeof storeSchema>
+
+// Post Schema
+export const postSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  content: z.string(),
+  createdAt: z.date(),
+  likes: z.number().default(0),
+  comments: z.number().default(0),
+})
+
+export type Post = z.infer<typeof postSchema>

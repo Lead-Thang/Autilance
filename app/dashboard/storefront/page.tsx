@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
 import { Button } from "../../../components/ui/button"
 import { Input } from "../../../components/ui/input"
@@ -9,6 +9,7 @@ import { Textarea } from "../../../components/ui/textarea"
 import { Badge } from "../../../components/ui/badge"
 import { StoreEditor } from "../../../components/store-builder/store-editor"
 import { type StoreData, storeAI } from "../../../lib/store-ai"
+import { useUser } from "../../../hooks/use-user"
 import {
   Sparkles,
   Store,
@@ -27,42 +28,56 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 
+interface UserStore extends StoreData {
+  id: string
+  name: string
+  domain: string
+  created_at: string
+}
+
 export default function StorefrontPage() {
+  const { user, isLoading } = useUser()
   const [isGenerating, setIsGenerating] = useState(false)
   const [editingStore, setEditingStore] = useState<StoreData | null>(null)
-  const [stores, setStores] = useState<StoreData[]>([
-    {
-      id: "1",
-      name: "Anime Fitness Hub",
-      domain: "anime-fitness.Autilance.com",
-      components: [],
-      theme: { primaryColor: "#6366f1", secondaryColor: "#8b5cf6", fontFamily: "Inter", layout: "modern" },
-      seo: {
-        title: "Anime Fitness Hub",
-        description: "Anime merchandise and fitness guides",
-        keywords: ["anime", "fitness"],
-      },
-    },
-    {
-      id: "2",
-      name: "Tech Gadgets Pro",
-      domain: "tech-gadgets.Autilance.com",
-      components: [],
-      theme: { primaryColor: "#10b981", secondaryColor: "#3b82f6", fontFamily: "Inter", layout: "modern" },
-      seo: {
-        title: "Tech Gadgets Pro",
-        description: "Latest tech gadgets and accessories",
-        keywords: ["tech", "gadgets"],
-      },
-    },
-  ])
-
+  const [stores, setStores] = useState<UserStore[]>([])
   const [storeData, setStoreData] = useState({
     niche: "",
     description: "",
     targetAudience: "",
     priceRange: "",
   })
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserStores()
+    }
+  }, [user?.id])
+
+  const fetchUserStores = async () => {
+    if (!user?.id) return
+
+    try {
+      const response = await fetch('/api/stores')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch stores')
+      }
+      
+      const data = await response.json()
+      
+      setStores(data.map((store: any) => ({
+        id: store.id,
+        name: store.name,
+        domain: store.domain,
+        components: store.components || [],
+        theme: store.theme || { primaryColor: "#6366f1", secondaryColor: "#8b5cf6", fontFamily: "Inter", layout: "modern" },
+        seo: store.seo || { title: "", description: "", keywords: [] },
+        created_at: store.created_at
+      })))
+    } catch (error) {
+      console.error("Error fetching user stores:", error)
+    }
+  }
 
   const handleGenerate = async () => {
     if (!storeData.niche.trim()) return
@@ -79,23 +94,63 @@ export default function StorefrontPage() {
     }
   }
 
-  const handleSaveStore = (store: StoreData) => {
-    setStores((prev) => {
-      const existing = prev.find((s) => s.id === store.id)
-      if (existing) {
-        return prev.map((s) => (s.id === store.id ? store : s))
+  const handleSaveStore = async (store: StoreData) => {
+    if (!user?.id) return
+
+    try {
+      const response = await fetch('/api/stores', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(store),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to save store')
       }
-      return [...prev, store]
-    })
-    setEditingStore(null)
+      
+      // Refresh stores list
+      fetchUserStores()
+      setEditingStore(null)
+    } catch (error) {
+      console.error("Error saving store:", error)
+    }
   }
 
   const handleEditStore = (store: StoreData) => {
     setEditingStore(store)
   }
 
+  const handleCreateNewStore = () => {
+    setEditingStore({
+      id: Date.now().toString(),
+      name: "New Store",
+      domain: `${user?.name?.toLowerCase().replace(/\s+/g, '-') || 'new-store'}.autilance.com`,
+      components: [],
+      theme: {
+        primaryColor: "#6366f1",
+        secondaryColor: "#8b5cf6",
+        fontFamily: "Inter",
+        layout: "modern",
+      },
+      seo: { title: "", description: "", keywords: [] },
+    })
+  }
+
   if (editingStore) {
     return <StoreEditor initialStore={editingStore} onSave={handleSaveStore} />
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading your stores...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -125,21 +180,7 @@ export default function StorefrontPage() {
                   <Button
                     size="lg"
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
-                    onClick={() =>
-                      setEditingStore({
-                        id: Date.now().toString(),
-                        name: "New AI Store",
-                        domain: "new-store.autilance.com",
-                        components: [],
-                        theme: {
-                          primaryColor: "#6366f1",
-                          secondaryColor: "#8b5cf6",
-                          fontFamily: "Inter",
-                          layout: "modern",
-                        },
-                        seo: { title: "", description: "", keywords: [] },
-                      })
-                    }
+                    onClick={handleCreateNewStore}
                   >
                     <Rocket className="w-5 h-5 mr-2" />
                     Create Store with AI
@@ -315,7 +356,7 @@ export default function StorefrontPage() {
               <CardContent className="p-0">
                 <div className="relative">
                   <Image
-                    src="/images/ai-marketplace-network.jpeg"
+                    src="/ai-marketplace-network.jpeg"
                     alt="AI network visualization showing interconnected marketplace intelligence"
                     width={500}
                     height={300}
@@ -426,21 +467,7 @@ export default function StorefrontPage() {
                 {/* Create New Store Card */}
                 <Card
                   className="border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 transition-colors cursor-pointer group bg-transparent"
-                  onClick={() =>
-                    setEditingStore({
-                      id: Date.now().toString(),
-                      name: "New Store",
-                      domain: "new-store.autilance.com",
-                      components: [],
-                      theme: {
-                        primaryColor: "#6366f1",
-                        secondaryColor: "#8b5cf6",
-                        fontFamily: "Inter",
-                        layout: "modern",
-                      },
-                      seo: { title: "", description: "", keywords: [] },
-                    })
-                  }
+                  onClick={handleCreateNewStore}
                 >
                   <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                     <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -490,6 +517,20 @@ export default function StorefrontPage() {
                     </CardContent>
                   </Card>
                 ))}
+
+                {stores.length === 0 && (
+                  <div className="col-span-full text-center py-12">
+                    <Store className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No stores yet</h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      Create your first AI-powered store to get started
+                    </p>
+                    <Button onClick={handleCreateNewStore} className="bg-gradient-to-r from-blue-600 to-purple-600">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Your First Store
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

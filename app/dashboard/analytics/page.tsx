@@ -5,8 +5,68 @@ import { Badge } from "../../../components/ui/badge"
 import { Progress } from "../../../components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
 import { TrendingUp, Users, DollarSign, Eye, Store, Calendar, ArrowUp, ArrowDown } from "lucide-react"
+import { useAnalyticsData } from "../../../hooks/use-analytics-data"
+import { formatCurrency, formatNumber, formatPercentage } from "../../../lib/utils"
 
 export default function AnalyticsPage() {
+  const { analyticsData, isLoading, error } = useAnalyticsData()
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
+            <p className="text-gray-600">Track your business performance and lead insights</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Calendar className="w-4 h-4 text-gray-600" />
+            <span className="text-sm text-gray-600">Last 30 days</span>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <p>Loading analytics data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !analyticsData) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
+            <p className="text-gray-600">Track your business performance and lead insights</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Calendar className="w-4 h-4 text-gray-600" />
+            <span className="text-sm text-gray-600">Last 30 days</span>
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <p className="text-red-500">Error loading analytics data: {error}</p>
+        </div>
+      </div>
+    )
+  }
+
+  const {
+    revenueStats,
+    leadStats,
+    storeViewStats,
+    conversionStats,
+    leadSources,
+    leadStatuses,
+    leadActivities,
+    storePerformances,
+    trafficMetrics,
+    taskStats,
+    taskCategories,
+    aiMetrics,
+    aiUsage
+  } = analyticsData
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -28,10 +88,14 @@ export default function AnalyticsPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$12,345</div>
-            <div className="flex items-center text-xs text-green-600">
-              <ArrowUp className="w-3 h-3 mr-1" />
-              +20.1% from last month
+            <div className="text-2xl font-bold">{formatCurrency(revenueStats.totalRevenue)}</div>
+            <div className={`flex items-center text-xs ${revenueStats.revenueChangeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}>
+              {revenueStats.revenueChangeType === 'increase' ? (
+                <ArrowUp className="w-3 h-3 mr-1" />
+              ) : (
+                <ArrowDown className="w-3 h-3 mr-1" />
+              )}
+              {revenueStats.revenueChangeType === 'increase' ? '+' : ''}{revenueStats.revenueChange}% from last month
             </div>
           </CardContent>
         </Card>
@@ -42,10 +106,14 @@ export default function AnalyticsPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2,456</div>
-            <div className="flex items-center text-xs text-green-600">
-              <ArrowUp className="w-3 h-3 mr-1" />
-              +15.3% from last month
+            <div className="text-2xl font-bold">{formatNumber(leadStats.totalLeads)}</div>
+            <div className={`flex items-center text-xs ${leadStats.leadChangeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}>
+              {leadStats.leadChangeType === 'increase' ? (
+                <ArrowUp className="w-3 h-3 mr-1" />
+              ) : (
+                <ArrowDown className="w-3 h-3 mr-1" />
+              )}
+              {leadStats.leadChangeType === 'increase' ? '+' : ''}{leadStats.leadChange}% from last month
             </div>
           </CardContent>
         </Card>
@@ -56,10 +124,14 @@ export default function AnalyticsPage() {
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8,234</div>
-            <div className="flex items-center text-xs text-red-600">
-              <ArrowDown className="w-3 h-3 mr-1" />
-              -2.4% from last month
+            <div className="text-2xl font-bold">{formatNumber(storeViewStats.storeViews)}</div>
+            <div className={`flex items-center text-xs ${storeViewStats.viewChangeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}>
+              {storeViewStats.viewChangeType === 'increase' ? (
+                <ArrowUp className="w-3 h-3 mr-1" />
+              ) : (
+                <ArrowDown className="w-3 h-3 mr-1" />
+              )}
+              {storeViewStats.viewChangeType === 'increase' ? '+' : ''}{storeViewStats.viewChange}% from last month
             </div>
           </CardContent>
         </Card>
@@ -70,10 +142,14 @@ export default function AnalyticsPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3.2%</div>
-            <div className="flex items-center text-xs text-green-600">
-              <ArrowUp className="w-3 h-3 mr-1" />
-              +0.8% from last month
+            <div className="text-2xl font-bold">{conversionStats.conversionRate}%</div>
+            <div className={`flex items-center text-xs ${conversionStats.conversionChangeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}>
+              {conversionStats.conversionChangeType === 'increase' ? (
+                <ArrowUp className="w-3 h-3 mr-1" />
+              ) : (
+                <ArrowDown className="w-3 h-3 mr-1" />
+              )}
+              {conversionStats.conversionChangeType === 'increase' ? '+' : ''}{conversionStats.conversionChange}% from last month
             </div>
           </CardContent>
         </Card>
@@ -95,34 +171,15 @@ export default function AnalyticsPage() {
                 <CardDescription>Where your leads are coming from</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Social Feed</span>
-                    <span>45%</span>
+                {leadSources.map((source, index) => (
+                  <div className="space-y-2" key={index}>
+                    <div className="flex justify-between text-sm">
+                      <span>{source.name}</span>
+                      <span>{source.percentage}%</span>
+                    </div>
+                    <Progress value={source.percentage} />
                   </div>
-                  <Progress value={45} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Direct Store Visits</span>
-                    <span>32%</span>
-                  </div>
-                  <Progress value={32} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>WRV Tasks</span>
-                    <span>18%</span>
-                  </div>
-                  <Progress value={18} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Referrals</span>
-                    <span>5%</span>
-                  </div>
-                  <Progress value={5} />
-                </div>
+                ))}
               </CardContent>
             </Card>
 
@@ -132,49 +189,18 @@ export default function AnalyticsPage() {
                 <CardDescription>Current status of your leads</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className="text-sm">Hot Leads</span>
+                {leadStatuses.map((status, index) => (
+                  <div className="flex items-center justify-between" key={index}>
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-3 h-3 ${status.color} rounded-full`}></div>
+                      <span className="text-sm">{status.status}</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium">{formatNumber(status.count)}</div>
+                      <div className="text-xs text-gray-600">{formatPercentage(status.percentage)}</div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium">234</div>
-                    <div className="text-xs text-gray-600">9.5%</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <span className="text-sm">Warm Leads</span>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium">567</div>
-                    <div className="text-xs text-gray-600">23.1%</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm">Cold Leads</span>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium">1,234</div>
-                    <div className="text-xs text-gray-600">50.2%</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                    <span className="text-sm">Converted</span>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium">421</div>
-                    <div className="text-xs text-gray-600">17.1%</div>
-                  </div>
-                </div>
+                ))}
               </CardContent>
             </Card>
           </div>
@@ -186,38 +212,34 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <div>
-                      <p className="text-sm font-medium">john.doe@email.com</p>
-                      <p className="text-xs text-gray-600">Visited Anime Store → Made Purchase</p>
+                {leadActivities.map((activity) => (
+                  <div 
+                    className={`flex items-center justify-between p-3 rounded-lg ${
+                      activity.status === 'Converted' ? 'bg-green-50' : 
+                      activity.status === 'Warm' ? 'bg-yellow-50' : 'bg-blue-50'
+                    }`}
+                    key={activity.id}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-2 h-2 ${
+                        activity.status === 'Converted' ? 'bg-green-500' : 
+                        activity.status === 'Warm' ? 'bg-yellow-500' : 'bg-blue-500'
+                      } rounded-full`}></div>
+                      <div>
+                        <p className="text-sm font-medium">{activity.email}</p>
+                        <p className="text-xs text-gray-600">{activity.action}</p>
+                      </div>
                     </div>
+                    <Badge 
+                      className={
+                        activity.status === 'Converted' ? 'bg-green-100 text-green-800' : 
+                        activity.status === 'Warm' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
+                      }
+                    >
+                      {activity.status}
+                    </Badge>
                   </div>
-                  <Badge className="bg-green-100 text-green-800">Converted</Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                    <div>
-                      <p className="text-sm font-medium">sarah.miller@email.com</p>
-                      <p className="text-xs text-gray-600">Responded to WRV Task → Awaiting Review</p>
-                    </div>
-                  </div>
-                  <Badge className="bg-yellow-100 text-yellow-800">Warm</Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <div>
-                      <p className="text-sm font-medium">mike.johnson@email.com</p>
-                      <p className="text-xs text-gray-600">Viewed Store → Left without Action</p>
-                    </div>
-                  </div>
-                  <Badge className="bg-blue-100 text-blue-800">Cold</Badge>
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -231,33 +253,21 @@ export default function AnalyticsPage() {
                 <CardDescription>Revenue and traffic by store</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Store className="w-8 h-8 text-purple-600" />
-                    <div>
-                      <p className="font-medium">Anime Fitness Hub</p>
-                      <p className="text-sm text-gray-600">anime-fitness.Autilance.com</p>
+                {storePerformances.map((store) => (
+                  <div className="flex items-center justify-between p-3 border rounded-lg" key={store.id}>
+                    <div className="flex items-center space-x-3">
+                      <Store className={`w-8 h-8 ${store.iconColor}`} />
+                      <div>
+                        <p className="font-medium">{store.name}</p>
+                        <p className="text-sm text-gray-600">{store.url}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-green-600">{formatCurrency(store.revenue)}</p>
+                      <p className="text-sm text-gray-600">{formatNumber(store.views)} views</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium text-green-600">$2,456</p>
-                    <p className="text-sm text-gray-600">1.2k views</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Store className="w-8 h-8 text-blue-600" />
-                    <div>
-                      <p className="font-medium">Tech Gadgets Pro</p>
-                      <p className="text-sm text-gray-600">tech-gadgets.Autilance.com</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-green-600">$1,789</p>
-                    <p className="text-sm text-gray-600">856 views</p>
-                  </div>
-                </div>
+                ))}
               </CardContent>
             </Card>
 
@@ -267,27 +277,15 @@ export default function AnalyticsPage() {
                 <CardDescription>Visitor behavior and engagement</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Bounce Rate</span>
-                    <span>34%</span>
+                {trafficMetrics.map((metric, index) => (
+                  <div className="space-y-2" key={index}>
+                    <div className="flex justify-between text-sm">
+                      <span>{metric.name}</span>
+                      <span>{metric.value}{metric.name.includes('Duration') ? 's' : metric.name.includes('Pages') ? '' : '%'}</span>
+                    </div>
+                    <Progress value={metric.value} max={metric.maxValue} />
                   </div>
-                  <Progress value={34} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Avg. Session Duration</span>
-                    <span>2m 45s</span>
-                  </div>
-                  <Progress value={68} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Pages per Session</span>
-                    <span>3.2</span>
-                  </div>
-                  <Progress value={64} />
-                </div>
+                ))}
               </CardContent>
             </Card>
           </div>
@@ -303,11 +301,11 @@ export default function AnalyticsPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">23</div>
+                    <div className="text-2xl font-bold text-blue-600">{taskStats.activeTasks}</div>
                     <div className="text-sm text-gray-600">Active Tasks</div>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">15</div>
+                    <div className="text-2xl font-bold text-green-600">{taskStats.completedTasks}</div>
                     <div className="text-sm text-gray-600">Completed</div>
                   </div>
                 </div>
@@ -315,15 +313,15 @@ export default function AnalyticsPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Task Completion Rate</span>
-                    <span>78%</span>
+                    <span>{taskStats.completionRate}%</span>
                   </div>
-                  <Progress value={78} />
+                  <Progress value={taskStats.completionRate} />
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Average Response Time</span>
-                    <span>2.3 days</span>
+                    <span>{taskStats.avgResponseTime}</span>
                   </div>
                   <Progress value={85} />
                 </div>
@@ -336,22 +334,12 @@ export default function AnalyticsPage() {
                 <CardDescription>Most popular task types</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Web Development</span>
-                  <Badge variant="secondary">12 tasks</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Design</span>
-                  <Badge variant="secondary">8 tasks</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Content Writing</span>
-                  <Badge variant="secondary">6 tasks</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Marketing</span>
-                  <Badge variant="secondary">4 tasks</Badge>
-                </div>
+                {taskCategories.map((category, index) => (
+                  <div className="flex items-center justify-between" key={index}>
+                    <span className="text-sm">{category.name}</span>
+                    <Badge variant="secondary">{category.count} tasks</Badge>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </div>
@@ -367,11 +355,11 @@ export default function AnalyticsPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">1,234</div>
+                    <div className="text-2xl font-bold text-purple-600">{formatNumber(aiMetrics.messagesHandled)}</div>
                     <div className="text-sm text-gray-600">Messages Handled</div>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">94%</div>
+                    <div className="text-2xl font-bold text-green-600">{aiMetrics.satisfactionRate}%</div>
                     <div className="text-sm text-gray-600">Satisfaction Rate</div>
                   </div>
                 </div>
@@ -379,15 +367,15 @@ export default function AnalyticsPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Response Accuracy</span>
-                    <span>92%</span>
+                    <span>{aiMetrics.accuracy}%</span>
                   </div>
-                  <Progress value={92} />
+                  <Progress value={aiMetrics.accuracy} />
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Average Response Time</span>
-                    <span>1.2s</span>
+                    <span>{aiMetrics.avgResponseTime}</span>
                   </div>
                   <Progress value={88} />
                 </div>
@@ -400,34 +388,15 @@ export default function AnalyticsPage() {
                 <CardDescription>How your AI assistant is being used</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Customer Support</span>
-                    <span>45%</span>
+                {aiUsage.map((usage, index) => (
+                  <div className="space-y-2" key={index}>
+                    <div className="flex justify-between text-sm">
+                      <span>{usage.category}</span>
+                      <span>{usage.percentage}%</span>
+                    </div>
+                    <Progress value={usage.percentage} />
                   </div>
-                  <Progress value={45} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Content Generation</span>
-                    <span>28%</span>
-                  </div>
-                  <Progress value={28} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Lead Qualification</span>
-                    <span>18%</span>
-                  </div>
-                  <Progress value={18} />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Marketing Tasks</span>
-                    <span>9%</span>
-                  </div>
-                  <Progress value={9} />
-                </div>
+                ))}
               </CardContent>
             </Card>
           </div>

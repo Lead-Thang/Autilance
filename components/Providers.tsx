@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { ThemeProvider } from ".././hooks/use-theme"
+import { ThemeProvider } from "./theme-provider"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 export function Providers({ children }: { children: React.ReactNode }) {

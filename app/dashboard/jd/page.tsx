@@ -21,16 +21,105 @@ import {
   MessageSquare,
   Eye,
   Star,
+  MapPin,
+  Navigation,
 } from "lucide-react"
+import JobMap from "@/components/job-map"
+import { calculateDistance } from "@/lib/geolocation"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useGeolocation } from "@/lib/geolocationContext"
+import { geolocationManager } from "@/lib/geolocationService"
+
+// Mock data for job descriptions
+const mockJobDescriptions = [
+  {
+    id: "1",
+    company: "TechCorp Inc.",
+    title: "Full Stack Developer",
+    category: "Tech",
+    verifiedCount: 24,
+    skills: ["React", "Node.js", "TypeScript", "PostgreSQL", "AWS"],
+    updatedAt: "2 days ago",
+    verifiedUsers: 12,
+    location: "San Francisco, CA",
+    latitude: 37.7749,
+    longitude: -122.4194,
+  },
+  {
+    id: "2",
+    company: "DesignStudio",
+    title: "UI/UX Designer",
+    category: "Design",
+    verifiedCount: 18,
+    skills: ["Figma", "UI Design", "Prototyping", "User Research", "Wireframing"],
+    updatedAt: "5 days ago",
+    verifiedUsers: 8,
+    location: "New York, NY",
+    latitude: 40.7128,
+    longitude: -74.0060,
+  },
+  {
+    id: "3",
+    company: "GrowthCorp",
+    title: "Digital Marketing Specialist",
+    category: "Marketing",
+    verifiedCount: 9,
+    skills: ["SEO", "Social Media", "Analytics", "Content Marketing", "PPC", "Email Marketing", "Copywriting"],
+    updatedAt: "1 week ago",
+    verifiedUsers: 5,
+    location: "Los Angeles, CA",
+    latitude: 34.0522,
+    longitude: -118.2437,
+  },
+]
 
 export default function JobDescriptionsPage() {
   const [activeTab, setActiveTab] = useState("browse")
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null)
+  const [locationError, setLocationError] = useState<string | null>(null)
+  const [distanceFilter, setDistanceFilter] = useState<number>(50) // in kilometers
+  const [selectedJob, setSelectedJob] = useState<any>(null)
+  const { selectedProvider, setSelectedProvider } = useGeolocation()
+
+  // Get user's current location
+  const handleGetLocation = async () => {
+    try {
+      // Set the provider before getting location
+      geolocationManager.setCurrentProvider(selectedProvider);
+      
+      const location = await geolocationManager.getCurrentLocation()
+      setUserLocation({ lat: location.latitude, lon: location.longitude })
+      setLocationError(null)
+    } catch (err) {
+      console.error("Error getting location:", err)
+      setLocationError("Unable to get your location. Please enable location services.")
+    }
+  }
+
+  // Calculate distance to a job
+  const getDistanceToJob = (jobLat: number, jobLon: number) => {
+    if (!userLocation) return null
+    return calculateDistance(userLocation.lat, userLocation.lon, jobLat, jobLon)
+  }
+
+  // Filter jobs by distance
+  const filteredJobs = mockJobDescriptions.filter(job => {
+    if (!userLocation || !job.latitude || !job.longitude) return true
+    const distance = getDistanceToJob(job.latitude, job.longitude)
+    return distance !== null && distance <= distanceFilter
+  })
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Job Descriptions</h1>
+          <h1 className="text-3xl font-bold">Jobs</h1>
           <p className="text-gray-600">Browse company requirements or create your own JD</p>
         </div>
         <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
@@ -41,180 +130,173 @@ export default function JobDescriptionsPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="browse">Browse JDs</TabsTrigger>
-          <TabsTrigger value="my-jds">My JDs</TabsTrigger>
+          <TabsTrigger value="browse">Browse Jobs</TabsTrigger>
+          <TabsTrigger value="my-jds">My Jobs</TabsTrigger>
           <TabsTrigger value="verifications">My Verifications</TabsTrigger>
-          <TabsTrigger value="create">Create JD</TabsTrigger>
+          <TabsTrigger value="create">Create Job</TabsTrigger>
         </TabsList>
 
         <TabsContent value="browse" className="space-y-6">
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input placeholder="Search job descriptions..." className="pl-10" />
             </div>
-            <Button variant="outline">
-              <Filter className="w-4 h-4 mr-2" />
-              Filter
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline">
+                <Filter className="w-4 h-4 mr-2" />
+                Filter
+              </Button>
+              {userLocation ? (
+                <div className="flex items-center bg-blue-50 px-3 py-2 rounded-md">
+                  <Navigation className="w-4 h-4 text-blue-600 mr-2" />
+                  <span className="text-sm text-blue-800">
+                    Nearby ({distanceFilter} km)
+                  </span>
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Select value={selectedProvider} onValueChange={setSelectedProvider}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select Provider" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="browser">Browser Geolocation</SelectItem>
+                      <SelectItem value="ipgeolocation">ipgeolocation.io</SelectItem>
+                      <SelectItem value="ip2location">IP2Location</SelectItem>
+                      <SelectItem value="smarty">Smarty</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleGetLocation}
+                  >
+                    <MapPin className="w-4 h-4 mr-2" />
+                    Enable Location
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* JD Card 1 */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <Badge className="bg-blue-100 text-blue-800">Tech</Badge>
-                  <div className="flex items-center space-x-1">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    <span className="text-sm text-gray-600">Verified: 24</span>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 mt-2">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                    <AvatarFallback>TC</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className="text-lg">TechCorp Inc.</CardTitle>
-                    <CardDescription>Full Stack Developer</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium">Required Skills</div>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline" className="bg-slate-100">React</Badge>
-                      <Badge variant="outline" className="bg-slate-100">Node.js</Badge>
-                      <Badge variant="outline" className="bg-slate-100">TypeScript</Badge>
-                      <Badge variant="outline" className="bg-slate-100">+3 more</Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center text-gray-600">
-                      <Clock className="w-4 h-4 mr-1" />
-                      Updated 2 days ago
-                    </div>
-                    <div className="flex items-center text-gray-600">
-                      <Users className="w-4 h-4 mr-1" />
-                      12 verified users
-                    </div>
-                  </div>
-                  
-                  <Button className="w-full">
-                    <Eye className="w-4 h-4 mr-2" />
-                    View Requirements
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+          {locationError && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+              <p className="text-yellow-800 text-sm">{locationError}</p>
+            </div>
+          )}
 
-            {/* JD Card 2 */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <Badge className="bg-green-100 text-green-800">Design</Badge>
-                  <div className="flex items-center space-x-1">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    <span className="text-sm text-gray-600">Verified: 18</span>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 mt-2">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                    <AvatarFallback>DS</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className="text-lg">DesignStudio</CardTitle>
-                    <CardDescription>UI/UX Designer</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium">Required Skills</div>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline" className="bg-slate-100">Figma</Badge>
-                      <Badge variant="outline" className="bg-slate-100">UI Design</Badge>
-                      <Badge variant="outline" className="bg-slate-100">Prototyping</Badge>
-                      <Badge variant="outline" className="bg-slate-100">+2 more</Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center text-gray-600">
-                      <Clock className="w-4 h-4 mr-1" />
-                      Updated 5 days ago
-                    </div>
-                    <div className="flex items-center text-gray-600">
-                      <Users className="w-4 h-4 mr-1" />
-                      8 verified users
-                    </div>
-                  </div>
-                  
-                  <Button className="w-full">
-                    <Eye className="w-4 h-4 mr-2" />
-                    View Requirements
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+          {userLocation && (
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">Distance:</span>
+              <Input
+                type="range"
+                min="5"
+                max="200"
+                step="5"
+                value={distanceFilter}
+                onChange={(e) => setDistanceFilter(Number(e.target.value))}
+                className="max-w-xs"
+              />
+              <span className="text-sm font-medium">{distanceFilter} km</span>
+            </div>
+          )}
 
-            {/* JD Card 3 */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <Badge className="bg-purple-100 text-purple-800">Marketing</Badge>
-                  <div className="flex items-center space-x-1">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    <span className="text-sm text-gray-600">Verified: 9</span>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 mt-2">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                    <AvatarFallback>GC</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className="text-lg">GrowthCorp</CardTitle>
-                    <CardDescription>Digital Marketing Specialist</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium">Required Skills</div>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline" className="bg-slate-100">SEO</Badge>
-                      <Badge variant="outline" className="bg-slate-100">Social Media</Badge>
-                      <Badge variant="outline" className="bg-slate-100">Analytics</Badge>
-                      <Badge variant="outline" className="bg-slate-100">+4 more</Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center text-gray-600">
-                      <Clock className="w-4 h-4 mr-1" />
-                      Updated 1 week ago
-                    </div>
-                    <div className="flex items-center text-gray-600">
-                      <Users className="w-4 h-4 mr-1" />
-                      5 verified users
-                    </div>
-                  </div>
-                  
-                  <Button className="w-full">
-                    <Eye className="w-4 h-4 mr-2" />
-                    View Requirements
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-6">
+                {filteredJobs.map((job) => {
+                  const distance = userLocation && job.latitude && job.longitude 
+                    ? getDistanceToJob(job.latitude, job.longitude)?.toFixed(1)
+                    : null
+
+                  return (
+                    <Card 
+                      key={job.id} 
+                      className={`hover:shadow-lg transition-shadow cursor-pointer ${
+                        selectedJob?.id === job.id ? "border-blue-500 border-2" : ""
+                      }`}
+                      onClick={() => setSelectedJob(job)}
+                    >
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <Badge className="bg-blue-100 text-blue-800">{job.category}</Badge>
+                          <div className="flex items-center space-x-1">
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                            <span className="text-sm text-gray-600">Verified: {job.verifiedCount}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3 mt-2">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                            <AvatarFallback>{job.company.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <CardTitle className="text-lg">{job.company}</CardTitle>
+                            <CardDescription>{job.title}</CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <div className="text-sm font-medium">Required Skills</div>
+                            <div className="flex flex-wrap gap-2">
+                              {job.skills.slice(0, 3).map((skill, index) => (
+                                <Badge key={index} variant="outline" className="bg-slate-100">
+                                  {skill}
+                                </Badge>
+                              ))}
+                              {job.skills.length > 3 && (
+                                <Badge variant="outline" className="bg-slate-100">
+                                  +{job.skills.length - 3} more
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center text-gray-600">
+                              <Clock className="w-4 h-4 mr-1" />
+                              Updated {job.updatedAt}
+                            </div>
+                            <div className="flex items-center text-gray-600">
+                              <Users className="w-4 h-4 mr-1" />
+                              {job.verifiedUsers} verified users
+                            </div>
+                          </div>
+
+                          {job.location && (
+                            <div className="flex items-center justify-between text-sm">
+                              <div className="flex items-center text-gray-600">
+                                <MapPin className="w-4 h-4 mr-1" />
+                                {job.location}
+                              </div>
+                              {distance && (
+                                <div className="flex items-center text-blue-600 font-medium">
+                                  {distance} km away
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          <Button className="w-full">
+                            <Eye className="w-4 h-4 mr-2" />
+                            View Requirements
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            </div>
+            
+            <div>
+              <JobMap 
+                jobs={mockJobDescriptions} 
+                onJobSelect={setSelectedJob} 
+              />
+            </div>
           </div>
         </TabsContent>
 
@@ -363,6 +445,18 @@ export default function JobDescriptionsPage() {
                   <label className="text-sm font-medium">Company</label>
                   <Input placeholder="Your company name" />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Location</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input 
+                    placeholder="e.g., San Francisco, CA or Remote" 
+                    className="pl-10"
+                  />
+                </div>
+                <p className="text-sm text-gray-600">Enter a location or &quot;Remote&quot; for remote positions</p>
               </div>
 
               <div className="space-y-2">

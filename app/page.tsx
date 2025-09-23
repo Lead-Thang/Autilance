@@ -65,13 +65,6 @@ const features = [
     href: "/dashboard/tasks",
   },
   {
-    icon: Shield,
-    title: "Enterprise Security",
-    description: "Bank-level security with AI-powered threat detection and data protection protocols.",
-    color: "from-indigo-500 to-purple-500",
-    href: "/dashboard/settings",
-  },
-  {
     icon: DollarSign,
     title: "Make Money",
     description: "Consolidated money-making features including investments, partnerships, marketplace, and store management.",
@@ -147,7 +140,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Image src="/logo.png" alt="Autilance Logo" width={40} height={40} className="rounded-xl" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold text-white">
                 Autilance
               </span>
             </div>
@@ -218,7 +211,7 @@ export default function HomePage() {
                       className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-4 text-lg"
                     >
                       <Rocket className="w-6 h-6 mr-3" />
-                      Start Free Trial
+                      Start Now!
                     </Button>
                   </Link>
                   <Link href="#features">

@@ -2,7 +2,7 @@ import { mistralAI } from "../lib/mistral"
 
 export interface StoreComponent {
   id: string
-  type: "hero" | "product-grid" | "about" | "testimonials" | "contact" | "footer" | "header" | "text"
+  type: "hero" | "product-grid" | "about" | "testimonials" | "contact" | "footer" | "header" | "text" | "faq" | "newsletter" | "team" | "pricing" | "image"
   content: any
   styles: any
   position: number
@@ -210,13 +210,82 @@ Always respond with actionable, specific suggestions that can be implemented in 
       },
       {
         id: "5",
+        type: "testimonials",
+        content: {
+          title: "What Our Customers Say",
+          testimonials: [
+            {
+              id: "1",
+              name: "Alex Johnson",
+              role: "Customer",
+              content: "This store has completely transformed my shopping experience. The quality is unmatched!",
+              avatar: "/placeholder.svg?height=100&width=100",
+            },
+            {
+              id: "2",
+              name: "Sarah Miller",
+              role: "Regular Customer",
+              content: "Fast shipping and excellent customer service. Will definitely shop here again!",
+              avatar: "/placeholder.svg?height=100&width=100",
+            }
+          ]
+        },
+        styles: { padding: "60px 20px", backgroundColor: "#f8f9fa" },
+        position: 4,
+      },
+      {
+        id: "6",
+        type: "faq",
+        content: {
+          title: "Frequently Asked Questions",
+          faqs: [
+            {
+              id: "1",
+              question: "How do I place an order?",
+              answer: "You can place an order by browsing our products and adding them to your cart. Proceed to checkout and complete your payment."
+            },
+            {
+              id: "2",
+              question: "What payment methods do you accept?",
+              answer: "We accept all major credit cards, PayPal, and bank transfers."
+            }
+          ]
+        },
+        styles: { padding: "60px 20px" },
+        position: 5,
+      },
+      {
+        id: "7",
+        type: "newsletter",
+        content: {
+          title: "Subscribe to Our Newsletter",
+          description: "Get the latest updates on new products and special offers",
+          placeholder: "Enter your email",
+        },
+        styles: { padding: "60px 20px", backgroundColor: "#f8f9fa" },
+        position: 6,
+      },
+      {
+        id: "8",
+        type: "contact",
+        content: {
+          title: "Contact Us",
+          email: "hello@store.com",
+          phone: "+1 (555) 123-4567",
+          address: "123 Store Street, City, State 12345",
+        },
+        styles: { padding: "60px 20px" },
+        position: 7,
+      },
+      {
+        id: "9",
         type: "footer",
         content: {
           copyright: `© 2024 ${aiData.name || "Store"}. All rights reserved.`,
           links: ["Privacy Policy", "Terms of Service", "Contact"],
         },
         styles: { backgroundColor: "#f8f9fa", padding: "40px 20px" },
-        position: 4,
+        position: 8,
       },
     ]
   }
@@ -228,6 +297,97 @@ Always respond with actionable, specific suggestions that can be implemented in 
           text: "Double click to edit text...",
           heading: "Section Title",
           alignment: "left",
+        }
+      case "header":
+        return {
+          logo: "Store Logo",
+          navigation: ["Home", "Products", "About", "Contact"],
+        }
+      case "hero":
+        return {
+          title: "Welcome to Our Store",
+          subtitle: "Discover amazing products",
+          ctaText: "Shop Now",
+          backgroundImage: "/placeholder.svg?height=600&width=1200",
+        }
+      case "product-grid":
+        return {
+          title: "Featured Products",
+          products: this.getDefaultProducts(),
+        }
+      case "about":
+        return {
+          title: "About Us",
+          description: "We are passionate about providing quality products to our customers.",
+        }
+      case "testimonials":
+        return {
+          title: "What Our Customers Say",
+          testimonials: [
+            {
+              id: "1",
+              name: "Customer Name",
+              role: "Customer",
+              content: "This is a great testimonial",
+              avatar: "/placeholder.svg?height=100&width=100",
+            }
+          ]
+        }
+      case "faq":
+        return {
+          title: "Frequently Asked Questions",
+          faqs: [
+            {
+              id: "1",
+              question: "Sample Question?",
+              answer: "Sample answer to the question."
+            }
+          ]
+        }
+      case "newsletter":
+        return {
+          title: "Subscribe to Our Newsletter",
+          description: "Get the latest updates and offers",
+          placeholder: "Enter your email",
+        }
+      case "team":
+        return {
+          title: "Meet Our Team",
+          members: [
+            {
+              id: "1",
+              name: "Team Member",
+              role: "Position",
+              bio: "Team member bio",
+              image: "/placeholder.svg?height=300&width=300",
+            }
+          ]
+        }
+      case "pricing":
+        return {
+          title: "Our Pricing Plans",
+          plans: [
+            {
+              id: "1",
+              name: "Basic Plan",
+              price: "$9.99",
+              period: "per month",
+              features: ["Feature 1", "Feature 2"],
+              cta: "Get Started",
+            }
+          ]
+        }
+      case "contact":
+        return {
+          title: "Contact Us",
+          email: "hello@store.com",
+          phone: "+1 (555) 123-4567",
+          address: "123 Store Street, City, State 12345",
+        }
+      case "footer":
+        return {
+          copyright: "© 2024 Store. All rights reserved.",
+          links: ["Privacy Policy", "Terms of Service", "Contact"],
         }
       default:
         return {}
@@ -242,6 +402,60 @@ Always respond with actionable, specific suggestions that can be implemented in 
           backgroundColor: "#ffffff",
           textColor: "#000000",
           fontSize: "16px"
+        }
+      case "header":
+        return { 
+          padding: "20px", 
+          backgroundColor: "#ffffff"
+        }
+      case "hero":
+        return { 
+          textAlign: "center", 
+          padding: "80px 20px",
+          backgroundColor: "#f8f9fa"
+        }
+      case "product-grid":
+        return { 
+          columns: 3, 
+          gap: "20px",
+          padding: "60px 20px"
+        }
+      case "about":
+        return { 
+          padding: "60px 20px",
+          textAlign: "center"
+        }
+      case "testimonials":
+        return { 
+          padding: "60px 20px",
+          backgroundColor: "#f8f9fa"
+        }
+      case "faq":
+        return { 
+          padding: "60px 20px"
+        }
+      case "newsletter":
+        return { 
+          padding: "60px 20px",
+          backgroundColor: "#f8f9fa"
+        }
+      case "team":
+        return { 
+          padding: "60px 20px"
+        }
+      case "pricing":
+        return { 
+          padding: "60px 20px"
+        }
+      case "contact":
+        return { 
+          padding: "60px 20px"
+        }
+      case "footer":
+        return { 
+          backgroundColor: "#f8f9fa",
+          padding: "40px 20px",
+          textAlign: "center"
         }
       default:
         return {}

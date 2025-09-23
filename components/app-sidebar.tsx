@@ -1,6 +1,7 @@
 "use client"
 
-import type * as React from "react"
+import * as React from "react"
+import type { ComponentProps } from "react"
 import {
   Bot,
   Settings2,
@@ -15,6 +16,8 @@ import {
   Sparkles,
   DollarSign
 } from "lucide-react"
+import { useState } from "react"
+import { createClient } from "@/lib/supabase/client"
 
 import { NavMain } from "../components/nav-main"
 import { NavProjects } from "../components/nav-projects"
@@ -32,11 +35,6 @@ import {
 } from "../components/ui/sidebar"
 
 const data = {
-  user: {
-    name: "Autilance User",
-    email: "user@autilance.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   teams: [
     {
       name: "Autilance Platform",
@@ -75,28 +73,16 @@ const data = {
         },
       ],
     },
+    // Jobs navigation item links directly to the job description (jd) page
     {
-      title: "Job Descriptions",
+      title: "Jobs",
       url: "/dashboard/jd",
-      icon: CheckSquare,
-      items: [
-        {
-          title: "Browse JDs",
-          url: "/dashboard/jd",
-        },
-        {
-          title: "My JDs",
-          url: "/dashboard/jd?tab=my-jds",
-        },
-        {
-          title: "Verifications",
-          url: "/dashboard/jd?tab=verifications",
-        },
-        {
-          title: "Create JD",
-          url: "/dashboard/jd?tab=create",
-        },
-      ],
+      icon: CheckSquare
+    },
+    {
+      title: "Messages",
+      url: "/dashboard/messages",
+      icon: MessageSquare,
     },
     {
       title: "AI Assistant",
@@ -131,14 +117,15 @@ const data = {
           url: "/dashboard/partnerships",
         },
         {
-          title: "Selling & Buying",
-          url: "/dashboard/marketplace",
-        },
-        {
           title: "Store Management",
           url: "/dashboard/storefront",
         },
       ],
+    },
+    {
+      title: "Marketplace",
+      url: "/dashboard/marketplace",
+      icon: Store,
     },
     {
       title: "Certifications",
@@ -215,19 +202,50 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
+  const [user, setUser] = useState({
+    name: "Autilance User",
+    email: "user@autilance.com",
+    avatar: "/avatars/shadcn.jpg",
+  })
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { user: supabaseUser }, error } = await supabase.auth.getUser()
+        
+        if (error) {
+          console.error("Error fetching user:", error)
+          return
+        }
+        
+        if (supabaseUser) {
+          setUser({
+            name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || "User",
+            email: supabaseUser.email || "",
+            avatar: supabaseUser.user_metadata?.avatar_url || "/avatars/shadcn.jpg",
+          })
+        }
+      } catch (error) {
+        console.error("Error loading user:", error)
+      }
+    }
+
+    fetchUser()
+  }, [])
+
   return (
-    <div className="app-sidebar">
-      <img src="logo.png" alt="Gopod Logo" className="logo" />
+    <Sidebar {...props} collapsible="icon">
       <SidebarHeader className="border-b border-border/50 bg-background/50">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="/dashboard" className="flex items-center gap-2">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Sparkles className="size-4" />
+                  <img src="/logo.png" className="size-6" />
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+                <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                   <span className="truncate font-semibold">Autilance</span>
                   <span className="truncate text-xs text-muted-foreground">Platform</span>
                 </div>
@@ -245,10 +263,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarFooter className="border-t border-border/50 bg-background/50">
         <div className="flex items-center justify-between p-2">
-          <NavUser user={data.user} />
-          <ThemeToggle />
+          <NavUser user={user} />
+          <div className="group-data-[collapsible=icon]:hidden">
+            <ThemeToggle />
+          </div>
         </div>
       </SidebarFooter>
-    </div>
+    </Sidebar>
   )
 }

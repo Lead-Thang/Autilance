@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
 import { Button } from "../../../components/ui/button"
 import { Input } from "../../../components/ui/input"
+import { Textarea } from "../../../components/ui/textarea"
 import { Badge } from "../../../components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
+import { useUser } from "../../../hooks/use-user"
 import {
   Heart,
   MessageCircle,
@@ -21,13 +23,100 @@ import {
   Eye,
   DollarSign,
   CheckCircle,
+  X,
 } from "lucide-react"
 
-import React from "react";
+interface Post {
+  id: string
+  user_id: string
+  content: string
+  created_at: string
+  likes: number
+  comments: number
+  users: {
+    id: string
+    name: string
+    avatar?: string
+  }
+  liked: boolean
+}
 
 export default function FeedPage() {
-  const [companyName, setCompanyName] = useState("");
+  const { user } = useUser()
   const [activeTab, setActiveTab] = useState("explore")
+  const [posts, setPosts] = useState<Post[]>([])
+  const [newPost, setNewPost] = useState("")
+  const [showCreatePost, setShowCreatePost] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  // Fetch posts from API
+  useEffect(() => {
+    fetchPosts()
+  }, [])
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('/api/feed/posts')
+      const data = await response.json()
+      
+      // Transform the data to match our interface
+      const transformedPosts = data.map((post: any) => ({
+        id: post.id,
+        user_id: post.user_id,
+        content: post.content,
+        created_at: new Date(post.created_at).toLocaleDateString(),
+        likes: post.likes,
+        comments: post.comments,
+        users: {
+          id: post.users?.id || post.user_id,
+          name: post.users?.name || "User",
+          avatar: post.users?.avatar || "/placeholder.svg?height=40&width=40"
+        },
+        liked: false // We would need to track this separately in a real app
+      }))
+      
+      setPosts(transformedPosts)
+      setLoading(false)
+    } catch (error) {
+      console.error("Error fetching posts:", error)
+      setLoading(false)
+    }
+  }
+
+  const handleCreatePost = async () => {
+    if (!newPost.trim() || !user) return
+
+    try {
+      const response = await fetch('/api/feed/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: newPost })
+      })
+      
+      if (response.ok) {
+        // Refresh the posts list
+        fetchPosts()
+        setNewPost("")
+        setShowCreatePost(false)
+      } else {
+        console.error("Failed to create post")
+      }
+    } catch (error) {
+      console.error("Error creating post:", error)
+    }
+  }
+
+  const handleLikePost = (postId: string) => {
+    setPosts(posts.map(post => 
+      post.id === postId 
+        ? { 
+            ...post, 
+            liked: !post.liked,
+            likes: post.liked ? post.likes - 1 : post.likes + 1
+          } 
+        : post
+    ))
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -38,11 +127,59 @@ export default function FeedPage() {
             Discover certifications, connect with companies, and showcase your verified skills
           </p>
         </div>
-        <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
+        <Button 
+          className="bg-gradient-to-r from-purple-600 to-blue-600"
+          onClick={() => setShowCreatePost(true)}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Create Post
         </Button>
       </div>
+
+      {/* Create Post Modal */}
+      {showCreatePost && (
+        <Card className="mb-6">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Create a Post</CardTitle>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setShowCreatePost(false)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <Avatar>
+                <AvatarImage src={user?.avatar || "/placeholder.svg?height=40&width=40"} />
+                <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-semibold">{user?.name || "User"}</p>
+                <Badge variant="secondary">Public</Badge>
+              </div>
+            </div>
+            
+            <Textarea
+              placeholder="What do you want to talk about?"
+              value={newPost}
+              onChange={(e) => setNewPost(e.target.value)}
+              rows={4}
+            />
+            
+            <div className="flex justify-end">
+              <Button 
+                onClick={handleCreatePost}
+                disabled={!newPost.trim()}
+                className="bg-gradient-to-r from-purple-600 to-blue-600"
+              >
+                Post
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4">
@@ -66,193 +203,71 @@ export default function FeedPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              {/* Post 1 */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center space-x-3">
-                    <Avatar>
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                      <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold">John Doe</h3>
-                        <Badge variant="secondary">Creator</Badge>
-                      </div>
-                      <p className="text-sm text-gray-600">2 hours ago</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p>
-                    Just launched my new AI-generated anime merchandise store! 🎌 Check out these amazing designs
-                    created entirely by AI. What do you think?
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="aspect-square bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg flex items-center justify-center">
-                      <Store className="w-8 h-8 text-purple-600" />
-                    </div>
-                    <div className="aspect-square bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center">
-                      <Store className="w-8 h-8 text-blue-600" />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <div className="flex items-center space-x-4">
-                      <Button variant="ghost" size="sm">
-                        <Heart className="w-4 h-4 mr-1" />
-                        24
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <MessageCircle className="w-4 h-4 mr-1" />8
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Share className="w-4 h-4 mr-1" />
-                        Share
-                      </Button>
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      <Bookmark className="w-4 h-4" />
+              {loading ? (
+                <div className="flex justify-center items-center h-32">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                </div>
+              ) : posts.length === 0 ? (
+                <Card>
+                  <CardContent className="py-8 text-center">
+                    <p className="text-gray-600">No posts yet. Be the first to create one!</p>
+                    <Button 
+                      className="mt-4 bg-gradient-to-r from-purple-600 to-blue-600"
+                      onClick={() => setShowCreatePost(true)}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Your First Post
                     </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              ) : (
+                posts.map((post) => (
+                  <Card key={post.id}>
+                    <CardHeader>
+                      <div className="flex items-center space-x-3">
+                        <Avatar>
+                          <AvatarImage src={post.users.avatar || "/placeholder.svg?height=40&width=40"} />
+                          <AvatarFallback>{post.users.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <h3 className="font-semibold">{post.users.name}</h3>
+                            <Badge variant="secondary">User</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600">{new Date(post.created_at).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p>{post.content}</p>
 
-              {/* Post 2 */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center space-x-3">
-                    <Avatar>
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                      <AvatarFallback>SM</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold">Sarah Miller</h3>
-                        <Badge className="bg-blue-100 text-blue-800">Developer</Badge>
+                      <div className="flex items-center justify-between pt-2 border-t">
+                        <div className="flex items-center space-x-4">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleLikePost(post.id)}
+                          >
+                            <Heart className={`w-4 h-4 mr-1 ${post.liked ? 'fill-red-500 text-red-500' : ''}`} />
+                            {post.likes}
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <MessageCircle className="w-4 h-4 mr-1" />
+                            {post.comments}
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Share className="w-4 h-4 mr-1" />
+                            Share
+                          </Button>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          <Bookmark className="w-4 h-4" />
+                        </Button>
                       </div>
-                      <p className="text-sm text-gray-600">4 hours ago</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p>
-                    Looking for a business partner to help scale my SaaS platform! 🚀 I handle the tech, need someone
-                    for marketing and sales. Revenue sharing opportunity!
-                  </p>
-
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
-                    <h4 className="font-semibold mb-2">Partnership Opportunity</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">Industry:</span>
-                        <p className="font-medium">AI/SaaS</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Stage:</span>
-                        <p className="font-medium">Early Growth</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Looking for:</span>
-                        <p className="font-medium">Marketing Partner</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Equity:</span>
-                        <p className="font-medium">20-30%</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <div className="flex items-center space-x-4">
-                      <Button variant="ghost" size="sm">
-                        <Heart className="w-4 h-4 mr-1" />
-                        15
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <MessageCircle className="w-4 h-4 mr-1" />
-                        12
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Share className="w-4 h-4 mr-1" />
-                        Share
-                      </Button>
-                    </div>
-                    <Button size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600">
-                      Interested
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Post 3 */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center space-x-3">
-                    <Avatar>
-                      <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                      <AvatarFallback>TC</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold">{companyName || "TechCorp Inc."}</h3>
-                        <Badge className="bg-green-100 text-green-800">Company</Badge>
-                      </div>
-                      <p className="text-sm text-gray-600">6 hours ago</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p>We're hiring! Looking for talented developers to join our team. Here's what we're looking for:</p>
-
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-semibold mb-2">What We Want From Our Team</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                        <span>Strong coding skills (React, Node.js, Python)</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                        <span>AI/ML knowledge preferred</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                        <span>Engineering mindset and problem-solving skills</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                        <span>Team collaboration and communication</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="w-4 h-4 text-green-600" />
-                        <span>Certified in React</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <div className="flex items-center space-x-4">
-                      <Button variant="ghost" size="sm">
-                        <Heart className="w-4 h-4 mr-1" />
-                        32
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <MessageCircle className="w-4 h-4 mr-1" />
-                        18
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Share className="w-4 h-4 mr-1" />
-                        Share
-                      </Button>
-                    </div>
-                    <Button size="sm" className="bg-gradient-to-r from-green-600 to-blue-600">
-                      Apply Now
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
 
             {/* Sidebar */}

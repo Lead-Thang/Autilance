@@ -15,14 +15,16 @@ import {
   Award,
   BarChart3,
 } from "lucide-react"
-import { SidebarProvider, SidebarTrigger } from "../../components/ui/sidebar"
-import { AppSidebar } from "../../components/app-sidebar"
+import { useCourseData } from "../../hooks/use-course-data"
 
 export default function DashboardPage() {
-  const stats = [
+  const { stats, recentActivity, courses, isLoading } = useCourseData()
+
+  // Convert stats to the format expected by the UI
+  const statItems = [
     {
       title: "Courses Completed",
-      value: "12",
+      value: stats.coursesCompleted.toString(),
       change: "+2 this month",
       icon: BookOpen,
       color: "text-blue-500",
@@ -30,7 +32,7 @@ export default function DashboardPage() {
     },
     {
       title: "Certifications Earned",
-      value: "8",
+      value: stats.certificationsEarned.toString(),
       change: "+1 this week",
       icon: Trophy,
       color: "text-yellow-500",
@@ -38,7 +40,7 @@ export default function DashboardPage() {
     },
     {
       title: "Network Connections",
-      value: "156",
+      value: stats.networkConnections.toString(),
       change: "+12 this week",
       icon: Users,
       color: "text-green-500",
@@ -46,7 +48,7 @@ export default function DashboardPage() {
     },
     {
       title: "Learning Hours",
-      value: "89",
+      value: stats.learningHours.toString(),
       change: "+15 this month",
       icon: Clock,
       color: "text-purple-500",
@@ -54,32 +56,10 @@ export default function DashboardPage() {
     },
   ]
 
-  const recentActivity = [
-    {
-      title: "Completed Advanced React Course",
-      description: "Earned certification in React development",
-      time: "2 hours ago",
-      type: "completion",
-    },
-    {
-      title: "Connected with Sarah Johnson",
-      description: "New connection in your professional network",
-      time: "5 hours ago",
-      type: "connection",
-    },
-    {
-      title: "Started AI Fundamentals Course",
-      description: "Beginning your journey in artificial intelligence",
-      time: "1 day ago",
-      type: "start",
-    },
-  ]
-
   return (
     // Removed SidebarProvider and AppSidebar since they are already provided in the layout
     <main className="flex-1 p-6 bg-gradient-to-br from-background via-primary/5 to-accent/5">
       <div className="flex items-center gap-4 mb-8">
-        <SidebarTrigger />
         <div>
           <h1 className="text-3xl font-bold text-gradient-primary">Welcome back!</h1>
           <p className="text-muted-foreground">Here's what's happening with your learning journey</p>
@@ -88,7 +68,7 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
+        {statItems.map((stat, index) => (
           <Card key={index} className="hover-lift border-border/50 bg-card/50 backdrop-blur-sm group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
@@ -117,27 +97,15 @@ export default function DashboardPage() {
             <CardDescription>Your current course progress and goals</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">AI Fundamentals</span>
-                <span className="text-sm text-muted-foreground">75%</span>
+            {courses.map((course) => (
+              <div key={course.id} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">{course.title}</span>
+                  <span className="text-sm text-muted-foreground">{course.progress}%</span>
+                </div>
+                <Progress value={course.progress} className="h-2" />
               </div>
-              <Progress value={75} className="h-2" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Digital Marketing</span>
-                <span className="text-sm text-muted-foreground">45%</span>
-              </div>
-              <Progress value={45} className="h-2" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Data Science Basics</span>
-                <span className="text-sm text-muted-foreground">90%</span>
-              </div>
-              <Progress value={90} className="h-2" />
-            </div>
+            ))}
             <Button className="w-full bg-gradient-primary hover:scale-105 transition-all duration-200">
               Continue Learning
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -154,9 +122,9 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {recentActivity.map((activity, index) => (
+            {recentActivity.map((activity) => (
               <div
-                key={index}
+                key={activity.id}
                 className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors duration-200"
               >
                 <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>

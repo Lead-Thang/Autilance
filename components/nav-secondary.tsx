@@ -43,8 +43,10 @@ export function NavSecondary({
                   }`}
                 >
                   <Link href={item.url} className="flex items-center gap-2">
-                    <item.icon className="size-4" />
-                    <span className="font-medium">{item.title}</span>
+                    <item.icon className="size-4 shrink-0" />
+                    <span className="font-medium group-data-[collapsible=icon]:hidden">
+                      {item.title}
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

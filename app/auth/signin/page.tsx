@@ -59,22 +59,28 @@ export default function SignInPage() {
 
     try {
       const supabase = createClientComponentClient()
+      
+      // Use a more robust redirect URL configuration
+      const redirectTo = `${window.location.origin}/auth/callback`
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo
         }
       })
 
       if (error) {
-        setError(`Google sign-in failed: ${error}`)
+        setError(`Google sign-in failed: ${error.message || error}`)
+        console.error("Google OAuth error:", error)
       } else if (data?.url) {
-        router.push(data.url)
+        window.location.href = data.url
       } else {
         setError("Unexpected error. Try again.")
       }
-    } catch {
+    } catch (err) {
       setError("Google sign-in failed. Please try again.")
+      console.error("Google OAuth exception:", err)
     } finally {
       setIsLoading(false)
     }
@@ -196,7 +202,7 @@ export default function SignInPage() {
           </form>
 
           <div className="text-center text-sm">
-            <span className="text-muted-foreground">Don’t have an account? </span>
+            <span className="text-muted-foreground">Don't have an account? </span>
             <Link href="/auth/signup" className="text-primary hover:underline font-medium">
               Sign up
             </Link>

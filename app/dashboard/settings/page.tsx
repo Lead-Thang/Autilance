@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
 import { Button } from "../../../components/ui/button"
 import { Input } from "../../../components/ui/input"
@@ -28,24 +28,214 @@ import {
   EyeOff,
   Plus,
 } from "lucide-react"
-import { useTheme } from "../../../hooks/use-theme"
+import { useTheme } from "next-themes"
+import { useUser } from "../../../hooks/use-user"
+import { createClient } from "@/lib/supabase/client"
+
+interface UserProfile {
+  firstName: string
+  lastName: string
+  displayName: string
+  email: string
+  phone: string
+  location: string
+  bio: string
+  website: string
+  avatar: string
+}
+
+interface CompanyProfile {
+  name: string
+  industry: string
+  description: string
+  size: string
+  foundedYear: string
+  logo: string
+  certificationPrefix: string
+}
+
+interface NotificationSettings {
+  email: boolean
+  push: boolean
+  marketing: boolean
+  certifications: boolean
+  applications: boolean
+}
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
+  const { user, isLoading } = useUser()
   const [showPassword, setShowPassword] = useState(false)
-  const [notifications, setNotifications] = useState({
+  const [notifications, setNotifications] = useState<NotificationSettings>({
     email: true,
     push: true,
     marketing: false,
     certifications: true,
     applications: true,
   })
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    firstName: "",
+    lastName: "",
+    displayName: "",
+    email: "",
+    phone: "",
+    location: "",
+    bio: "",
+    website: "",
+    avatar: ""
+  })
+  const [companyProfile, setCompanyProfile] = useState<CompanyProfile>({
+    name: "",
+    industry: "",
+    description: "",
+    size: "",
+    foundedYear: "",
+    logo: "",
+    certificationPrefix: ""
+  })
 
-  const [companyName, setCompanyName] = useState("");
-  const [industry, setIndustry] = useState("");
-  const [companyDescription, setCompanyDescription] = useState("");
-  const [companySize, setCompanySize] = useState("");
-  const [foundedYear, setFoundedYear] = useState("");
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile()
+      fetchCompanyProfile()
+    }
+  }, [user])
+
+  const fetchUserProfile = async () => {
+    if (!user?.id) return
+
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('users')
+        .select('first_name, last_name, display_name, phone, location, bio, website, avatar')
+        .eq('id', user.id)
+        .single()
+
+      if (error) {
+        console.error("Error fetching user profile:", error)
+        return
+      }
+
+      setUserProfile({
+        firstName: data.first_name || user.name?.split(' ')[0] || "",
+        lastName: data.last_name || user.name?.split(' ')[1] || "",
+        displayName: data.display_name || user.displayName || user.name || "",
+        email: user.email || "",
+        phone: data.phone || "",
+        location: data.location || "",
+        bio: data.bio || "",
+        website: data.website || "",
+        avatar: data.avatar || user.avatar || ""
+      })
+    } catch (error) {
+      console.error("Error fetching user profile:", error)
+    }
+  }
+
+  const fetchCompanyProfile = async () => {
+    if (!user?.id) return
+
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('companies')
+        .select('name, industry, description, size, founded_year, logo, certification_prefix')
+        .eq('user_id', user.id)
+        .single()
+
+      if (error) {
+        console.error("Error fetching company profile:", error)
+        return
+      }
+
+      setCompanyProfile({
+        name: data.name || "",
+        industry: data.industry || "",
+        description: data.description || "",
+        size: data.size || "",
+        foundedYear: data.founded_year || "",
+        logo: data.logo || "",
+        certificationPrefix: data.certification_prefix || ""
+      })
+    } catch (error) {
+      console.error("Error fetching company profile:", error)
+    }
+  }
+
+  const handleSaveProfile = async () => {
+    if (!user?.id) return
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('users')
+        .update({
+          first_name: userProfile.firstName,
+          last_name: userProfile.lastName,
+          display_name: userProfile.displayName,
+          phone: userProfile.phone,
+          location: userProfile.location,
+          bio: userProfile.bio,
+          website: userProfile.website,
+          avatar: userProfile.avatar
+        })
+        .eq('id', user.id)
+
+      if (error) {
+        console.error("Error updating user profile:", error)
+        return
+      }
+
+      // Show success message
+      alert("Profile updated successfully!")
+    } catch (error) {
+      console.error("Error saving user profile:", error)
+      alert("Error updating profile. Please try again.")
+    }
+  }
+
+  const handleSaveCompany = async () => {
+    if (!user?.id) return
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('companies')
+        .update({
+          name: companyProfile.name,
+          industry: companyProfile.industry,
+          description: companyProfile.description,
+          size: companyProfile.size,
+          founded_year: companyProfile.foundedYear,
+          logo: companyProfile.logo,
+          certification_prefix: companyProfile.certificationPrefix
+        })
+        .eq('user_id', user.id)
+
+      if (error) {
+        console.error("Error updating company profile:", error)
+        return
+      }
+
+      // Show success message
+      alert("Company profile updated successfully!")
+    } catch (error) {
+      console.error("Error saving company profile:", error)
+      alert("Error updating company profile. Please try again.")
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -78,8 +268,10 @@ export default function SettingsPage() {
             <CardContent className="space-y-6">
               <div className="flex items-center space-x-6">
                 <Avatar className="w-20 h-20">
-                  <AvatarImage src="/placeholder.svg?height=80&width=80" />
-                  <AvatarFallback className="text-lg">JD</AvatarFallback>
+                  <AvatarImage src={userProfile.avatar || "/placeholder.svg?height=80&width=80"} />
+                  <AvatarFallback className="text-lg">
+                    {userProfile.firstName?.charAt(0)}{userProfile.lastName?.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
                   <Button variant="outline" size="sm">
@@ -93,54 +285,81 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" defaultValue="Alex" />
+                  <Input 
+                    id="firstName" 
+                    value={userProfile.firstName} 
+                    onChange={(e) => setUserProfile({...userProfile, firstName: e.target.value})} 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" defaultValue="Johnson" />
+                  <Input 
+                    id="lastName" 
+                    value={userProfile.lastName} 
+                    onChange={(e) => setUserProfile({...userProfile, lastName: e.target.value})} 
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="displayName">Display Name</Label>
-                <Input id="displayName" defaultValue="Alex J." placeholder="How you want to be addressed" />
+                <Input 
+                  id="displayName" 
+                  value={userProfile.displayName} 
+                  onChange={(e) => setUserProfile({...userProfile, displayName: e.target.value})} 
+                  placeholder="How you want to be addressed" 
+                />
                 <p className="text-sm text-gray-600">This is how you'll be greeted throughout the platform</p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
                 <div className="flex items-center space-x-2">
-                  <Input id="email" type="email" defaultValue="alex.johnson@example.com" className="flex-1" />
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24">
-                      <path
-                        fill="currentColor"
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      />
-                    </svg>
-                    Google
-                  </Badge>
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    value={userProfile.email} 
+                    className="flex-1" 
+                    readOnly
+                  />
+                  {user?.provider && (
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24">
+                        <path
+                          fill="currentColor"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        />
+                      </svg>
+                      {user.provider.charAt(0).toUpperCase() + user.provider.slice(1)}
+                    </Badge>
+                  )}
                 </div>
-                <p className="text-sm text-gray-600">Connected via Google OAuth</p>
+                <p className="text-sm text-gray-600">Connected via {user?.provider ? user.provider.charAt(0).toUpperCase() + user.provider.slice(1) + " OAuth" : "email"} </p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input id="phone" placeholder="+1 (555) 123-4567" className="pl-10" />
+                  <Input 
+                    id="phone" 
+                    placeholder="+1 (555) 123-4567" 
+                    className="pl-10" 
+                    value={userProfile.phone} 
+                    onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})} 
+                  />
                 </div>
               </div>
 
@@ -148,24 +367,45 @@ export default function SettingsPage() {
                 <Label htmlFor="location">Location</Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input id="location" placeholder="San Francisco, CA" className="pl-10" />
+                  <Input 
+                    id="location" 
+                    placeholder="San Francisco, CA" 
+                    className="pl-10" 
+                    value={userProfile.location} 
+                    onChange={(e) => setUserProfile({...userProfile, location: e.target.value})} 
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="bio">Bio</Label>
-                <Textarea id="bio" placeholder="Tell others about yourself and your expertise..." rows={4} />
+                <Textarea 
+                  id="bio" 
+                  placeholder="Tell others about yourself and your expertise..." 
+                  rows={4} 
+                  value={userProfile.bio} 
+                  onChange={(e) => setUserProfile({...userProfile, bio: e.target.value})} 
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="website">Website</Label>
                 <div className="relative">
                   <Globe className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input id="website" placeholder="https://yourwebsite.com" className="pl-10" />
+                  <Input 
+                    id="website" 
+                    placeholder="https://yourwebsite.com" 
+                    className="pl-10" 
+                    value={userProfile.website} 
+                    onChange={(e) => setUserProfile({...userProfile, website: e.target.value})} 
+                  />
                 </div>
               </div>
 
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
+              <Button 
+                className="bg-gradient-to-r from-purple-600 to-blue-600"
+                onClick={handleSaveProfile}
+              >
                 <Save className="w-4 h-4 mr-2" />
                 Save Changes
               </Button>
@@ -199,11 +439,21 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="companyName">Company Name</Label>
-                  <Input id="companyName" placeholder="Your Company Inc." value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                  <Input 
+                    id="companyName" 
+                    placeholder="Your Company Inc." 
+                    value={companyProfile.name} 
+                    onChange={(e) => setCompanyProfile({...companyProfile, name: e.target.value})} 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="industry">Industry</Label>
-                  <Input id="industry" placeholder="Technology, Healthcare, etc." value={industry} onChange={(e) => setIndustry(e.target.value)} />
+                  <Input 
+                    id="industry" 
+                    placeholder="Technology, Healthcare, etc." 
+                    value={companyProfile.industry} 
+                    onChange={(e) => setCompanyProfile({...companyProfile, industry: e.target.value})} 
+                  />
                 </div>
               </div>
 
@@ -213,19 +463,29 @@ export default function SettingsPage() {
                   id="companyDescription"
                   placeholder="Describe your company and what certifications you offer..."
                   rows={4}
-                  value={companyDescription}
-                  onChange={(e) => setCompanyDescription(e.target.value)}
+                  value={companyProfile.description}
+                  onChange={(e) => setCompanyProfile({...companyProfile, description: e.target.value})}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="companySize">Company Size</Label>
-                  <Input id="companySize" placeholder="1-10, 11-50, 51-200, etc." value={companySize} onChange={(e) => setCompanySize(e.target.value)} />
+                  <Input 
+                    id="companySize" 
+                    placeholder="1-10, 11-50, 51-200, etc." 
+                    value={companyProfile.size} 
+                    onChange={(e) => setCompanyProfile({...companyProfile, size: e.target.value})} 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="founded">Founded Year</Label>
-                  <Input id="founded" placeholder="2020" value={foundedYear} onChange={(e) => setFoundedYear(e.target.value)} />
+                  <Input 
+                    id="founded" 
+                    placeholder="2020" 
+                    value={companyProfile.foundedYear} 
+                    onChange={(e) => setCompanyProfile({...companyProfile, foundedYear: e.target.value})} 
+                  />
                 </div>
               </div>
 
@@ -245,14 +505,22 @@ export default function SettingsPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="certificationPrefix">Certification Prefix</Label>
-                  <Input id="certificationPrefix" placeholder="TECH-" />
+                  <Input 
+                    id="certificationPrefix" 
+                    placeholder="TECH-" 
+                    value={companyProfile.certificationPrefix} 
+                    onChange={(e) => setCompanyProfile({...companyProfile, certificationPrefix: e.target.value})} 
+                  />
                   <p className="text-sm text-gray-600">
                     This prefix will appear on all certificates you issue (e.g., TECH-001)
                   </p>
                 </div>
               </div>
 
-              <Button className="bg-gradient-to-r from-green-600 to-blue-600">
+              <Button 
+                className="bg-gradient-to-r from-green-600 to-blue-600"
+                onClick={handleSaveCompany}
+              >
                 <Save className="w-4 h-4 mr-2" />
                 Update Company Profile
               </Button>
