@@ -77,6 +77,34 @@ Autilance is a reverse job board where companies list the skills, knowledge, beh
 
 6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Deployment
+
+### Vercel Deployment
+
+1. Make sure you have the following environment variables set in your Vercel project:
+   - `DATABASE_URL` - PostgreSQL database connection string
+   - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
+   - `UPLOADTHING_SECRET` - UploadThing secret
+   - `UPLOADTHING_APP_ID` - UploadThing app ID
+
+2. The project is configured with:
+   - `postinstall` script that generates the Prisma client
+   - Custom `build` script that ensures Prisma client is generated before building
+   - `vercel.json` configuration that includes necessary files
+
+3. Deploy to Vercel:
+   - Connect your GitHub repository to Vercel
+   - Make sure to set the environment variables in the Vercel dashboard
+   - The build should automatically run `npx prisma generate` before building the Next.js app
+
+### Troubleshooting Deployment
+
+If you encounter issues with Prisma client during deployment:
+1. Make sure the `postinstall` script is present in package.json
+2. Check that `vercel.json` includes the build command with `npx prisma generate`
+3. Ensure the database connection string is correctly set in `DATABASE_URL`
+
 ## Project Structure
 
 - `/app`: Next.js app router pages and API routes

@@ -1,6 +1,18 @@
 {
-  "version": 2,
-  "buildCommand": "pnpm install && pnpm run build",
-  "devCommand": "pnpm run dev",
-  "outputDirectory": ".next"
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next",
+      "config": {
+        "includeFiles": [
+          ".next/**",
+          "!.next/cache/**",
+          "node_modules/.pnpm/@prisma+client@*/node_modules/@prisma/**",
+          "prisma/**",
+          "!.env"
+        ]
+      }
+    }
+  ],
+  "buildCommand": "npx prisma generate && next build"
 }
