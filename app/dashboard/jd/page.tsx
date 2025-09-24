@@ -23,6 +23,11 @@ import {
   Star,
   MapPin,
   Navigation,
+  DollarSign,
+  Tag,
+  User,
+  Calendar,
+  CreditCard,
 } from "lucide-react"
 import JobMap from "@/components/job-map"
 import { calculateDistance } from "@/lib/geolocation"
@@ -36,13 +41,14 @@ import {
 import { useGeolocation } from "@/lib/geolocationContext"
 import { geolocationManager } from "@/lib/geolocationService"
 
-// Mock data for job descriptions
-const mockJobDescriptions = [
+// Mock data for tasks (replacing job descriptions)
+const mockTasks = [
   {
     id: "1",
-    company: "TechCorp Inc.",
-    title: "Full Stack Developer",
+    creator: "TechCorp Inc.",
+    title: "Website Redesign Project",
     category: "Tech",
+    price: 1200,
     verifiedCount: 24,
     skills: ["React", "Node.js", "TypeScript", "PostgreSQL", "AWS"],
     updatedAt: "2 days ago",
@@ -50,12 +56,17 @@ const mockJobDescriptions = [
     location: "San Francisco, CA",
     latitude: 37.7749,
     longitude: -122.4194,
+    remote: false,
+    status: "open", // open, in_progress, completed
+    description: "Need a complete redesign of our company website with modern UI/UX principles.",
+    deadline: "2023-06-30",
   },
   {
     id: "2",
-    company: "DesignStudio",
-    title: "UI/UX Designer",
+    creator: "DesignStudio",
+    title: "Logo Design for Startup",
     category: "Design",
+    price: 350,
     verifiedCount: 18,
     skills: ["Figma", "UI Design", "Prototyping", "User Research", "Wireframing"],
     updatedAt: "5 days ago",
@@ -63,12 +74,17 @@ const mockJobDescriptions = [
     location: "New York, NY",
     latitude: 40.7128,
     longitude: -74.0060,
+    remote: true,
+    status: "open",
+    description: "Looking for a creative logo design for our new tech startup.",
+    deadline: "2023-05-15",
   },
   {
     id: "3",
-    company: "GrowthCorp",
-    title: "Digital Marketing Specialist",
+    creator: "GrowthCorp",
+    title: "Social Media Marketing Campaign",
     category: "Marketing",
+    price: 800,
     verifiedCount: 9,
     skills: ["SEO", "Social Media", "Analytics", "Content Marketing", "PPC", "Email Marketing", "Copywriting"],
     updatedAt: "1 week ago",
@@ -76,15 +92,19 @@ const mockJobDescriptions = [
     location: "Los Angeles, CA",
     latitude: 34.0522,
     longitude: -118.2437,
+    remote: true,
+    status: "in_progress",
+    description: "Need an experienced marketer to run a 3-month social media campaign.",
+    deadline: "2023-08-01",
   },
 ]
 
-export default function JobDescriptionsPage() {
+export default function FreelancePlatformPage() {
   const [activeTab, setActiveTab] = useState("browse")
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [distanceFilter, setDistanceFilter] = useState<number>(50) // in kilometers
-  const [selectedJob, setSelectedJob] = useState<any>(null)
+  const [selectedTask, setSelectedTask] = useState<any>(null)
   const { selectedProvider, setSelectedProvider } = useGeolocation()
 
   // Get user's current location
@@ -102,16 +122,22 @@ export default function JobDescriptionsPage() {
     }
   }
 
-  // Calculate distance to a job
-  const getDistanceToJob = (jobLat: number, jobLon: number) => {
+  // Calculate distance to a task
+  const getDistanceToTask = (taskLat: number, taskLon: number) => {
     if (!userLocation) return null
-    return calculateDistance(userLocation.lat, userLocation.lon, jobLat, jobLon)
+    return calculateDistance(userLocation.lat, userLocation.lon, taskLat, taskLon)
   }
 
-  // Filter jobs by distance
-  const filteredJobs = mockJobDescriptions.filter(job => {
-    if (!userLocation || !job.latitude || !job.longitude) return true
-    const distance = getDistanceToJob(job.latitude, job.longitude)
+  // Filter tasks by distance
+  const filteredTasks = mockTasks.filter(task => {
+    // Only show open tasks
+    if (task.status !== "open") return false;
+    
+    // If user location not available or task is remote, show it
+    if (!userLocation || !task.latitude || !task.longitude || task.remote) return true
+    
+    // Filter by distance for local tasks
+    const distance = getDistanceToTask(task.latitude, task.longitude)
     return distance !== null && distance <= distanceFilter
   })
 
@@ -119,28 +145,28 @@ export default function JobDescriptionsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Jobs</h1>
-          <p className="text-gray-600">Browse company requirements or create your own JD</p>
+          <h1 className="text-3xl font-bold">Tasks</h1>
+          <p className="text-gray-600">Browse freelance tasks or create your own</p>
         </div>
         <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
           <Plus className="w-4 h-4 mr-2" />
-          Create JD
+          Create Task
         </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="browse">Browse Jobs</TabsTrigger>
-          <TabsTrigger value="my-jds">My Jobs</TabsTrigger>
-          <TabsTrigger value="verifications">My Verifications</TabsTrigger>
-          <TabsTrigger value="create">Create Job</TabsTrigger>
+          <TabsTrigger value="browse">Browse Tasks</TabsTrigger>
+          <TabsTrigger value="my-tasks">My Tasks</TabsTrigger>
+          <TabsTrigger value="my-bids">My Bids</TabsTrigger>
+          <TabsTrigger value="create">Create Task</TabsTrigger>
         </TabsList>
 
         <TabsContent value="browse" className="space-y-6">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input placeholder="Search job descriptions..." className="pl-10" />
+              <Input placeholder="Search tasks..." className="pl-10" />
             </div>
             <div className="flex gap-2">
               <Button variant="outline">
@@ -204,51 +230,53 @@ export default function JobDescriptionsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-6">
               <div className="grid grid-cols-1 gap-6">
-                {filteredJobs.map((job) => {
-                  const distance = userLocation && job.latitude && job.longitude 
-                    ? getDistanceToJob(job.latitude, job.longitude)?.toFixed(1)
+                {filteredTasks.map((task) => {
+                  const distance = userLocation && task.latitude && task.longitude && !task.remote
+                    ? getDistanceToTask(task.latitude, task.longitude)?.toFixed(1)
                     : null
 
                   return (
                     <Card 
-                      key={job.id} 
+                      key={task.id} 
                       className={`hover:shadow-lg transition-shadow cursor-pointer ${
-                        selectedJob?.id === job.id ? "border-blue-500 border-2" : ""
+                        selectedTask?.id === task.id ? "border-blue-500 border-2" : ""
                       }`}
-                      onClick={() => setSelectedJob(job)}
+                      onClick={() => setSelectedTask(task)}
                     >
                       <CardHeader>
                         <div className="flex items-center justify-between">
-                          <Badge className="bg-blue-100 text-blue-800">{job.category}</Badge>
+                          <Badge className="bg-blue-100 text-blue-800">{task.category}</Badge>
                           <div className="flex items-center space-x-1">
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                            <span className="text-sm text-gray-600">Verified: {job.verifiedCount}</span>
+                            <DollarSign className="w-4 h-4 text-green-600" />
+                            <span className="text-sm font-bold text-gray-600">${task.price}</span>
                           </div>
                         </div>
                         <div className="flex items-center space-x-3 mt-2">
                           <Avatar className="h-10 w-10">
                             <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                            <AvatarFallback>{job.company.charAt(0)}</AvatarFallback>
+                            <AvatarFallback>{task.creator.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div>
-                            <CardTitle className="text-lg">{job.company}</CardTitle>
-                            <CardDescription>{job.title}</CardDescription>
+                            <CardTitle className="text-lg">{task.creator}</CardTitle>
+                            <CardDescription>{task.title}</CardDescription>
                           </div>
                         </div>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
+                          <p className="text-sm text-gray-600">{task.description}</p>
+                          
                           <div className="space-y-2">
                             <div className="text-sm font-medium">Required Skills</div>
                             <div className="flex flex-wrap gap-2">
-                              {job.skills.slice(0, 3).map((skill, index) => (
+                              {task.skills.slice(0, 3).map((skill, index) => (
                                 <Badge key={index} variant="outline" className="bg-slate-100">
                                   {skill}
                                 </Badge>
                               ))}
-                              {job.skills.length > 3 && (
+                              {task.skills.length > 3 && (
                                 <Badge variant="outline" className="bg-slate-100">
-                                  +{job.skills.length - 3} more
+                                  +{task.skills.length - 3} more
                                 </Badge>
                               )}
                             </div>
@@ -257,31 +285,42 @@ export default function JobDescriptionsPage() {
                           <div className="flex items-center justify-between text-sm">
                             <div className="flex items-center text-gray-600">
                               <Clock className="w-4 h-4 mr-1" />
-                              Updated {job.updatedAt}
+                              Updated {task.updatedAt}
                             </div>
                             <div className="flex items-center text-gray-600">
                               <Users className="w-4 h-4 mr-1" />
-                              {job.verifiedUsers} verified users
+                              {task.verifiedUsers} verified users
                             </div>
                           </div>
 
-                          {job.location && (
-                            <div className="flex items-center justify-between text-sm">
-                              <div className="flex items-center text-gray-600">
-                                <MapPin className="w-4 h-4 mr-1" />
-                                {job.location}
-                              </div>
-                              {distance && (
-                                <div className="flex items-center text-blue-600 font-medium">
-                                  {distance} km away
-                                </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center text-gray-600">
+                              <Calendar className="w-4 h-4 mr-1" />
+                              Due: {task.deadline}
+                            </div>
+                            <div className="flex items-center text-gray-600">
+                              {task.remote ? (
+                                <span className="flex items-center">
+                                  <Tag className="w-4 h-4 mr-1" />
+                                  Remote
+                                </span>
+                              ) : (
+                                <span className="flex items-center">
+                                  <MapPin className="w-4 h-4 mr-1" />
+                                  {task.location}
+                                </span>
                               )}
                             </div>
-                          )}
+                            {distance && !task.remote && (
+                              <div className="flex items-center text-blue-600 font-medium">
+                                {distance} km away
+                              </div>
+                            )}
+                          </div>
                           
                           <Button className="w-full">
                             <Eye className="w-4 h-4 mr-2" />
-                            View Requirements
+                            View Task Details
                           </Button>
                         </div>
                       </CardContent>
@@ -293,18 +332,18 @@ export default function JobDescriptionsPage() {
             
             <div>
               <JobMap 
-                jobs={mockJobDescriptions} 
-                onJobSelect={setSelectedJob} 
+                jobs={mockTasks} 
+                onJobSelect={setSelectedTask} 
               />
             </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="my-jds" className="space-y-6">
+        <TabsContent value="my-tasks" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Your Job Descriptions</CardTitle>
-              <CardDescription>Manage your company's job descriptions and requirements</CardDescription>
+              <CardTitle>Your Tasks</CardTitle>
+              <CardDescription>Manage your created tasks</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -313,11 +352,12 @@ export default function JobDescriptionsPage() {
                     <Briefcase className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Full Stack Developer</h3>
-                    <p className="text-sm text-gray-600">Created 2 weeks ago • 24 verified users</p>
+                    <h3 className="font-semibold">Website Redesign Project</h3>
+                    <p className="text-sm text-gray-600">Created 2 weeks ago • $1200</p>
                   </div>
                 </div>
                 <div className="flex space-x-2">
+                  <Badge className="bg-green-100 text-green-800">Open</Badge>
                   <Button size="sm" variant="outline">
                     <Eye className="w-4 h-4 mr-1" />
                     View
@@ -335,18 +375,15 @@ export default function JobDescriptionsPage() {
                     <Briefcase className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Product Manager</h3>
-                    <p className="text-sm text-gray-600">Created 1 month ago • 15 verified users</p>
+                    <h3 className="font-semibold">Logo Design for Startup</h3>
+                    <p className="text-sm text-gray-600">Created 1 month ago • $350</p>
                   </div>
                 </div>
                 <div className="flex space-x-2">
+                  <Badge className="bg-yellow-100 text-yellow-800">In Progress</Badge>
                   <Button size="sm" variant="outline">
                     <Eye className="w-4 h-4 mr-1" />
                     View
-                  </Button>
-                  <Button size="sm" variant="outline">
-                    <FileText className="w-4 h-4 mr-1" />
-                    Edit
                   </Button>
                 </div>
               </div>
@@ -354,11 +391,11 @@ export default function JobDescriptionsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="verifications" className="space-y-6">
+        <TabsContent value="my-bids" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Your Verification Status</CardTitle>
-              <CardDescription>Track your verification submissions and badges</CardDescription>
+              <CardTitle>Your Bids</CardTitle>
+              <CardDescription>Track your submitted bids on tasks</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -368,11 +405,11 @@ export default function JobDescriptionsPage() {
                     <AvatarFallback>TC</AvatarFallback>
                   </Avatar>
                   <div>
-                    <h3 className="font-semibold">TechCorp Inc. - Full Stack Developer</h3>
-                    <p className="text-sm text-gray-600">Submitted 3 days ago</p>
+                    <h3 className="font-semibold">TechCorp Inc. - Website Redesign Project</h3>
+                    <p className="text-sm text-gray-600">Bid submitted 3 days ago • $1100</p>
                   </div>
                 </div>
-                <Badge className="bg-yellow-100 text-yellow-800">Pending Review</Badge>
+                <Badge className="bg-green-100 text-green-800">Accepted</Badge>
               </div>
 
               <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -382,18 +419,15 @@ export default function JobDescriptionsPage() {
                     <AvatarFallback>DS</AvatarFallback>
                   </Avatar>
                   <div>
-                    <h3 className="font-semibold">DesignStudio - UI/UX Designer</h3>
-                    <p className="text-sm text-gray-600">Verified on May 15, 2023</p>
+                    <h3 className="font-semibold">DesignStudio - Logo Design</h3>
+                    <p className="text-sm text-gray-600">Bid submitted on May 15, 2023 • $300</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Badge className="bg-green-100 text-green-800">
-                    <CheckCircle className="w-3 h-3 mr-1" />
-                    Verified
-                  </Badge>
+                  <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>
                   <Button size="sm" variant="outline">
-                    <Star className="w-4 h-4 mr-1" />
-                    View Badge
+                    <MessageSquare className="w-4 h-4 mr-1" />
+                    Message
                   </Button>
                 </div>
               </div>
@@ -402,27 +436,36 @@ export default function JobDescriptionsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Your Badges</CardTitle>
-              <CardDescription>Showcase your verified skills and qualifications</CardDescription>
+              <CardTitle>Your Earnings</CardTitle>
+              <CardDescription>Track your completed tasks and earnings</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="border rounded-lg p-4 text-center">
                   <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Code className="w-8 h-8 text-white" />
+                    <CreditCard className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="font-semibold">Full Stack Developer</h3>
-                  <p className="text-sm text-gray-600 mb-3">TechCorp Inc.</p>
-                  <Badge className="bg-green-100 text-green-800">Verified</Badge>
+                  <h3 className="font-semibold">Total Earnings</h3>
+                  <p className="text-2xl font-bold text-gray-800 mb-3">$2,450</p>
+                  <Badge className="bg-green-100 text-green-800">+12% from last month</Badge>
                 </div>
 
                 <div className="border rounded-lg p-4 text-center">
                   <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <BookOpen className="w-8 h-8 text-white" />
+                    <CheckCircle className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="font-semibold">UI/UX Designer</h3>
-                  <p className="text-sm text-gray-600 mb-3">DesignStudio</p>
-                  <Badge className="bg-green-100 text-green-800">Verified</Badge>
+                  <h3 className="font-semibold">Completed Tasks</h3>
+                  <p className="text-2xl font-bold text-gray-800 mb-3">18</p>
+                  <Badge className="bg-blue-100 text-blue-800">3 in progress</Badge>
+                </div>
+                
+                <div className="border rounded-lg p-4 text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Star className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="font-semibold">Average Rating</h3>
+                  <p className="text-2xl font-bold text-gray-800 mb-3">4.8/5.0</p>
+                  <Badge className="bg-amber-100 text-amber-800">Top Rated</Badge>
                 </div>
               </div>
             </CardContent>
@@ -432,19 +475,32 @@ export default function JobDescriptionsPage() {
         <TabsContent value="create" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Create New Job Description</CardTitle>
-              <CardDescription>Define the skills, behaviors, and knowledge required for your role</CardDescription>
+              <CardTitle>Create New Task</CardTitle>
+              <CardDescription>Define the skills, budget, and requirements for your task</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Job Title</label>
-                  <Input placeholder="e.g., Full Stack Developer" />
+                  <label className="text-sm font-medium">Task Title</label>
+                  <Input placeholder="e.g., Website Redesign Project" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Company</label>
-                  <Input placeholder="Your company name" />
+                  <label className="text-sm font-medium">Your Company/Name</label>
+                  <Input placeholder="Your company name or personal name" />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Budget</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input 
+                    type="number"
+                    placeholder="e.g., 500" 
+                    className="pl-10"
+                  />
+                </div>
+                <p className="text-sm text-gray-600">Set a fair price for the task</p>
               </div>
 
               <div className="space-y-2">
@@ -456,14 +512,25 @@ export default function JobDescriptionsPage() {
                     className="pl-10"
                   />
                 </div>
-                <p className="text-sm text-gray-600">Enter a location or &quot;Remote&quot; for remote positions</p>
+                <p className="text-sm text-gray-600">Enter a location or "Remote" for remote tasks</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Deadline</label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input 
+                    type="date"
+                    className="pl-10"
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Description</label>
                 <textarea 
                   className="w-full min-h-[100px] p-3 border rounded-md" 
-                  placeholder="Describe the role and your company..."
+                  placeholder="Describe the task in detail..."
                 ></textarea>
               </div>
 
@@ -496,35 +563,10 @@ export default function JobDescriptionsPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Required Behaviors</label>
+                <label className="text-sm font-medium">Required Experience</label>
                 <div className="border rounded-md p-4">
                   <div className="flex items-center space-x-2 mb-3">
-                    <Input placeholder="Add a behavior (e.g., Team Communication)" className="flex-1" />
-                    <select className="border rounded-md p-2">
-                      <option>Low</option>
-                      <option>Medium</option>
-                      <option>High</option>
-                      <option>Critical</option>
-                    </select>
-                    <Button size="sm">Add</Button>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                      <div>
-                        <p className="font-medium">Team Communication</p>
-                        <p className="text-xs text-gray-600">Must be responsive in team chats and meetings</p>
-                      </div>
-                      <Badge className="bg-red-100 text-red-800">Critical</Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Required Certifications</label>
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <Input placeholder="Add a certification (e.g., AWS Certified Developer)" className="flex-1" />
+                    <Input placeholder="Add experience requirement (e.g., 3+ years in web development)" className="flex-1" />
                     <Button size="sm">Add</Button>
                   </div>
                 </div>
@@ -544,18 +586,8 @@ export default function JobDescriptionsPage() {
                 <label className="text-sm font-medium">External Links</label>
                 <div className="border rounded-md p-4">
                   <div className="flex items-center space-x-2 mb-3">
-                    <Input placeholder="Title (e.g., Company Handbook)" className="flex-1" />
+                    <Input placeholder="Title (e.g., Project Brief)" className="flex-1" />
                     <Input placeholder="URL (https://...)" className="flex-1" />
-                    <Button size="sm">Add</Button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Company Rules & Culture</label>
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <Input placeholder="Add a rule (e.g., Camera On Policy)" className="flex-1" />
                     <Button size="sm">Add</Button>
                   </div>
                 </div>
@@ -564,7 +596,7 @@ export default function JobDescriptionsPage() {
               <div className="flex justify-end space-x-3">
                 <Button variant="outline">Save as Draft</Button>
                 <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
-                  Publish Job Description
+                  Post Task
                 </Button>
               </div>
             </CardContent>

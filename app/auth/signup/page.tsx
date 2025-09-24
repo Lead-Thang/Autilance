@@ -15,8 +15,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2, Mail, Lock, User, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/theme-toggle"
-import Image from "next/image"; // 引入 Image 组件
-import { Eye, EyeOff } from "lucide-react"; // 引入眼睛图标
+import { Eye, EyeOff } from "lucide-react"
+import { ThemeAwareLogo } from "@/components/theme-aware-logo"
 
 export default function SignUpPage() {
   const [name, setName] = useState("")
@@ -46,10 +46,6 @@ export default function SignUpPage() {
     }
 
     try {
-      // Simulate account creation
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // After successful signup, sign in the user
       const supabase = createClientComponentClient()
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -57,13 +53,15 @@ export default function SignUpPage() {
         options: {
           data: {
             full_name: name
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       })
 
       if (error) {
         setError(error.message || "Account creation failed. Please try again.")
-      } else if (data.user) {
+      } else {
+        // For newly created accounts, redirect to a confirmation page or dashboard
         router.push("/dashboard")
       }
     } catch (error) {
@@ -75,20 +73,22 @@ export default function SignUpPage() {
 
 const handleGoogleSignUp = async () => {
   setIsLoading(true);
+  setError("");
+  
   try {
-    const supabase = createClientComponentClient()
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`
-        }
-      });
+    const supabase = createClientComponentClient();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
 
     if (error) {
       console.error("Google sign-up error:", error);
       setError(error.message || "Google sign-up failed");
     } else if (data.url) {
-      router.push(data.url);
+      window.location.href = data.url; // Use window.location.href for external redirects
     }
   } catch (error) {
     console.error("Google sign-up error:", error);
@@ -98,7 +98,7 @@ const handleGoogleSignUp = async () => {
   }
 }
 
-  const [showPassword, setShowPassword] = useState(false); // 新增状态管理
+  const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -113,7 +113,7 @@ const handleGoogleSignUp = async () => {
       <Card className="w-full max-w-md shadow-2xl border-border/50 bg-card/95 backdrop-blur-sm">
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center space-x-2">
-            <Image src="/logo.png" alt="Autilance Logo" width={40} height={40} className="rounded-xl" /> {/* 添加 logo.png */}
+            <ThemeAwareLogo width={40} height={40} className="rounded-xl" />
             <span className="text-2xl font-bold text-gradient-primary">Autilance</span>
           </div>
           <CardTitle className="text-2xl font-bold">Create Your Account</CardTitle>

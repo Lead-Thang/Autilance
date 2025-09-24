@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { MapPin, Navigation, ZoomIn, ZoomOut, Globe } from "lucide-react"
+import { MapPin, Navigation, ZoomIn, ZoomOut, Globe, DollarSign } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { geolocationManager } from "@/lib/geolocationService"
@@ -18,7 +18,7 @@ declare module 'leaflet' {
 // Define the Job type
 interface Job {
   id: string
-  company: string
+  creator: string
   title: string
   category: string
   verifiedCount: number
@@ -28,6 +28,11 @@ interface Job {
   location: string
   latitude?: number
   longitude?: number
+  price?: number
+  remote?: boolean
+  status?: string
+  description?: string
+  deadline?: string
 }
 
 interface JobMapProps {
@@ -195,11 +200,12 @@ const JobMap = ({ jobs, onJobSelect }: JobMapProps) => {
         // Add detailed popup
         marker.bindPopup(`
           <div class="min-w-[250px]">
-            <h3 class="font-bold text-lg text-gray-800">${job.company}</h3>
+            <h3 class="font-bold text-lg text-gray-800">${job.creator}</h3>
             <p class="text-blue-600 font-medium mb-2">${job.title}</p>
             <div class="space-y-1">
               <p class="text-sm"><span class="font-medium">📍 Location:</span> ${job.location}</p>
               <p class="text-sm"><span class="font-medium">💼 Category:</span> ${job.category}</p>
+              ${job.price ? `<p class="text-sm"><span class="font-medium">💰 Price:</span> $${job.price}</p>` : ''}
               <p class="text-sm"><span class="font-medium">👥 Verified Users:</span> ${job.verifiedUsers}</p>
               <p class="text-sm"><span class="font-medium">✅ Total Verifications:</span> ${job.verifiedCount}</p>
             </div>
@@ -421,7 +427,7 @@ const JobMap = ({ jobs, onJobSelect }: JobMapProps) => {
                 }}
               >
                 <div className="flex justify-between">
-                  <h3 className="font-semibold">{job.company}</h3>
+                  <h3 className="font-semibold">{job.creator}</h3>
                   {distance && (
                     <span className="text-sm text-blue-600 font-medium">
                       {distance.toFixed(1)} km away
@@ -433,6 +439,12 @@ const JobMap = ({ jobs, onJobSelect }: JobMapProps) => {
                   <MapPin className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-500">{job.location}</span>
                 </div>
+                {job.price && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <DollarSign className="w-4 h-4 text-green-500" />
+                    <span className="text-sm font-medium text-green-600">${job.price}</span>
+                  </div>
+                )}
               </div>
             )
           })}

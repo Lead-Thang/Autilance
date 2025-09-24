@@ -5,6 +5,7 @@ import type React from "react"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { Search } from "@/components/search"
 
 export default function DashboardLayout({
   children,
@@ -18,7 +19,10 @@ export default function DashboardLayout({
         <div className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-40">
           <div className="flex h-16 items-center justify-between px-4">
             <SidebarTrigger />
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <Search />
+              <ThemeToggle />
+            </div>
           </div>
         </div>
         {children}

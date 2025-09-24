@@ -9,6 +9,8 @@ import { useUser } from "../../../hooks/use-user"
 import { MapPin, Globe, Calendar, Award, Star, Eye, Share, Edit, Mail, CheckCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { useToast } from "@/hooks/use-toast"
+import { EditProfileModal } from "@/components/edit-profile-modal"
 
 interface Certification {
   id: string
@@ -31,7 +33,8 @@ interface Activity {
 }
 
 export default function ProfilePage() {
-  const { user, isLoading } = useUser()
+  const { user, isLoading, setUser } = useUser()
+  const { toast } = useToast()
   const [currentContextIndex, setCurrentContextIndex] = useState(0)
   const [userContexts, setUserContexts] = useState([
     { name: "Professional" },
@@ -47,6 +50,9 @@ export default function ProfilePage() {
     certifications: 0,
     skillScore: 0
   })
+  
+  // Profile editing states
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
 
   const switchUserContext = (index: number) => {
     setCurrentContextIndex(index)
@@ -139,6 +145,7 @@ export default function ProfilePage() {
     }
   }
 
+
   if (isLoading) {
     return (
       <div className="p-6 space-y-6">
@@ -199,6 +206,7 @@ export default function ProfilePage() {
                 </Avatar>
 
                 <h2 className="text-2xl font-bold mb-1">{user?.name || "User Name"}</h2>
+
                 <p className="text-gray-600 mb-2">@{user?.displayName?.toLowerCase().replace(" ", "") || "username"}</p>
 
                 <div className="flex items-center justify-center space-x-2 mb-4">
@@ -215,7 +223,11 @@ export default function ProfilePage() {
                   {user?.bio || "Professional with expertise in various fields. Add a bio to tell others about yourself."}
                 </p>
 
-                <Button className="w-full mb-4 bg-transparent" variant="outline">
+                <Button 
+                  className="w-full mb-4 bg-transparent" 
+                  variant="outline"
+                  onClick={() => setIsEditingProfile(true)}
+                >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Profile
                 </Button>
@@ -358,6 +370,11 @@ export default function ProfilePage() {
           </Card>
         </div>
       </div>
+      
+      <EditProfileModal 
+        open={isEditingProfile} 
+        onOpenChange={setIsEditingProfile} 
+      />
     </div>
   )
 }

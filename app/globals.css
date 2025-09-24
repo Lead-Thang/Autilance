@@ -207,6 +207,11 @@ body {
   transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Invert class for logo inversion in dark mode */
+.invert {
+  filter: invert(100%);
+}
+
 /* Loading animation */
 .loading-dots {
   display: inline-flex;
