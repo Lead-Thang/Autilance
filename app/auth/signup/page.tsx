@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -50,7 +50,7 @@ export default function SignUpPage() {
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
       // After successful signup, sign in the user
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -76,7 +76,7 @@ export default function SignUpPage() {
 const handleGoogleSignUp = async () => {
   setIsLoading(true);
   try {
-    const supabase = createClientComponentClient()
+    const supabase = createClient()
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

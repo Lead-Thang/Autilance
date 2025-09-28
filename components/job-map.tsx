@@ -8,25 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getCurrentLocation, calculateDistance } from "@/lib/geolocation"
 
-// Define the Job type
-interface Job {
-  id: string
-  creator: string
-  title: string
-  category: string
-  verifiedCount: number
-  skills: string[]
-  updatedAt: string
-  verifiedUsers: number
-  location: string
-  latitude?: number
-  longitude?: number
-  price?: number
-  remote?: boolean
-  status?: string
-  description?: string
-  deadline?: string
-}
+import { Job } from "@/types/jobs";
 
 interface JobMapProps {
   jobs: Job[]

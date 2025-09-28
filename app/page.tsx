@@ -9,7 +9,7 @@ import { Badge } from "../components/ui/badge"
 import { Input } from "../components/ui/input"
 import { ThemeToggle } from "../components/theme-toggle"
 import { FloatingAIChat } from "../components/floating-ai-chat"
-import { createBrowserClient } from "@supabase/ssr"
+import { createClient } from "@/lib/supabase/client"
 import { Session } from "@supabase/supabase-js"
 import Link from "next/link"
 import Image from "next/image"
@@ -112,7 +112,7 @@ const stats = [
 ]
 
 export default function LandingPage() {
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  const supabase = createClient()
   const [session, setSession] = useState<Session | null>(null)
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { Loader2, Mail } from "lucide-react"
 import { ThemeAwareLogo } from "@/components/theme-aware-logo"
@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
     setMessage("")
 
     try {
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       })

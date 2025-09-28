@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -35,7 +35,7 @@ export default function SignInPage() {
     setError("")
 
     try {
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -58,7 +58,7 @@ export default function SignInPage() {
     setError("")
 
     try {
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
       
       // Use a more robust redirect URL configuration
       const redirectTo = `${window.location.origin}/auth/callback`
