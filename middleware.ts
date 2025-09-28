@@ -64,7 +64,8 @@ export async function middleware(request: NextRequest) {
       }
     )
 
-    await supabase.auth.getUser()
+    // Use getSession instead of getUser to check authentication
+    await supabase.auth.getSession()
   } catch (error) {
     console.error('Middleware error:', error)
   }
