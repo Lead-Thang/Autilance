@@ -48,6 +48,25 @@ Autilance is a reverse job board where companies list the skills, knowledge, beh
 - PostgreSQL database
 - pnpm (recommended) or npm
 
+### Environment Variables
+
+This project uses environment variables for configuration. All sensitive information should be stored in environment variables and never committed to the repository.
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+2. Update `.env.local` with your actual values:
+   - Supabase credentials
+   - UploadThing keys
+   - IP Geolocation API key (for location services)
+   - Email service configuration
+   - NextAuth configuration (if used)
+   - Any other service keys you might need
+
+**Important**: The `.env*` files are included in `.gitignore` and will not be committed to the repository for security reasons.
+
 ### Installation
 
 1. Clone the repository:
@@ -63,7 +82,7 @@ Autilance is a reverse job board where companies list the skills, knowledge, beh
 
 3. Set up environment variables:
    - Copy `.env.example` to `.env.local`
-   - Update the database connection string and other required variables
+   - Update the values with your actual configuration
 
 4. Set up the database:
    ```bash
