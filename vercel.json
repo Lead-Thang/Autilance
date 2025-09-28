@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "pnpm install && pnpm run build",
+  "buildCommand": "prisma generate && pnpm run build",
   "devCommand": "pnpm run dev",
   "outputDirectory": ".next"
 }

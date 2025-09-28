@@ -8,6 +8,7 @@
           "lint": "next lint",
           "start": "next start",
           "setup": "node setup-env.js",
+          "postinstall": "prisma generate",
           "test:keploy": "jest --coverage --config='{\"testEnvironment\":\"jsdom\",\"transform\":{\"^.+\\\\.(js|jsx|ts|tsx)$\":[\"@swc/jest\",{\"jsc\":{\"parser\":{\"syntax\":\"typescript\",\"tsx\":true,\"dynamicImport\":true},\"transform\":{\"react\":{\"runtime\":\"automatic\"}}},\"module\":{\"type\":\"commonjs\"}}]},\"moduleFileExtensions\":[\"js\",\"jsx\",\"ts\",\"tsx\"],\"coveragePathIgnorePatterns\":[\"/monaco-editor/\"],\"collectCoverageFrom\":[\"./**/*.{js,jsx,ts,tsx}\"],\"coverageDirectory\":\".\",\"coverageReporters\":[\"text\",\"cobertura\"]}'"
      },
      "dependencies": {
