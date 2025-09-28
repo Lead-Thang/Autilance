@@ -11,8 +11,6 @@ export const companySchema = z.object({
   industry: z.string().optional(),
   size: z.string().optional(),
   location: z.string().optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
@@ -26,9 +24,6 @@ export const jdSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().optional(),
   isPublic: z.boolean().default(true),
-  location: z.string().optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
   

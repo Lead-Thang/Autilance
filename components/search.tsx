@@ -31,7 +31,7 @@ export function Search() {
   const [isOpen, setIsOpen] = useState(false)
   const [searchLoading, setSearchLoading] = useState(false)
 
-  // Simulate user search
+  // Handle user search
   const handleUserSearch = async (query: string) => {
     if (!query.trim()) {
       setSearchResults([])
@@ -42,37 +42,13 @@ export function Search() {
     setSearchLoading(true)
     setIsOpen(true)
     
-    // Simulate API call delay
+    // In a real application, this would be an actual API call to search users
+    // For now we'll just demonstrate the loading state and empty results
     await new Promise(resolve => setTimeout(resolve, 300))
     
-    // Mock search results
-    const mockResults: UserSearchResult[] = [
-      {
-        id: "1",
-        name: "John Doe",
-        avatar: null,
-        title: "Frontend Developer",
-        isFriend: true
-      },
-      {
-        id: "2",
-        name: "Jane Smith",
-        avatar: null,
-        title: "UX Designer",
-        isFriend: false
-      },
-      {
-        id: "3",
-        name: "Bob Johnson",
-        avatar: null,
-        title: "Backend Engineer",
-        isFriend: true
-      }
-    ]
-
-    setSearchResults(mockResults.filter(user => 
-      user.name.toLowerCase().includes(query.toLowerCase())
-    ))
+    // In a real app, we would receive actual results from an API
+    // For now we'll set empty results to demonstrate the UI without mockups
+    setSearchResults([])
     setSearchLoading(false)
   }
 

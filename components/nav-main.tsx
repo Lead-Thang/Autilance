@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { ChevronRight, type LucideIcon, Home } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -19,6 +19,11 @@ import {
 import { DollarSign, Store, Users, ShoppingCart, SquareTerminal, CheckSquare, Bot, Trophy } from "lucide-react"
 
 export const navMain = [
+  {
+    title: "Home",
+    url: "/home",
+    icon: Home,
+  },
   {
     title: "Dashboard",
     url: "/dashboard",
@@ -151,43 +156,38 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/80">Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const isActive = pathname === item.url || (pathname !== null && pathname.startsWith(item.url + "/"))
 
           return (
-            <Collapsible key={item.title} asChild defaultOpen={item.isActive} className="group/collapsible">
+            <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
               <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton
-                    tooltip={item.title}
-                    asChild
-                    className={`transition-all duration-200 hover:bg-primary/10 hover:text-primary ${
-                      isActive ? "bg-primary/15 text-primary border-r-2 border-primary" : ""
-                    }`}
-                  >
-                    <Link href={item.url} className="flex items-center gap-2 animate-lift">
-                      {item.icon && <item.icon className="size-4 shrink-0" />}
-                      <span className="font-medium group-data-[collapsible=icon]:hidden"> 
-                        {item.title}
-                      </span>
-                      {item.items && (
-                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
-                      )}
+                <div className="flex items-center">
+                  <SidebarMenuButton asChild tooltip={item.title} className="flex-1 justify-start">
+                    <Link href={item.url} className={isActive ? "bg-sidebar-accent" : ""}>
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
-                </CollapsibleTrigger>
-                {item.items && (
-                  <CollapsibleContent className="group-data-[collapsible=icon]:hidden">
+                  {item.items?.length ? (
+                    <div className="ml-auto pl-4">
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground px-2">
+                          <ChevronRight className="transition-transform duration-200 data-[state=open]:rotate-90" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                    </div>
+                  ) : null}
+                </div>
+                {item.items?.length ? (
+                  <CollapsibleContent>
                     <SidebarMenuSub>
-                      {item.items?.map((subItem) => (
+                      {item.items.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton
-                            asChild
-                            className="transition-all duration-200 hover:bg-primary/5 hover:text-primary"
-                          >
-                            <Link href={subItem.url}>
+                          <SidebarMenuSubButton asChild>
+                            <Link href={subItem.url} className={pathname === subItem.url ? "bg-sidebar-accent" : ""}>
                               <span>{subItem.title}</span>
                             </Link>
                           </SidebarMenuSubButton>
@@ -195,7 +195,7 @@ export function NavMain({
                       ))}
                     </SidebarMenuSub>
                   </CollapsibleContent>
-                )}
+                ) : null}
               </SidebarMenuItem>
             </Collapsible>
           )

@@ -73,8 +73,6 @@ model Company {
   industry    String?
   size        String?
   location    String?
-  latitude    Float?
-  longitude   Float?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -91,9 +89,6 @@ model JobDescription {
   title       String
   description String?  @db.Text
   isPublic    Boolean  @default(true)
-  location    String?
-  latitude    Float?
-  longitude   Float?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

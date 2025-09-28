@@ -5,7 +5,7 @@ import type { ComponentProps } from "react"
 import {
   Bot,
   Settings2,
-  SquareTerminal,
+  Briefcase,
   Store,
   Trophy,
   Users,
@@ -14,16 +14,17 @@ import {
   CheckSquare,
   User,
   Sparkles,
-  DollarSign
+  DollarSign,
+  Home
 } from "lucide-react"
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 
-import { NavMain } from "../components/nav-main"
-import { NavProjects } from "../components/nav-projects"
-import { NavSecondary } from "../components/nav-secondary"
-import { NavUser } from "../components/nav-user"
-import { ThemeToggle } from "../components/theme-toggle"
+import { NavMain } from "@/components/nav-main"
+import { NavProjects } from "@/components/nav-projects"
+import { NavSecondary } from "@/components/nav-secondary"
+import { NavUser } from "@/components/nav-user"
+import { ThemeToggle } from "@/components/theme-toggle"
 import {
   Sidebar,
   SidebarContent,
@@ -32,7 +33,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "../components/ui/sidebar"
+} from "@/components/ui/sidebar"
 
 const data = {
   teams: [
@@ -54,9 +55,9 @@ const data = {
   ],
   navMain: [
     {
-      title: "Dashboard",
+      title: "Home",
       url: "/dashboard",
-      icon: SquareTerminal,
+      icon: Home,
       isActive: true,
       items: [
         {
@@ -77,7 +78,7 @@ const data = {
     {
       title: "Jobs",
       url: "/dashboard/jd",
-      icon: CheckSquare
+      icon: Briefcase
     },
     {
       title: "Messages",
@@ -208,11 +209,11 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
     email: "user@autilance.com",
     avatar: "/avatars/shadcn.jpg",
   })
+  const supabase = createClient()
 
   React.useEffect(() => {
     const fetchUser = async () => {
       try {
-        const supabase = createClient()
         const { data: { user: supabaseUser }, error } = await supabase.auth.getUser()
         
         if (error) {

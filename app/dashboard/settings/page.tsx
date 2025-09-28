@@ -93,6 +93,7 @@ export default function SettingsPage() {
     logo: "",
     certificationPrefix: ""
   })
+  const supabase = createClient()
 
   useEffect(() => {
     if (user) {
@@ -105,7 +106,6 @@ export default function SettingsPage() {
     if (!user?.id) return
 
     try {
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('users')
         .select('first_name, last_name, display_name, phone, location, bio, website, avatar')
@@ -137,7 +137,6 @@ export default function SettingsPage() {
     if (!user?.id) return
 
     try {
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('companies')
         .select('name, industry, description, size, founded_year, logo, certification_prefix')
@@ -167,7 +166,6 @@ export default function SettingsPage() {
     if (!user?.id) return
 
     try {
-      const supabase = createClient()
       const { error } = await supabase
         .from('users')
         .update({
@@ -199,7 +197,6 @@ export default function SettingsPage() {
     if (!user?.id) return
 
     try {
-      const supabase = createClient()
       const { error } = await supabase
         .from('companies')
         .update({

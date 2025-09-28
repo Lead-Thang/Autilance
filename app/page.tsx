@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { Button } from "../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
 import { Badge } from "../components/ui/badge"
@@ -13,6 +13,8 @@ import { createBrowserClient } from "@supabase/ssr"
 import { Session } from "@supabase/supabase-js"
 import Link from "next/link"
 import Image from "next/image"
+import { ThemeAwareLogo } from "@/components/theme-aware-logo"
+import { DynamicIcon } from "@/components/dynamic-icon"
 import {
   ArrowRight,
   Sparkles,
@@ -21,7 +23,7 @@ import {
   TrendingUp,
   Users,
   Zap,
-  Shield,
+  Briefcase,
   Star,
   Rocket,
   Brain,
@@ -30,42 +32,42 @@ import {
 
 const features = [
   {
-    icon: Store,
+    icon: { name: "Store" },
     title: "AI Store Builder",
     description: "Create professional e-commerce stores with AI-powered design, optimization, and product management.",
     color: "from-blue-500 to-cyan-500",
     href: "/dashboard/storefront",
   },
   {
-    icon: MessageSquare,
+    icon: { name: "MessageSquare" },
     title: "Multi-AI Assistant",
     description: "Chat with Mistral, Grok, and Gemini AI models for personalized business guidance and support.",
     color: "from-purple-500 to-pink-500",
     href: "/dashboard/assistant",
   },
   {
-    icon: TrendingUp,
+    icon: { name: "TrendingUp" },
     title: "Analytics & Insights",
     description: "Advanced analytics powered by AI to track performance, identify trends, and optimize growth.",
     color: "from-green-500 to-emerald-500",
     href: "/dashboard/analytics",
   },
   {
-    icon: Users,
+    icon: { name: "Users" },
     title: "Team Collaboration",
     description: "Collaborate with your team using AI-enhanced tools for project management and communication.",
     color: "from-orange-500 to-red-500",
     href: "/dashboard/feed",
   },
   {
-    icon: Zap,
+    icon: { name: "Zap" },
     title: "Automation Hub",
     description: "Automate repetitive tasks and workflows with intelligent AI-powered automation tools.",
     color: "from-yellow-500 to-orange-500",
     href: "/dashboard/tasks",
   },
   {
-    icon: DollarSign,
+    icon: { name: "DollarSign" },
     title: "Make Money",
     description: "Consolidated money-making features including investments, partnerships, marketplace, and store management.",
     color: "from-green-600 to-emerald-600",
@@ -104,13 +106,13 @@ const testimonials = [
 ]
 
 const stats = [
-  { label: "Active Users", value: "50,000+", icon: Users },
-  { label: "Stores Created", value: "25,000+", icon: Store },
-  { label: "AI Conversations", value: "1M+", icon: MessageSquare },
-  { label: "Success Rate", value: "98%", icon: TrendingUp },
+  { label: "On Marketplace", value: "Buy & Sell", icon: { name: "Store" } },
+  { label: "Stores Created", value: "25,000+", icon: { name: "Users" } },
+  { label: "AI Conversations", value: "1M+", icon: { name: "MessageSquare" } },
+  { label: "Apply or Employ", value: "Job & Task", icon: { name: "Briefcase" } },
 ]
 
-export default function HomePage() {
+export default function LandingPage() {
   const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
   const [session, setSession] = useState<Session | null>(null)
 
@@ -132,6 +134,76 @@ export default function HomePage() {
     // Show success message
   }
 
+  const [currentPhrase, setCurrentPhrase] = useState(0);
+  
+  // Generate deterministic values for star animation to prevent hydration errors
+  // Using pre-defined fixed values to ensure exact match between server and client
+  const generateStarValues = () => {
+    // Pre-calculated fixed values to ensure exact match between server and client
+    const fixedValues = [
+      { left: 89.3788977833, delay: 4.1114995803, duration: 3.5791005233, starSize: 1.6448636801 },
+      { left: 94.0498132382, delay: 4.8306431650, duration: 5.5076143817, starSize: 2.2317890123 },
+      { left: 12.5234987654, delay: 1.2345678901, duration: 4.3210987654, starSize: 1.9876543210 },
+      { left: 67.8901234567, delay: 3.4567890123, duration: 5.6789012345, starSize: 2.3456789012 },
+      { left: 45.6789012345, delay: 2.3456789012, duration: 3.2109876543, starSize: 1.4567890123 },
+      { left: 23.4567890123, delay: 1.8765432109, duration: 4.5678901234, starSize: 2.7890123456 },
+      { left: 78.9012345678, delay: 3.2109876543, duration: 3.8765432109, starSize: 1.2345678901 },
+      { left: 34.5678901234, delay: 2.7654321098, duration: 5.4321098765, starSize: 2.5678901234 },
+      { left: 56.7890123456, delay: 3.6543210987, duration: 4.7654321098, starSize: 1.7890123456 },
+      { left: 89.0123456789, delay: 4.5432109876, duration: 3.6543210987, starSize: 2.8901234567 },
+      { left: 12.3456789012, delay: 1.4321098765, duration: 5.3210987654, starSize: 1.3210987654 },
+      { left: 45.6789012345, delay: 2.5432109876, duration: 4.2109876543, starSize: 2.2109876543 },
+      { left: 78.9012345678, delay: 3.6543210987, duration: 3.0987654321, starSize: 1.0987654321 },
+      { left: 23.4567890123, delay: 1.7654321098, duration: 4.9876543210, starSize: 2.9876543210 },
+      { left: 56.7890123456, delay: 2.8765432109, duration: 5.8765432109, starSize: 1.8765432109 }
+    ];
+    
+    return fixedValues.map((fixedValue, i) => {
+      return {
+        id: i,
+        left: fixedValue.left,
+        delay: fixedValue.delay,
+        duration: fixedValue.duration,
+        starSize: fixedValue.starSize,
+        trails: Array.from({ length: 5 }, (_, j) => {
+          return {
+            id: j,
+            size: 0.5 + (j * 0.3),
+            opacity: parseFloat((1 - (j * 0.2)).toFixed(10)),
+            top: -j * 10,
+            trailDelay: j * 0.1
+          }
+        })
+      }
+    });
+  };
+  
+  // Use useMemo with an empty dependency array to ensure values are consistent between server and client
+  const starValues = useMemo(generateStarValues, []);
+  
+  const phrases = [
+    { 
+      primary: "Earn remotely & locally", 
+      secondary: "with Autilance!" 
+    },
+    { 
+      primary: "Buy & Sell products", 
+      secondary: "physical or digital" 
+    },
+    { 
+      primary: "Find yourself a co-founder", 
+      secondary: "as ambitious as you are" 
+    }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPhrase(prev => (prev + 1) % phrases.length);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900">
       {/* Navigation */}
@@ -139,7 +211,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Image src="/public/logo.png" alt="Autilance Logo" width={40} height={40} className="rounded-xl" />
+              <ThemeAwareLogo alt="Autilance Logo" width={40} height={40} />
               <span className="text-2xl font-bold text-white">
                 Autilance
               </span>
@@ -151,7 +223,7 @@ export default function HomePage() {
                 <Link href="/dashboard">
                   <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
                     Dashboard
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <DynamicIcon name="ArrowRight" className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
               ) : (
@@ -174,18 +246,63 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 lg:py-32">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-indigo-600/10" />
+        {/* Raining Stars Effect with Trails */}
+        <div className="absolute inset-0 overflow-hidden">
+          {starValues.map((star) => (
+            <div
+              key={star.id}
+              className="absolute top-[-20px] animate-star-container"
+              style={
+                {
+                  '--star-left': `${star.left.toFixed(10)}%`,
+                  '--star-delay': `${star.delay.toFixed(10)}s`,
+                  '--star-duration': `${star.duration.toFixed(10)}s`,
+                } as React.CSSProperties
+              }
+            >
+              {/* Main star */}
+              <div className="absolute rounded-full bg-white animate-star-main" 
+                style={
+                  {
+                    '--star-size': `${star.starSize.toFixed(10)}px`,
+                  } as React.CSSProperties
+                }
+              />
+              {/* Trail elements */}
+              {star.trails.map((trail) => (
+                <div
+                  key={trail.id}
+                  className="absolute rounded-full bg-white animate-star-trail"
+                  style={
+                    {
+                      '--trail-size': `${trail.size.toFixed(10)}px`,
+                      '--trail-opacity': trail.opacity.toFixed(10),
+                      '--trail-top': `${trail.top}px`,
+                      '--trail-delay': `${trail.trailDelay.toFixed(10)}s`,
+                    } as React.CSSProperties
+                  }
+                />
+              ))}
+            </div>
+          ))}
+        </div>
         <div className="relative max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <Badge className="mb-6 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 border-blue-300 dark:border-blue-600 px-4 py-2">
-              <Sparkles className="w-4 h-4 mr-2" />
+              <DynamicIcon name="Sparkles" className="w-4 h-4 mr-2" />
               Powered by Advanced AI
             </Badge>
 
-            <h1 className="text-5xl lg:text-7xl font-bold mb-8 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent leading-tight">
-              Transform Your Business
-              <br />
-              <span className="text-4xl lg:text-6xl">with AI Intelligence</span>
-            </h1>
+            <div className="mb-8 h-32 flex items-center justify-center">
+              <div className="transition-opacity duration-1000 ease-in-out">
+                <h1 className="text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  {phrases[currentPhrase].primary}
+                </h1>
+                <p className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  {phrases[currentPhrase].secondary}
+                </p>
+              </div>
+            </div>
 
             <p className="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
               Create AI-powered stores, chat with multiple AI assistants, and automate your business processes. The
@@ -238,7 +355,7 @@ export default function HomePage() {
               >
                 <CardContent className="p-6">
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <stat.icon className="w-6 h-6 text-white" />
+                    <DynamicIcon name={stat.icon.name as any} className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-3xl font-bold mb-2">{stat.value}</div>
                   <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
@@ -273,7 +390,7 @@ export default function HomePage() {
                     <div
                       className={`w-14 h-14 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}
                     >
-                      <feature.icon className="w-7 h-7 text-white" />
+                      <DynamicIcon name={feature.icon.name as any} className="w-7 h-7 text-white" />
                     </div>
                     <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
                   </CardHeader>
@@ -293,7 +410,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <Badge className="mb-6 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-100 border-purple-300 dark:border-purple-600">
-                <Brain className="w-4 h-4 mr-2" />
+                <DynamicIcon name="Brain" className="w-4 h-4 mr-2" />
                 Multi-AI Intelligence
               </Badge>
 
@@ -335,7 +452,7 @@ export default function HomePage() {
                     size="lg"
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                   >
-                    <MessageSquare className="w-5 h-5 mr-3" />
+                    <DynamicIcon name="MessageSquare" className="w-5 h-5 mr-3" />
                     Start AI Conversation
                   </Button>
                 </Link>
@@ -345,7 +462,7 @@ export default function HomePage() {
                     size="lg"
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                   >
-                    <MessageSquare className="w-5 h-5 mr-3" />
+                    <DynamicIcon name="MessageSquare" className="w-5 h-5 mr-3" />
                     Try AI Assistant
                   </Button>
                 </Link>
@@ -453,7 +570,7 @@ export default function HomePage() {
                 {session ? (
                   <Link href="/dashboard">
                     <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg px-8 py-4 text-lg">
-                      <Rocket className="w-6 h-6 mr-3" />
+                      <DynamicIcon name="Rocket" className="w-6 h-6 mr-3" />
                       Go to Dashboard
                     </Button>
                   </Link>
@@ -464,7 +581,7 @@ export default function HomePage() {
                         size="lg"
                         className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg px-8 py-4 text-lg"
                       >
-                        <Rocket className="w-6 h-6 mr-3" />
+                        <DynamicIcon name="Rocket" className="w-6 h-6 mr-3" />
                         Start Now!
                       </Button>
                     </Link>
@@ -508,7 +625,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
+                  <DynamicIcon name="Sparkles" className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-xl font-bold">Autilance</span>
               </div>
@@ -618,3 +735,4 @@ export default function HomePage() {
     </div>
   )
 }
+

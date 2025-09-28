@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -28,11 +28,153 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+// Define the type for our job description data
+type JobDescription = {
+  id: string
+  title: string
+  companyName: string
+  companyType: string
+  companySize: string
+  industry: string
+  description: string
+  skills: {
+    level: string
+    name: string
+    type: string
+    description: string
+  }[]
+  certifications: {
+    name: string
+    provider: string
+    required: boolean
+  }[]
+  behaviors: {
+    name: string
+    priority: string
+    description: string
+  }[]
+  resources: {
+    title: string
+    type: string
+    size?: string
+    url?: string
+    duration?: string
+    level?: string
+    price?: string
+  }[]
+  verificationRate: number
+  lastUpdated: string
+  verifiedCount: number
+}
+
 export default function JobDescriptionPage({ params }: { params: { id: string } }) {
-  const [activeTab, setActiveTab] = useState("overview")
+  const [activeTab, setActiveTab] = useState("overview");
+  const [jdData, setJdData] = useState<JobDescription | null>(null);
   
   // In a real app, you would fetch the JD data based on the ID
-  const jdId = params.id
+  useEffect(() => {
+    // Simulate API call
+    setTimeout(() => {
+      const mockJdData = {
+        id: params.id,
+        title: "Full Stack Developer",
+        companyName: "TechCorp Inc.",
+        companyType: "Technology Company",
+        companySize: "50-200 employees",
+        industry: "Tech",
+        description: "We are seeking a talented Full Stack Developer to join our growing team. The ideal candidate will be responsible for developing and maintaining web applications using React, Node.js, and TypeScript. You will work closely with our product and design teams to build high-quality, scalable, and performant applications.",
+        skills: [
+          {
+            level: "Advanced",
+            name: "React",
+            type: "Frontend",
+            description: "Proficient in React with experience in hooks, context API, and state management libraries. Should be able to build complex, performant UIs and understand component lifecycle."
+          },
+          {
+            level: "Intermediate",
+            name: "Node.js",
+            type: "Backend",
+            description: "Experience with Node.js and Express for building RESTful APIs and server-side applications. Understanding of asynchronous programming and middleware concepts."
+          },
+          {
+            level: "Advanced",
+            name: "TypeScript",
+            type: "Language",
+            description: "Strong TypeScript skills including interfaces, generics, and type definitions. Ability to configure and optimize TypeScript projects."
+          }
+        ],
+        certifications: [
+          {
+            name: "AWS Certified Developer",
+            provider: "Amazon Web Services",
+            required: false
+          }
+        ],
+        behaviors: [
+          {
+            name: "Team Communication",
+            priority: "Critical",
+            description: "Must be responsive in team chats and meetings. Expected to provide regular updates on work progress and communicate any blockers or issues promptly. Should be able to clearly articulate technical concepts to both technical and non-technical team members."
+          },
+          {
+            name: "Meeting Etiquette",
+            priority: "High",
+            description: "Camera must be ON during all video meetings. Be punctual and prepared for scheduled meetings. Actively participate in discussions and provide constructive feedback."
+          },
+          {
+            name: "Code Quality Standards",
+            priority: "Critical",
+            description: "Must follow company coding standards and best practices. All code should be properly documented and tested. Pull requests should include comprehensive descriptions and be of manageable size."
+          }
+        ],
+        resources: [
+          {
+            title: "Coding Standards Guide",
+            type: "document",
+            size: "2.4 MB"
+          },
+          {
+            title: "Onboarding Process",
+            type: "document",
+            size: "1.8 MB"
+          },
+          {
+            title: "Company Handbook",
+            type: "link",
+            url: "https://example.com/handbook"
+          },
+          {
+            title: "GitHub Repository",
+            type: "link",
+            url: "https://github.com/example"
+          },
+          {
+            title: "React Best Practices",
+            type: "course",
+            duration: "4 hours",
+            level: "Beginner to Advanced",
+            price: "Free"
+          }
+        ],
+        verificationRate: 85,
+        lastUpdated: "2 days ago",
+        verifiedCount: 24
+      };
+      
+      setJdData(mockJdData);
+    }, 500);
+  }, [params.id]);
+  
+  if (!jdData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading job description...</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="p-6 space-y-6">
@@ -56,8 +198,8 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
                   <AvatarFallback>TC</AvatarFallback>
                 </Avatar>
                 <div>
-                  <CardTitle>TechCorp Inc.</CardTitle>
-                  <CardDescription>Technology Company</CardDescription>
+                  <CardTitle>{jdData.companyName}</CardTitle>
+                  <CardDescription>{jdData.companyType}</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -97,11 +239,11 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-1">
                   <Clock className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">Updated 2 days ago</span>
+                  <span className="text-sm text-gray-600">Updated {jdData.lastUpdated}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm text-gray-600">24 verified</span>
+                  <span className="text-sm text-gray-600">{jdData.verifiedCount} verified</span>
                 </div>
               </div>
               
@@ -117,7 +259,7 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
               
               <div className="space-y-1">
                 <div className="text-sm font-medium">JD ID</div>
-                <div className="text-sm text-gray-600">{jdId}</div>
+                <div className="text-sm text-gray-600">{jdData.id}</div>
               </div>
               
               <Button className="w-full bg-gradient-to-r from-green-600 to-blue-600">
@@ -140,7 +282,7 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
                 </Badge>
               </div>
               <CardDescription>
-                We're looking for a skilled Full Stack Developer to join our team
+                {jdData.description}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -157,10 +299,7 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Description</h3>
                     <p className="text-gray-600">
-                      We are seeking a talented Full Stack Developer to join our growing team. The ideal candidate 
-                      will be responsible for developing and maintaining web applications using React, Node.js, 
-                      and TypeScript. You will work closely with our product and design teams to build high-quality, 
-                      scalable, and performant applications.
+                      {jdData.description}
                     </p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
@@ -168,7 +307,7 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
                         <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                           <Code className="w-6 h-6 text-blue-600" />
                         </div>
-                        <h4 className="font-medium">12 Skills</h4>
+                        <h4 className="font-medium">{jdData.skills.length} Skills</h4>
                         <p className="text-sm text-gray-600">Required technical abilities</p>
                       </div>
                       
@@ -176,7 +315,7 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
                         <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
                           <Users className="w-6 h-6 text-purple-600" />
                         </div>
-                        <h4 className="font-medium">8 Behaviors</h4>
+                        <h4 className="font-medium">{jdData.behaviors.length} Behaviors</h4>
                         <p className="text-sm text-gray-600">Expected work conduct</p>
                       </div>
                       
@@ -184,7 +323,7 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
                         <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                           <FileText className="w-6 h-6 text-green-600" />
                         </div>
-                        <h4 className="font-medium">5 Resources</h4>
+                        <h4 className="font-medium">{jdData.resources.length} Resources</h4>
                         <p className="text-sm text-gray-600">Documents & links</p>
                       </div>
                     </div>
@@ -292,11 +431,11 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
                           <div className="flex items-center space-x-3">
                             <Award className="w-5 h-5 text-yellow-600" />
                             <div>
-                              <h4 className="font-medium">AWS Certified Developer</h4>
-                              <p className="text-sm text-gray-600">Amazon Web Services</p>
+                              <h4 className="font-medium">{jdData.certifications[0].name}</h4>
+                              <p className="text-sm text-gray-600">{jdData.certifications[0].provider}</p>
                             </div>
                           </div>
-                          <Badge variant="outline">Optional</Badge>
+                          <Badge variant="outline">{jdData.certifications[0].required ? 'Required' : 'Optional'}</Badge>
                         </div>
                       </div>
                     </div>
@@ -375,8 +514,8 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
                           <div className="flex items-center space-x-3">
                             <FileText className="w-5 h-5 text-blue-600" />
                             <div>
-                              <h4 className="font-medium">Coding Standards Guide</h4>
-                              <p className="text-sm text-gray-600">PDF • 2.4 MB</p>
+                              <h4 className="font-medium">{jdData.resources[0].title}</h4>
+                              <p className="text-sm text-gray-600">PDF • {jdData.resources[0].size}</p>
                             </div>
                           </div>
                           <Button size="sm" variant="outline">
@@ -391,8 +530,8 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
                           <div className="flex items-center space-x-3">
                             <FileText className="w-5 h-5 text-blue-600" />
                             <div>
-                              <h4 className="font-medium">Onboarding Process</h4>
-                              <p className="text-sm text-gray-600">PDF • 1.8 MB</p>
+                              <h4 className="font-medium">{jdData.resources[1].title}</h4>
+                              <p className="text-sm text-gray-600">PDF • {jdData.resources[1].size}</p>
                             </div>
                           </div>
                           <Button size="sm" variant="outline">
@@ -412,7 +551,7 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
                           <div className="flex items-center space-x-3">
                             <LinkIcon className="w-5 h-5 text-blue-600" />
                             <div>
-                              <h4 className="font-medium">Company Handbook</h4>
+                              <h4 className="font-medium">{jdData.resources[2].title}</h4>
                               <p className="text-sm text-gray-600">Notion Document</p>
                             </div>
                           </div>
@@ -428,7 +567,7 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
                           <div className="flex items-center space-x-3">
                             <LinkIcon className="w-5 h-5 text-blue-600" />
                             <div>
-                              <h4 className="font-medium">GitHub Repository</h4>
+                              <h4 className="font-medium">{jdData.resources[3].title}</h4>
                               <p className="text-sm text-gray-600">Code Examples</p>
                             </div>
                           </div>
@@ -449,11 +588,11 @@ export default function JobDescriptionPage({ params }: { params: { id: string } 
                           <div className="flex items-center space-x-3">
                             <BookOpen className="w-5 h-5 text-green-600" />
                             <div>
-                              <h4 className="font-medium">React Best Practices</h4>
-                              <p className="text-sm text-gray-600">4 hours • Beginner to Advanced</p>
+                              <h4 className="font-medium">{jdData.resources[4].title}</h4>
+                              <p className="text-sm text-gray-600">{jdData.resources[4].duration} • {jdData.resources[4].level}</p>
                             </div>
                           </div>
-                          <Badge className="bg-green-100 text-green-800">Free</Badge>
+                          <Badge className="bg-green-100 text-green-800">{jdData.resources[4].price}</Badge>
                         </div>
                         <Button size="sm" className="w-full">View Course</Button>
                       </div>

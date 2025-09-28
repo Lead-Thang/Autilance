@@ -1,14 +1,4 @@
 import type { Metadata, Viewport } from "next"
-import type React from "react"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { Toaster } from "../components/ui/toaster"
-import { SessionProvider } from "next-auth/react"
-import { Providers } from "../components/Providers"
-import { GeolocationProvider } from "@/lib/geolocationContext"
-
-const inter = Inter({ subsets: ["latin"] })
-
 export const metadata: Metadata = {
   title: "Autilance - AI-Powered Business Ecosystem",
   description:
@@ -42,6 +32,15 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
   ],
 }
+import type React from "react"
+import { Inter } from "next/font/google"
+import "./globals.css"
+import { Toaster } from "../components/ui/toaster"
+import { SessionProvider } from "next-auth/react"
+import { Providers } from "../components/Providers"
+
+const inter = Inter({ subsets: ["latin"] })
+
 
 export default function RootLayout({
   children,
@@ -57,9 +56,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} antialiased`}>
         <Providers>
-          <GeolocationProvider>
-            <div className="min-h-screen bg-background text-foreground">{children}</div>
-          </GeolocationProvider>
+          <div className="min-h-screen bg-background text-foreground">{children}</div>
           <Toaster />
         </Providers>
       </body>

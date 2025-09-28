@@ -1,0 +1,9 @@
+{
+    "Lingma.DisplayLanguage": "English",
+    "Lingma.PreferredLanguage for AI Chat": "English",
+    "Lingma.PreferredLanguage forCommitMessage": "English",
+    "geminicodeassist.agentDebugMode": true,
+    "geminicodeassist.agentYoloMode": false,
+    "codingcopilot.modelResponseLanguage": "English",
+    "codingcopilot.modelDocumentLanguage": "English"
+}

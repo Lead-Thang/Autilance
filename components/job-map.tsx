@@ -1,19 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { MapPin, Navigation, ZoomIn, ZoomOut, Globe, DollarSign } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import maplibregl from "maplibre-gl"
+import "maplibre-gl/dist/maplibre-gl.css"
+import { MapPin, Navigation, DollarSign } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { geolocationManager } from "@/lib/geolocationService"
-import { calculateDistance } from "@/lib/geolocation"
-import { useGeolocation } from "@/lib/geolocationContext"
-
-// Extend the L object with the provider function from leaflet-providers
-declare module 'leaflet' {
-  interface TileLayerStatic {
-    provider: (provider: string) => any;
-  }
-}
+import { getCurrentLocation, calculateDistance } from "@/lib/geolocation"
 
 // Define the Job type
 interface Job {
@@ -41,303 +34,187 @@ interface JobMapProps {
 }
 
 const JobMap = ({ jobs, onJobSelect }: JobMapProps) => {
-  const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstanceRef = useRef<any>(null)
-  const markersRef = useRef<any[]>([])
+  const mapContainerRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<maplibregl.Map | null>(null)
+  const markersRef = useRef<maplibregl.Marker[]>([])
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null)
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const [mapError, setMapError] = useState<string | null>(null)
-  const [isClient, setIsClient] = useState(false)
-  const [mapLoaded, setMapLoaded] = useState(false)
-  const [locationProvider, setLocationProvider] = useState<string | null>(null)
-  const { selectedProvider } = useGeolocation()
-
-  // Set isClient to true on mount
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   // Initialize the map
   useEffect(() => {
-    if (!isClient || !mapRef.current) return;
+    if (!mapContainerRef.current) return
 
-    let L: any;
-    let map: any;
-    
-    const initMap = async () => {
+    // Clean up existing map if it exists
+    if (mapRef.current) {
       try {
-        // Dynamically import leaflet only on client side
-        const leafletModule = await import('leaflet');
-        L = leafletModule.default;
-        
-        // Import leaflet providers for more map options
-        await import('leaflet-providers');
-
-        // Fix for default marker icons in Next.js
-        delete (L.Icon.Default.prototype as any)._getIconUrl;
-        L.Icon.Default.mergeOptions({
-          iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png').default,
-          iconUrl: require('leaflet/dist/images/marker-icon.png').default,
-          shadowUrl: require('leaflet/dist/images/marker-shadow.png').default,
-        });
-
-        // Create map instance with more detailed configuration
-        map = L.map(mapRef.current, {
-          center: [20, 0],
-          zoom: 2,
-          zoomControl: false, // We'll add custom controls
-          layers: []
-        });
-        mapInstanceRef.current = map;
-
-        // Add multiple tile layers for more detail
-        const baseLayers = {
-          "OpenStreetMap": L.tileLayer.provider('OpenStreetMap.Mapnik'),
-          "OpenTopoMap": L.tileLayer.provider('OpenTopoMap'),
-          "Esri WorldStreetMap": L.tileLayer.provider('Esri.WorldStreetMap'),
-          "Esri WorldImagery": L.tileLayer.provider('Esri.WorldImagery'),
-          "CartoDB Voyager": L.tileLayer.provider('CartoDB.Voyager'),
-          "OpenStreetMap DE": L.tileLayer.provider('OpenStreetMap.DE'),
-          "OpenStreetMap France": L.tileLayer.provider('OpenStreetMap.France')
-        };
-
-        // Add default layer
-        baseLayers["OpenStreetMap"].addTo(map);
-
-        // Add layer control
-        L.control.layers(baseLayers).addTo(map);
-
-        // Add scale control
-        L.control.scale({ imperial: false }).addTo(map);
-
-        // Add job markers
-        updateMarkers();
-
-        setMapLoaded(true);
-
-        return () => {
-          if (map) {
-            map.remove();
-          }
-        };
+        mapRef.current.remove()
       } catch (error) {
-        console.error("Error initializing map:", error);
-        setMapError("Failed to initialize map. Please try again.");
+        console.warn("Error removing map:", error)
       }
-    };
+    }
 
-    initMap();
+    // Create a new map
+    const map = new maplibregl.Map({
+      container: mapContainerRef.current,
+      style: 'https://tiles.openfreemap.org/styles/liberty',
+      center: [0, 0],
+      zoom: 2,
+    })
 
-    // Clean up function
+    // Add navigation controls
+    map.addControl(new maplibregl.NavigationControl(), 'top-right')
+
+    // Store map reference
+    mapRef.current = map
+
+    // Add markers when map is loaded
+    map.on('load', () => {
+      updateMarkers()
+    })
+
+    // Clean up on unmount
     return () => {
-      if (map) {
-        map.remove();
-        map = null;
+      if (mapRef.current) {
+        try {
+          mapRef.current.remove()
+        } catch (error) {
+          console.warn("Error removing map:", error)
+        }
+        mapRef.current = null
       }
-    };
-  }, [isClient, jobs, selectedProvider]);
+    }
+  }, [])
 
-  // Update markers when jobs or user location change
-  const updateMarkers = async () => {
-    if (!mapInstanceRef.current) return;
+  // Update markers when jobs change
+  useEffect(() => {
+    if (mapRef.current && mapRef.current.isStyleLoaded && mapRef.current.isStyleLoaded()) {
+      updateMarkers()
+    }
+  }, [jobs])
 
-    // Dynamically import leaflet only on client side
-    const leafletModule = await import('leaflet');
-    const L = leafletModule.default;
+  // Update markers on the map
+  const updateMarkers = () => {
+    if (!mapRef.current) return
 
     // Clear existing markers
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
-
-    // Custom icons for different job categories
-    const techIcon = L.divIcon({
-      className: 'custom-icon',
-      html: `<div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white shadow-lg transform hover:scale-110 transition-transform">
-               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
-               </svg>
-             </div>`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
-    });
-
-    const designIcon = L.divIcon({
-      className: 'custom-icon',
-      html: `<div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center border-2 border-white shadow-lg transform hover:scale-110 transition-transform">
-               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                 <path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clip-rule="evenodd" />
-               </svg>
-             </div>`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
-    });
-
-    const marketingIcon = L.divIcon({
-      className: 'custom-icon',
-      html: `<div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-2 border-white shadow-lg transform hover:scale-110 transition-transform">
-               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                 <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-               </svg>
-             </div>`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
-    });
-
-    // Add markers for jobs
-    jobs.forEach(job => {
-      if (job.latitude && job.longitude) {
-        // Choose icon based on category
-        let icon = techIcon;
-        if (job.category === 'Design') {
-          icon = designIcon;
-        } else if (job.category === 'Marketing') {
-          icon = marketingIcon;
-        }
-
-        const marker = L.marker([job.latitude, job.longitude], { icon }).addTo(mapInstanceRef.current);
-        
-        // Add detailed popup
-        marker.bindPopup(`
-          <div class="min-w-[250px]">
-            <h3 class="font-bold text-lg text-gray-800">${job.creator}</h3>
-            <p class="text-blue-600 font-medium mb-2">${job.title}</p>
-            <div class="space-y-1">
-              <p class="text-sm"><span class="font-medium">📍 Location:</span> ${job.location}</p>
-              <p class="text-sm"><span class="font-medium">💼 Category:</span> ${job.category}</p>
-              ${job.price ? `<p class="text-sm"><span class="font-medium">💰 Price:</span> $${job.price}</p>` : ''}
-              <p class="text-sm"><span class="font-medium">👥 Verified Users:</span> ${job.verifiedUsers}</p>
-              <p class="text-sm"><span class="font-medium">✅ Total Verifications:</span> ${job.verifiedCount}</p>
-            </div>
-            <div class="mt-3">
-              <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                ${job.skills.slice(0, 3).join(', ')}${job.skills.length > 3 ? ` +${job.skills.length - 3} more` : ''}
-              </span>
-            </div>
-          </div>
-        `, {
-          className: 'custom-popup',
-          maxWidth: 300
-        });
-        
-        // Add mouse events for better interaction
-        marker.on('click', () => {
-          setSelectedJob(job);
-          onJobSelect?.(job);
-        });
-        
-        marker.on('mouseover', function (this: any) {
-          this.openPopup();
-        });
-        
-        marker.on('mouseout', function (this: any) {
-          if (selectedJob?.id !== job.id) {
-            this.closePopup();
-          }
-        });
-        
-        markersRef.current.push(marker);
+    markersRef.current.forEach(marker => {
+      try {
+        marker.remove()
+      } catch (error) {
+        console.warn("Error removing marker:", error)
       }
-    });
+    })
+    markersRef.current = []
+
+    // Add new markers for each job
+    jobs.forEach(job => {
+      if (job.latitude && job.longitude && mapRef.current) {
+        const el = document.createElement('div')
+        el.className = 'job-marker'
+        el.innerHTML = `
+          <div class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white cursor-pointer hover:bg-blue-600 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        `
+
+        el.addEventListener('click', () => {
+          setSelectedJob(job)
+          onJobSelect?.(job)
+          
+          // Fly to the marker
+          if (job.longitude && job.latitude && mapRef.current) {
+            try {
+              mapRef.current.flyTo({
+                center: [job.longitude, job.latitude],
+                zoom: 12,
+                essential: true
+              })
+            } catch (error) {
+              console.warn("Error flying to marker:", error)
+            }
+          }
+        })
+
+        try {
+          const jobMarker = new maplibregl.Marker({
+            element: el
+          })
+            .setLngLat([job.longitude, job.latitude])
+            .addTo(mapRef.current)
+
+          markersRef.current.push(jobMarker)
+        } catch (error) {
+          console.warn("Error adding job marker:", error)
+        }
+      }
+    })
 
     // Add user location marker if available
-    if (userLocation) {
-      const userMarker = L.marker([userLocation.lat, userLocation.lon], {
-        icon: L.divIcon({
-          className: 'user-marker',
-          html: `<div class="w-6 h-6 bg-blue-600 rounded-full border-2 border-white shadow-lg animate-pulse"></div>`,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12]
+    if (userLocation && mapRef.current) {
+      const el = document.createElement('div')
+      el.className = 'user-marker'
+      el.innerHTML = `
+        <div class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      `
+
+      try {
+        const userMarker = new maplibregl.Marker({
+          element: el
         })
-      }).addTo(mapInstanceRef.current);
-      
-      userMarker.bindPopup(`<b>Your Location (${locationProvider})</b>`, {
-        className: 'custom-popup'
-      });
-      markersRef.current.push(userMarker);
-      
-      // Center map on user location
-      mapInstanceRef.current.setView([userLocation.lat, userLocation.lon], 10);
+          .setLngLat([userLocation.lon, userLocation.lat])
+          .addTo(mapRef.current)
+
+        markersRef.current.push(userMarker)
+      } catch (error) {
+        console.warn("Error adding user marker:", error)
+      }
     }
-  };
+  }
 
   // Get user's current location
   const handleGetLocation = async () => {
     try {
-      // Set the provider before getting location
-      geolocationManager.setCurrentProvider(selectedProvider);
-      
-      // Get location with better accuracy
-      const location = await geolocationManager.getCurrentLocation();
+      const location = await getCurrentLocation()
       
       setUserLocation({ 
         lat: location.latitude, 
         lon: location.longitude 
-      });
-      setLocationProvider(location.provider);
-      setMapError(null);
+      })
       
-      // Update markers to show user location
-      updateMarkers();
+      setMapError(null)
+      
+      // Update the map with the new location
+      if (mapRef.current) {
+        try {
+          mapRef.current.flyTo({
+            center: [location.longitude, location.latitude],
+            zoom: 10,
+            essential: true
+          })
+          
+          // Update markers to include user location
+          setTimeout(updateMarkers, 100)
+        } catch (error) {
+          console.warn("Error flying to user location:", error)
+        }
+      }
     } catch (err) {
-      console.error("Error getting location:", err);
-      setMapError("Unable to get your location. Please enable location services and check your internet connection.");
+      console.error("Error getting location:", err)
+      setMapError("Unable to get your location. Please enable location services and check your internet connection.")
     }
-  };
-
-  // Cleanup function to remove geolocation resources
-  useEffect(() => {
-    return () => {
-      // Any necessary cleanup is handled by the browser automatically
-    };
-  }, []);
+  }
 
   // Calculate distance to a job
   const getDistanceToJob = (job: Job) => {
-    if (!userLocation || !job.latitude || !job.longitude) return null;
-    return calculateDistance(userLocation.lat, userLocation.lon, job.latitude, job.longitude);
-  };
-
-  // Map controls
-  const zoomIn = () => {
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.zoomIn();
-    }
-  };
-
-  const zoomOut = () => {
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.zoomOut();
-    }
-  };
-
-  // Only render map on client side
-  if (!isClient) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <CardTitle>Job Locations</CardTitle>
-              <CardDescription>Find jobs near you on the map</CardDescription>
-            </div>
-            <Button 
-              onClick={handleGetLocation}
-              variant="outline" 
-              className="flex items-center gap-2"
-            >
-              <Navigation className="w-4 h-4" />
-              Use My Location
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="w-full h-96 rounded-lg border border-gray-200 flex items-center justify-center">
-            <p>Loading map...</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    if (!userLocation || !job.latitude || !job.longitude) return null
+    return calculateDistance(userLocation.lat, userLocation.lon, job.latitude, job.longitude)
   }
 
   return (
@@ -346,12 +223,11 @@ const JobMap = ({ jobs, onJobSelect }: JobMapProps) => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <CardTitle>Job Locations</CardTitle>
-            <CardDescription>Find jobs near you on the map</CardDescription>
+            <CardDescription>Find jobs near you</CardDescription>
           </div>
           <Button 
             onClick={handleGetLocation}
-            variant="outline" 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 border border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
           >
             <Navigation className="w-4 h-4" />
             Use My Location
@@ -365,53 +241,25 @@ const JobMap = ({ jobs, onJobSelect }: JobMapProps) => {
           </div>
         )}
 
-        <div 
-          ref={mapRef} 
-          className="w-full h-96 rounded-lg border border-gray-200 relative"
-          style={{ minHeight: '300px' }}
-        >
-          {/* Map will be initialized here by Leaflet */}
-          {!mapLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-              <p>Loading detailed map...</p>
-            </div>
-          )}
+        <div className="relative w-full h-96 rounded-lg border border-gray-200 overflow-hidden">
+          <div 
+            ref={mapContainerRef} 
+            className="w-full h-full"
+          />
         </div>
-
-        {/* Custom map controls */}
-        {mapLoaded && (
-          <div className="absolute top-20 right-4 flex flex-col gap-2 z-[1000]">
-            <Button 
-              size="sm" 
-              variant="secondary"
-              onClick={zoomIn}
-              className="flex items-center justify-center w-10 h-10 shadow-lg"
-            >
-              <ZoomIn className="w-5 h-5" />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="secondary"
-              onClick={zoomOut}
-              className="flex items-center justify-center w-10 h-10 shadow-lg"
-            >
-              <ZoomOut className="w-5 h-5" />
-            </Button>
-          </div>
-        )}
 
         {userLocation && (
           <div className="text-sm text-gray-600 flex items-center gap-2">
             <Navigation className="w-4 h-4 text-blue-500" />
             <span>
-              Your location ({locationProvider}): {userLocation.lat.toFixed(4)}, {userLocation.lon.toFixed(4)}
+              Your location: {userLocation.lat.toFixed(4)}, {userLocation.lon.toFixed(4)}
             </span>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-60 overflow-y-auto">
           {jobs.map((job) => {
-            const distance = getDistanceToJob(job);
+            const distance = getDistanceToJob(job)
             
             return (
               <div 
@@ -422,8 +270,21 @@ const JobMap = ({ jobs, onJobSelect }: JobMapProps) => {
                     : "hover:bg-gray-50"
                 }`}
                 onClick={() => {
-                  setSelectedJob(job);
-                  onJobSelect?.(job);
+                  setSelectedJob(job)
+                  onJobSelect?.(job)
+                  
+                  // Fly to the job location on map
+                  if (mapRef.current && job.latitude && job.longitude) {
+                    try {
+                      mapRef.current.flyTo({
+                        center: [job.longitude, job.latitude],
+                        zoom: 12,
+                        essential: true
+                      })
+                    } catch (error) {
+                      console.warn("Error flying to job location:", error)
+                    }
+                  }
                 }}
               >
                 <div className="flex justify-between">
@@ -450,40 +311,6 @@ const JobMap = ({ jobs, onJobSelect }: JobMapProps) => {
           })}
         </div>
       </CardContent>
-      
-      <style jsx global>{`
-        .custom-popup .leaflet-popup-content-wrapper {
-          border-radius: 8px;
-          padding: 12px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .custom-popup .leaflet-popup-tip {
-          background: white;
-        }
-        .leaflet-control-layers {
-          border-radius: 8px;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        }
-        .leaflet-control-layers-toggle {
-          border-radius: 4px;
-        }
-        .leaflet-control-layers-expanded {
-          border-radius: 8px;
-          padding: 6px 10px;
-        }
-        .leaflet-control-layers label {
-          font-size: 14px;
-        }
-        .leaflet-control-scale {
-          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-          border-radius: 4px;
-          padding: 2px 5px;
-        }
-        .custom-icon {
-          background: transparent;
-          border: none;
-        }
-      `}</style>
     </Card>
   )
 }

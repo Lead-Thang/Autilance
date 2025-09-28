@@ -2,33 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import 'leaflet/dist/leaflet.css';
-
-html, body {
-  height: 100%;
-}
-
-body {
-  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
-/* Fix for Leaflet icons */
-.leaflet-container {
-  height: 100%;
-  width: 100%;
-}
-
-.leaflet-marker-icon {
-  background: none !important;
-  border: none !important;
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -207,11 +180,6 @@ body {
   transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Invert class for logo inversion in dark mode */
-.invert {
-  filter: invert(100%);
-}
-
 /* Loading animation */
 .loading-dots {
   display: inline-flex;
@@ -243,3 +211,79 @@ body {
     transform: scale(1);
   }
 }
+
+@keyframes star-container {
+    0% {
+      transform: translateY(0) translateX(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) translateX(20px);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes star-main {
+    0% {
+      transform: scale(0);
+    }
+    10% {
+      transform: scale(1);
+    }
+    90% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(0);
+    }
+  }
+  
+  @keyframes star-trail {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-100px);
+      opacity: 0;
+    }
+  }
+  
+  .animate-star-container {
+    animation: star-container linear infinite;
+    left: var(--star-left);
+    animation-delay: var(--star-delay);
+    animation-duration: var(--star-duration);
+  }
+  
+  .animate-star-main {
+    animation: star-main linear infinite;
+    width: var(--star-size);
+    height: var(--star-size);
+  }
+  
+  .animate-star-trail {
+    animation: star-trail linear infinite;
+    width: var(--trail-size);
+    height: var(--trail-size);
+    opacity: var(--trail-opacity);
+    top: var(--trail-top);
+    animation-delay: var(--trail-delay);
+  }
+
+  /* Map marker styles */
+  .job-marker,
+  .user-marker {
+    pointer-events: auto;
+  }
+
+  .job-marker:hover,
+  .user-marker:hover {
+    z-index: 10;
+  }

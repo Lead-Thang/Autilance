@@ -19,7 +19,7 @@ import { useUser } from "@/hooks/use-user"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Upload, X, Camera } from "lucide-react"
 import { generateReactHelpers } from "@uploadthing/react/hooks"
-import type { OurFileRouter } from "../app/api/uploadthing/core"
+import type { OurFileRouter } from "@/app/api/uploadthing/core"
 
 // Initialize UploadThing helpers
 const { useUploadThing } = generateReactHelpers<OurFileRouter>()

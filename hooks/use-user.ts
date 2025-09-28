@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { Session } from '@supabase/supabase-js'
 
 interface User {
   id: string
@@ -13,8 +14,6 @@ interface User {
   displayName?: string
   provider?: string
   bio?: string
-  title?: string
-  skills?: string[]
   location?: string
   website?: string
 }
@@ -22,11 +21,11 @@ interface User {
 export function useUser() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const supabase = createClient()
         const { data: { user: supabaseUser }, error } = await supabase.auth.getUser()
         
         if (error) {
@@ -38,7 +37,7 @@ export function useUser() {
           // Fetch additional user data from the users table
           const { data: userData, error: userError } = await supabase
             .from('users')
-            .select('name, avatar, role, created_at, display_name, website')
+            .select('name, avatar, role, created_at, display_name, bio, location, website')
             .eq('id', supabaseUser.id)
             .single()
           
@@ -55,6 +54,8 @@ export function useUser() {
             joinDate: new Date(userData?.created_at || supabaseUser.created_at),
             displayName: userData?.display_name || supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0],
             provider: supabaseUser.app_metadata?.provider || "email",
+            bio: userData?.bio || undefined,
+            location: userData?.location || undefined,
             website: userData?.website || undefined
           })
         }
@@ -68,30 +69,20 @@ export function useUser() {
     fetchUser()
     
     // Set up auth state listener
-    const supabase = createClient()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        // Fetch additional user data from the users table
-        const { data: userData, error: userError } = await supabase
-          .from('users')
-          .select('name, avatar, role, created_at, display_name, website')
-          .eq('id', session.user.id)
-          .single()
-        
-        if (userError) {
-          console.error("Error fetching user data:", userError)
-        }
-        
         setUser({
           id: session.user.id,
-          name: userData?.name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || "User",
+          name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || "User",
           email: session.user.email || "",
-          avatar: userData?.avatar || session.user.user_metadata?.avatar_url || undefined,
-          role: userData?.role || "Professional",
-          joinDate: new Date(userData?.created_at || session.user.created_at),
-          displayName: userData?.display_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
+          avatar: session.user.user_metadata?.avatar_url || undefined,
+          role: "Professional",
+          joinDate: new Date(session.user.created_at),
+          displayName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
           provider: session.user.app_metadata?.provider || "email",
-          website: userData?.website || undefined
+          bio: undefined,
+          location: undefined,
+          website: undefined
         })
       } else {
         setUser(null)
@@ -102,7 +93,7 @@ export function useUser() {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [supabase])
 
   return {
     user,

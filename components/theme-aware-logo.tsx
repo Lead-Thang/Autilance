@@ -1,49 +1,32 @@
 "use client"
 
+import type React from "react"
 import { useTheme } from "next-themes"
-import Image from "next/image"
-import { useEffect, useState } from "react"
+import Image, { ImageProps } from "next/image"
 
-interface ThemeAwareLogoProps {
+interface ThemeAwareLogoProps extends Omit<ImageProps, 'src'> {
   width?: number
   height?: number
-  className?: string
 }
 
-export function ThemeAwareLogo({ 
+export const ThemeAwareLogo: React.FC<ThemeAwareLogoProps> = ({ 
   width = 40, 
-  height = 40, 
-  className = "rounded-xl" 
-}: ThemeAwareLogoProps) {
-  const { theme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Render nothing on the server, or when not mounted
-  if (!mounted) {
-    return (
-      <div 
-        className={className} 
-        style={{ width, height, backgroundColor: 'transparent' }} 
-      />
-    )
-  }
-
-  // Use resolvedTheme to get the actual theme being used (important for system theme)
-  const isDark = resolvedTheme === 'dark'
-
+  height = 40,
+  alt = "Autilance Logo",
+  className = "",
+  ...props 
+}) => {
+  const { theme } = useTheme()
+  
+  // 使用实际的 logo.png 图片
   return (
-    <div className={`${className} ${isDark ? 'dark' : ''}`} style={{ width, height }}>
-      <Image 
-        src="/logo.png" 
-        alt="Autilance Logo" 
-        width={width} 
-        height={height} 
-        className={isDark ? 'invert' : ''}
-      />
-    </div>
+    <Image
+      src="/logo.png"
+      alt={alt}
+      width={width}
+      height={height}
+      className={`rounded-xl ${className}`}
+      {...props}
+    />
   )
 }

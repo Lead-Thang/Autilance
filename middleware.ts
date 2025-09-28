@@ -1,6 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { type NextFetchEvent } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -55,38 +54,7 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session
-  const { data, error } = await supabase.auth.getSession()
-  
-  // List of paths that should be publicly accessible
-  const publicPaths = [
-    '/auth/signin',
-    '/auth/signup',
-    '/',
-    '/terms',
-    '/privacy'
-  ]
-  
-  const isPublicPath = publicPaths.some(path => 
-    request.nextUrl.pathname === path || 
-    (path !== '/' && request.nextUrl.pathname.startsWith(path))
-  )
-  
-  // If user is not authenticated and trying to access protected routes
-  if (!data.session && !isPublicPath) {
-    // Redirect to sign in page
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/auth/signin'
-    return NextResponse.redirect(redirectUrl)
-  }
-  
-  // If user is authenticated and trying to access auth pages
-  if (data.session && isPublicPath && !['/', '/terms', '/privacy'].includes(request.nextUrl.pathname)) {
-    // Redirect to dashboard
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/dashboard'
-    return NextResponse.redirect(redirectUrl)
-  }
+  await supabase.auth.getUser()
 
   return response
 }

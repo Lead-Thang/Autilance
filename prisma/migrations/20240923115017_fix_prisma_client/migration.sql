@@ -1,3 +1,0 @@
--- Since this is a new deployment, we don't need to modify the schema
--- This empty migration ensures that the database is properly initialized
--- The actual schema is already defined in prisma/schema.prisma
