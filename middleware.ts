@@ -1,15 +1,15 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { updateSession } from '@/lib/supabase/middleware'
 
+// Minimal Edge-safe middleware: avoid importing any modules that may pull
+// Node-only APIs into the Edge bundle (for example, @supabase/ssr). If you
+// need to run Supabase session checks, perform them in server routes or
+// server components instead.
 export async function middleware(request: NextRequest) {
-  try {
-    const { response } = await updateSession(request)
-    return response
-  } catch (error) {
-    // If there's an error in session update, continue with a standard response
-    // This ensures middleware doesn't break the entire application
-    return NextResponse.next()
-  }
+  return NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
 }
 
 export const config = {
