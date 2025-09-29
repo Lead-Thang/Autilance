@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
 // POST create a new job description
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { session }, error } = await supabase.auth.getSession()
     
     if (!session?.user || error) {
