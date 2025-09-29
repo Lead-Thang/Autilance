@@ -1,4 +1,3 @@
-
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
 
@@ -52,10 +51,15 @@ export async function updateSession(request: NextRequest) {
           })
         },
       },
+      // Make the client Edge Runtime compatible by explicitly setting global fetch
+      global: {
+        fetch: fetch.bind(globalThis),
+      } as any,
     }
   )
 
-  await supabase.auth.getUser()
+  // Use getSession instead of getUser for better Edge Runtime compatibility
+  await supabase.auth.getSession()
 
   return { supabase, response }
 }

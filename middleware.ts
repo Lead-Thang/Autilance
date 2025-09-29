@@ -1,10 +1,15 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  const { response } = await updateSession(request)
-  return response
+  try {
+    const { response } = await updateSession(request)
+    return response
+  } catch (error) {
+    // If there's an error in session update, continue with a standard response
+    // This ensures middleware doesn't break the entire application
+    return NextResponse.next()
+  }
 }
 
 export const config = {
