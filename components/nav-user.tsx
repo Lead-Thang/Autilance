@@ -61,8 +61,8 @@ export function NavUser({
   };
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) console.error('Sign out error:', error);
+    const { error: signOutError } = await supabase.auth.signOut();
+    if (signOutError) console.error('Sign out error:', signOutError);
   };
 
   return (
@@ -75,20 +75,22 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-primary/10 hover:bg-primary/10 transition-all duration-200 animate-lift"
             >
-              <Avatar className="h-8 w-8 rounded-lg border-2 border-primary/20">
-                <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-                <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-semibold">
-                  {user.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+              <div className="flex items-left gap-2">
+                <Avatar className="h-8 w-8 rounded-lg border-2 border-primary/20">
+                  <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+                  <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-semibold">
+                    {user.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+                  <span className="truncate font-semibold">{user.name}</span>
+                  <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                </div>
+                <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
               </div>
-              <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           {isClient && (

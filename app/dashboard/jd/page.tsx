@@ -23,6 +23,8 @@ import {
   Star,
 } from "lucide-react"
 import dynamic from "next/dynamic"
+import { JobFilters } from "@/components/job-filters"
+import { calculateClientFitScore, getFitReasons, getRiskFactors } from "@/lib/client-fit-score"
 
 // Dynamically import JobMap to prevent SSR issues with Leaflet
 const JobMap = dynamic(() => import("@/components/job-map"), { 
@@ -64,6 +66,23 @@ type JobRule = {
   description: string;
 }
 
+// Define type for filters
+type JobFilters = {
+  search?: string;
+  verifiedPayment?: boolean;
+  spendTier?: string;
+  minHireRate?: number;
+  minRating?: number;
+  budgetType?: string;
+  hourlyRate?: string;
+  premiumWillingness?: boolean;
+  industry?: string;
+  projectType?: string;
+  unpaidTest?: boolean;
+  scopeCreepHistory?: boolean;
+  extremeNDA?: boolean;
+}
+
 type Job = {
   id: string;
   title: string;
@@ -89,6 +108,16 @@ type Job = {
   remote?: boolean;
   status?: string;
   deadline?: string;
+  // Client quality metrics
+  clientSpend?: string;
+  clientHireRate?: number;
+  clientRating?: number;
+  clientVerified?: boolean;
+  budgetType?: 'fixed' | 'hourly';
+  hourlyRate?: string;
+  projectType?: string;
+  industry?: string;
+  riskFlags?: string[];
 }
 
 type VerificationStatus = {
@@ -113,6 +142,7 @@ export default function JobDescriptionsPage() {
   const [activeTab, setActiveTab] = useState("browse")
   // State for job data
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [myJobs, setMyJobs] = useState<Job[]>([]);
   const [myVerifications, setMyVerifications] = useState<VerificationStatus[]>([]);
   const [badges, setBadges] = useState<Badge[]>([]);
@@ -120,6 +150,7 @@ export default function JobDescriptionsPage() {
   const [loadingMyJobs, setLoadingMyJobs] = useState(true);
   const [loadingVerifications, setLoadingVerifications] = useState(true);
   const [loadingBadges, setLoadingBadges] = useState(true);
+  const [filters, setFilters] = useState<JobFilters>({});
 
   // Load data from API
   useEffect(() => {
@@ -147,14 +178,70 @@ export default function JobDescriptionsPage() {
           creator: "Tech Corp", // Required by JobMap
           location: "New York, NY", // Required by JobMap
           latitude: 40.7128,
-          longitude: -74.0060
+          longitude: -74.0060,
+          clientSpend: "5-50k",
+          clientHireRate: 45,
+          clientRating: 4.8,
+          clientVerified: true,
+          budgetType: "hourly",
+          hourlyRate: "40-80",
+          projectType: "new-build",
+          industry: "saas"
+        }, {
+          id: "2",
+          title: "UX Designer",
+          company: "Design Studio",
+          category: "Design",
+          description: "Create beautiful user experiences",
+          skills: [{ name: "Figma", level: "expert" }],
+          behaviors: [{ name: "Creativity", description: "Think outside the box", priority: "high" }],
+          verifiedCount: 12,
+          verifiedUsers: 24,
+          updatedAt: "2023-02-15",
+          creator: "Design Studio",
+          location: "San Francisco, CA",
+          latitude: 37.7749,
+          longitude: -122.4194,
+          clientSpend: "50k+",
+          clientHireRate: 60,
+          clientRating: 4.9,
+          clientVerified: true,
+          budgetType: "fixed",
+          projectType: "research",
+          industry: "ecommerce",
+          riskFlags: ["scope-creep"]
+        }, {
+          id: "3",
+          title: "Backend Developer",
+          company: "StartupXYZ",
+          category: "Engineering",
+          description: "Build scalable backend systems",
+          skills: [{ name: "Node.js", level: "advanced" }, { name: "MongoDB", level: "intermediate" }],
+          behaviors: [{ name: "Problem Solving", description: "Solve complex technical problems", priority: "critical" }],
+          verifiedCount: 3,
+          verifiedUsers: 7,
+          updatedAt: "2023-03-10",
+          creator: "StartupXYZ",
+          location: "Austin, TX",
+          latitude: 30.2672,
+          longitude: -97.7431,
+          clientSpend: "1-5k",
+          clientHireRate: 20,
+          clientRating: 4.2,
+          clientVerified: false,
+          budgetType: "fixed",
+          projectType: "maintenance",
+          industry: "fintech",
+          riskFlags: ["unpaid-test", "extreme-nda"]
         }];
         // setJobs(mockJobs);
         setJobs([]); // Keep as empty array for now
+        setFilteredJobs([]); // Keep as empty array for now
       } catch (error) {
         console.error('Error fetching jobs:', error);
         // Set to an empty array to avoid undefined issues
         setJobs([]);
+        setFilteredJobs([]);
       } finally {
         setLoading(false);
       }
@@ -221,6 +308,54 @@ export default function JobDescriptionsPage() {
     fetchBadges();
   }, []);
 
+  // Apply filters when they change
+  useEffect(() => {
+    if (Object.keys(filters).length === 0) {
+      setFilteredJobs(jobs);
+      return;
+    }
+
+    const filtered = jobs.filter(job => {
+      // Search filter
+      if (filters.search && 
+          !job.title.toLowerCase().includes(filters.search.toLowerCase()) && 
+          !job.company.toLowerCase().includes(filters.search.toLowerCase()) &&
+          !job.skills.some(skill => skill.name.toLowerCase().includes(filters.search!.toLowerCase()))) {
+        return false;
+      }
+
+      // Client quality filters
+      if (filters.verifiedPayment && !job.clientVerified) return false;
+      if (filters.spendTier && job.clientSpend !== filters.spendTier) return false;
+      if (filters.minHireRate && job.clientHireRate && job.clientHireRate < filters.minHireRate) return false;
+      if (filters.minRating && job.clientRating && job.clientRating < filters.minRating) return false;
+
+      // Budget filters
+      if (filters.budgetType && job.budgetType !== filters.budgetType) return false;
+      if (filters.hourlyRate && job.hourlyRate !== filters.hourlyRate) return false;
+      if (filters.premiumWillingness) {
+        // This would require additional data
+      }
+
+      // Project filters
+      if (filters.industry && job.industry !== filters.industry) return false;
+      if (filters.projectType && job.projectType !== filters.projectType) return false;
+
+      // Risk filters
+      if (filters.unpaidTest && (!job.riskFlags || !job.riskFlags.includes('unpaid-test'))) return false;
+      if (filters.scopeCreepHistory && (!job.riskFlags || !job.riskFlags.includes('scope-creep'))) return false;
+      if (filters.extremeNDA && (!job.riskFlags || !job.riskFlags.includes('extreme-nda'))) return false;
+
+      return true;
+    });
+
+    setFilteredJobs(filtered);
+  }, [filters, jobs]);
+
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -243,17 +378,8 @@ export default function JobDescriptionsPage() {
         </TabsList>
 
         <TabsContent value="browse" className="space-y-4">
-          <div className="flex items-center space-x-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-              <Input placeholder="Search job descriptions..." className="pl-9 h-9" />
-            </div>
-            <Button variant="outline" className="h-9 px-3">
-              <Filter className="w-4 h-4 mr-1" />
-              <span>Filter</span>
-            </Button>
-          </div>
-
+          <JobFilters onFilterChange={handleFilterChange} />
+          
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Job Listings - Left side */}
             <div className="w-full lg:w-2/3">
@@ -262,71 +388,137 @@ export default function JobDescriptionsPage() {
                   <div className="flex justify-center items-center h-60">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
                   </div>
-                ) : jobs.length === 0 ? (
+                ) : filteredJobs.length === 0 ? (
                   <div className="text-center py-10 text-gray-500">
                     No jobs found. Try adjusting your search criteria.
                   </div>
                 ) : (
-                  jobs.map((job) => (
-                    <Card key={job.id} className="hover:shadow-md transition-shadow">
-                      <CardHeader className="p-4">
-                        <div className="flex items-center justify-between">
-                          <Badge className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5">{job.category}</Badge>
-                          <div className="flex items-center space-x-1">
-                            <CheckCircle className="w-3 h-3 text-green-600" />
-                            <span className="text-xs text-gray-600">Verified: {job.verifiedCount}</span>
+                  filteredJobs.map((job) => {
+                    const fitScore = calculateClientFitScore(job);
+                    const fitReasons = getFitReasons(job);
+                    const riskFactors = getRiskFactors(job);
+                    
+                    return (
+                      <Card key={job.id} className="hover:shadow-md transition-shadow">
+                        <CardHeader className="p-4">
+                          <div className="flex items-center justify-between">
+                            <Badge className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5">{job.category}</Badge>
+                            <div className="flex items-center space-x-2">
+                              <Badge 
+                                className={`text-xs px-2 py-0.5 ${
+                                  fitScore >= 70 
+                                    ? "bg-green-100 text-green-800" 
+                                    : fitScore >= 40 
+                                      ? "bg-yellow-100 text-yellow-800" 
+                                      : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {fitScore}/100 fit
+                              </Badge>
+                              <div className="flex items-center space-x-1">
+                                <CheckCircle className="w-3 h-3 text-green-600" />
+                                <span className="text-xs text-gray-600">Verified: {job.verifiedCount}</span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center space-x-2 mt-2">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                            <AvatarFallback className="text-xs">{job.company.substring(0, 2)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <CardTitle className="text-base">{job.company}</CardTitle>
-                            <CardDescription className="text-sm">{job.title}</CardDescription>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src="/placeholder.svg?height=32&width=32" />
+                              <AvatarFallback className="text-xs">{job.company.substring(0, 2)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <CardTitle className="text-base">{job.company}</CardTitle>
+                              <CardDescription className="text-sm">{job.title}</CardDescription>
+                            </div>
                           </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-0">
-                        <div className="space-y-3">
-                          <div className="space-y-1">
-                            <div className="text-xs font-medium">Required Skills</div>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-0">
+                          <div className="space-y-3">
+                            <div className="space-y-1">
+                              <div className="text-xs font-medium">Required Skills</div>
+                              <div className="flex flex-wrap gap-1">
+                                {job.skills.map((skill: JobSkill, index: number) => (
+                                  <Badge key={index} variant="outline" className="bg-slate-100 text-xs px-1.5 py-0.5">
+                                    {skill.name}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center text-gray-600">
+                                <Clock className="w-3 h-3 mr-1" />
+                                Updated {job.updatedAt}
+                              </div>
+                              <div className="flex items-center text-gray-600">
+                                <Users className="w-3 h-3 mr-1" />
+                                {job.verifiedUsers} verified users
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              {fitReasons.length > 0 && (
+                                <div>
+                                  <div className="text-xs font-medium text-green-700">Why it's a fit:</div>
+                                  <ul className="text-xs text-green-600 list-disc list-inside">
+                                    {fitReasons.map((reason, index) => (
+                                      <li key={index}>{reason}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              
+                              {riskFactors.length > 0 && (
+                                <div>
+                                  <div className="text-xs font-medium text-red-700">Risks to watch:</div>
+                                  <ul className="text-xs text-red-600 list-disc list-inside">
+                                    {riskFactors.map((risk, index) => (
+                                      <li key={index}>{risk}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                            
                             <div className="flex flex-wrap gap-1">
-                              {job.skills.map((skill: JobSkill, index: number) => (
-                                <Badge key={index} variant="outline" className="bg-slate-100 text-xs px-1.5 py-0.5">
-                                  {skill.name}
+                              {job.clientVerified && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Verified Client
+                                </Badge>
+                              )}
+                              {job.clientSpend && (
+                                <Badge variant="secondary" className="text-xs">
+                                  ${job.clientSpend} spent
+                                </Badge>
+                              )}
+                              {job.clientHireRate && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {job.clientHireRate}% hire rate
+                                </Badge>
+                              )}
+                              {job.riskFlags && job.riskFlags.map((flag, index) => (
+                                <Badge key={index} variant="destructive" className="text-xs">
+                                  {flag.replace('-', ' ')}
                                 </Badge>
                               ))}
                             </div>
+                            
+                            <Button className="w-full h-8 text-sm">
+                              <Eye className="w-3 h-3 mr-1" />
+                              View Requirements
+                            </Button>
                           </div>
-                          
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center text-gray-600">
-                              <Clock className="w-3 h-3 mr-1" />
-                              Updated {job.updatedAt}
-                            </div>
-                            <div className="flex items-center text-gray-600">
-                              <Users className="w-3 h-3 mr-1" />
-                              {job.verifiedUsers} verified users
-                            </div>
-                          </div>
-                          
-                          <Button className="w-full h-8 text-sm">
-                            <Eye className="w-3 h-3 mr-1" />
-                            View Requirements
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
+                        </CardContent>
+                      </Card>
+                    );
+                  })
                 )}
               </div>
             </div>
             
             {/* Map - Right side */}
             <div className="w-full lg:w-1/3">
-              <JobMap jobs={jobs.map(job => ({
+              <JobMap jobs={filteredJobs.map(job => ({
                 id: job.id,
                 creator: job.company,
                 title: job.title,

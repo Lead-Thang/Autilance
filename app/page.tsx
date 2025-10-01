@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Badge } from "../components/ui/badge"
 import { Input } from "../components/ui/input"
 import { ThemeToggle } from "../components/theme-toggle"
-import { FloatingAIChat } from "../components/floating-ai-chat"
 import { createClient } from "@/lib/supabase/client"
 import { Session } from "@supabase/supabase-js"
 import Link from "next/link"
@@ -724,8 +723,7 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* Floating AI Chat */}
-      <FloatingAIChat />
+      {/* Floating AI Chat is now in the main layout */}
     </div>
   )
 }

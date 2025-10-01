@@ -187,7 +187,7 @@ const data = {
   projects: [
     {
       name: "E-commerce Store",
-      url: "#",
+      url: "/dashboard/storefront",
       icon: Store,
     },
     {

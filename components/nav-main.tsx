@@ -167,12 +167,12 @@ export function NavMain({
                 <div className="flex items-center">
                   <SidebarMenuButton asChild tooltip={item.title} className="flex-1 justify-start">
                     <Link href={item.url} className={isActive ? "bg-sidebar-accent" : ""}>
-                      {item.icon && <item.icon />}
-                      <span>{item.title}</span>
+                      {item.icon && <item.icon className="shrink-0" />}
+                      <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                   {item.items?.length ? (
-                    <div className="ml-auto pl-4">
+                    <div className="ml-auto pl-4 group-data-[collapsible=icon]:hidden">
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground px-2">
                           <ChevronRight className="transition-transform duration-200 data-[state=open]:rotate-90" />

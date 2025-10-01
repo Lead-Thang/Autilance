@@ -1,4 +1,12 @@
 import type { Metadata, Viewport } from "next"
+import type React from "react"
+import { Inter } from "next/font/google"
+import "./globals.css"
+import { Toaster } from "../components/ui/toaster"
+import { SessionProvider } from "next-auth/react"
+import { Providers } from "../components/Providers"
+import { FloatingAIChat } from "../components/floating-ai-chat"
+
 export const metadata: Metadata = {
   title: "Autilance - AI-Powered Business Ecosystem",
   description:
@@ -32,15 +40,8 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
   ],
 }
-import type React from "react"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { Toaster } from "../components/ui/toaster"
-import { SessionProvider } from "next-auth/react"
-import { Providers } from "../components/Providers"
 
 const inter = Inter({ subsets: ["latin"] })
-
 
 export default function RootLayout({
   children,
@@ -56,7 +57,10 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} antialiased`}>
         <Providers>
-          <div className="min-h-screen bg-background text-foreground">{children}</div>
+          <div className="min-h-screen bg-background text-foreground">
+            {children}
+            <FloatingAIChat />
+          </div>
           <Toaster />
         </Providers>
       </body>
