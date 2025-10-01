@@ -30,6 +30,7 @@ export function Search() {
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [searchLoading, setSearchLoading] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   // Handle user search
   const handleUserSearch = async (query: string) => {
@@ -74,21 +75,35 @@ export function Search() {
 
   return (
     <div className="relative">
-      <form onSubmit={handleSearch} className="flex items-center">
-        <div className="relative">
-          <Input
-            type="text"
-            placeholder="Search users..."
-            className="pl-10 pr-4 w-40 focus:w-60 transition-all duration-300"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        </div>
-        <Button type="submit" variant="ghost" size="icon" className="ml-1">
+      {isExpanded ? (
+        <form onSubmit={handleSearch} className="flex items-center">
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="Search users..."
+              className="pl-10 pr-4 w-40 focus:w-60 transition-all duration-300"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onBlur={() => {
+                if (!searchQuery) {
+                  setIsExpanded(false)
+                }
+              }}
+              autoFocus
+            />
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          </div>
+        </form>
+      ) : (
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => setIsExpanded(true)}
+          className="rounded-full"
+        >
           <SearchIcon className="h-4 w-4" />
         </Button>
-      </form>
+      )}
 
       {isOpen && searchResults.length > 0 && (
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
