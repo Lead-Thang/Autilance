@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
   )
 
   // Refresh session if expired - required for Server Components
-  await supabase.auth.getSession()
+  await supabase.auth.getUser()
 
   return response
 }
