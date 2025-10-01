@@ -243,8 +243,8 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="/dashboard" className="flex items-center gap-2">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <img src="/logo.png" className="size-6" />
+                <div className="flex aspect-square bg-gradient-to-br from-blue-600 to-purple-700 size-10 items-center justify-center rounded-lg text-primary-foreground">
+                  <img src="/logo.png" className="size-6 items-center justify-between"/>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                   <span className="truncate font-semibold">Autilance</span>
@@ -263,7 +263,7 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border/50 bg-background/50">
-        <div className="flex items-center justify-between p-2">
+        <div className="flex items-start justify-start p-2 pl-0">
           <NavUser user={user} />
           <div className="group-data-[collapsible=icon]:hidden">
             <ThemeToggle />

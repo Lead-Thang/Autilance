@@ -23,7 +23,7 @@ import {
   Star,
 } from "lucide-react"
 import dynamic from "next/dynamic"
-import { JobFilters } from "@/components/job-filters"
+import { JobFilters, FilterButton } from "@/components/job-filters"
 import { calculateClientFitScore, getFitReasons, getRiskFactors } from "@/lib/client-fit-score"
 
 // Dynamically import JobMap to prevent SSR issues with Leaflet
@@ -363,22 +363,27 @@ export default function JobDescriptionsPage() {
           <h1 className="text-3xl font-bold">Jobs</h1>
           <p className="text-gray-600">Browse company requirements or create your own JD</p>
         </div>
-        <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
-          <Plus className="w-4 h-4 mr-2" />
-          Create JD
-        </Button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[300px]">
+              <TabsList className="grid grid-cols-4 h-9 p-1 bg-muted rounded-lg">
+                <TabsTrigger value="browse" className="h-7 text-xs">Browse</TabsTrigger>
+                <TabsTrigger value="my-jds" className="h-7 text-xs">My Jobs</TabsTrigger>
+                <TabsTrigger value="verifications" className="h-7 text-xs">Verifications</TabsTrigger>
+                <TabsTrigger value="create" className="h-7 text-xs">Create</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            {activeTab === "browse" && <FilterButton onFilterChange={handleFilterChange} />}
+          </div>
+          <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
+            <Plus className="w-4 h-4 mr-2" />
+            Create JD
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="browse">Browse Jobs</TabsTrigger>
-          <TabsTrigger value="my-jds">My Jobs</TabsTrigger>
-          <TabsTrigger value="verifications">My Verifications</TabsTrigger>
-          <TabsTrigger value="create">Create Job</TabsTrigger>
-        </TabsList>
-
         <TabsContent value="browse" className="space-y-4">
-          <JobFilters onFilterChange={handleFilterChange} />
           
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Job Listings - Left side */}
