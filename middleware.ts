@@ -44,9 +44,19 @@ export async function middleware(request: NextRequest) {
 
   // Refresh session if expired - required for Server Components
   try {
-    await supabase.auth.getUser()
+    // Version-agnostic approach: try to call a common method if it exists
+    const authAny: any = (supabase as any).auth
+    if (authAny) {
+      if (typeof authAny.getUser === 'function') {
+        await authAny.getUser()
+      } else if (typeof authAny.refreshSession === 'function') {
+        await authAny.refreshSession()
+      }
+      // If neither method exists, skip refresh gracefully
+    }
   } catch (e) {
     // Optional: handle error (log, clear cookies, etc.)
+    console.error('Supabase auth refresh failed:', e)
   }
 
   return response
