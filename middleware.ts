@@ -44,15 +44,8 @@ export async function middleware(request: NextRequest) {
 
   // Refresh session if expired - required for Server Components
   try {
-    // Use the appropriate method based on Supabase version
-    const auth = supabase.auth;
-    // Prefer getUser for newer versions; fallback to refreshSession if needed
-    if (typeof auth.getUser === 'function') {
-      await auth.getUser();
-    } else if (typeof auth.refreshSession === 'function') {
-      await auth.refreshSession();
-    }
-    // If neither exists, no action is taken
+    // Get the current session
+    await supabase.auth.getSession();
   } catch (e) {
     console.error('Supabase auth refresh failed:', e);
     // Optionally, clear cookies or redirect if critical
