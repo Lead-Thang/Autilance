@@ -1,9 +1,13 @@
-import { type NextRequest } from 'next/server';
-import { updateSession } from '@/lib/supabase/updateSession';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  // Use the existing updateSession function which properly handles session management
-  const { response } = await updateSession(request);
+  // Create a minimal response without importing any external modules
+  const response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+  
   return response;
 }
 
