@@ -5,6 +5,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
  * updateSession
  *
  * This function handles Supabase session updates in middleware running in Edge Runtime.
+ * It avoids using Node.js specific APIs to ensure compatibility.
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
@@ -33,7 +34,7 @@ export async function updateSession(request: NextRequest) {
   )
 
   // Refresh session to ensure current user data without using Node.js specific APIs
-  await supabase.auth.getSession()
+  await supabase.auth.getUser()
 
   return { supabase, response }
 }
