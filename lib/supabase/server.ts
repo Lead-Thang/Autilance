@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { type Database } from '@/types/supabase'; // Ensure types are generated
 
 export async function createClient() {
-  const cookieStore = await cookies(); // In Next.js 14+, cookies() returns a Promise
+  const cookieStore = await cookies(); // In Next.js 14 App Router, cookies() returns a Promise in server components
 
   // Check if environment variables are set
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

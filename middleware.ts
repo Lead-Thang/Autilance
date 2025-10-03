@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/updateSession'; // Adjust path based on your project structure
 
 export async function middleware(request: NextRequest) {
@@ -8,8 +8,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  runtime: 'nodejs', // Explicitly set to Node.js Runtime to resolve Edge incompatibilities
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
-}
+};
