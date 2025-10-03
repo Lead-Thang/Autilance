@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
+import { type SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * updateSession
@@ -14,28 +15,21 @@ export async function updateSession(request: NextRequest) {
     },
   })
 
-  // Create a Supabase client for the middleware
-  const supabase = createServerClient(
+  // Create a Supabase client for the middleware that's compatible with Edge Runtime
+  const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          response.cookies.set({ name, value, ...options })
-        },
-        remove(name: string, options: CookieOptions) {
-          response.cookies.set({ name, value: '', ...options })
-        },
-      },
-      // Disable features that use Node.js specific APIs in Edge Runtime
       auth: {
         detectSessionInUrl: false,
         flowType: 'pkce',
         autoRefreshToken: false,
         persistSession: false,
+      },
+      global: {
+        headers: {
+          'x-client-info': 'middleware',
+        },
       },
     }
   )
