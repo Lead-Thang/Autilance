@@ -30,6 +30,13 @@ export async function updateSession(request: NextRequest) {
           response.cookies.set({ name, value: '', ...options })
         },
       },
+      // Disable features that use Node.js specific APIs in Edge Runtime
+      auth: {
+        detectSessionInUrl: false,
+        flowType: 'pkce',
+        autoRefreshToken: false,
+        persistSession: false,
+      },
     }
   )
 
