@@ -1,17 +1,17 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 /**
  * updateSession
  *
- * This function handles Supabase session updates in middleware running in Node.js runtime.
+ * This function handles Supabase session updates in middleware running in Edge Runtime.
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
-  });
+  })
 
   // Create a Supabase client for the middleware
   const supabase = createServerClient(
@@ -20,20 +20,20 @@ export async function updateSession(request: NextRequest) {
     {
       cookies: {
         get(name: string) {
-          return request.cookies.get(name)?.value;
+          return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
-          response.cookies.set({ name, value, ...options });
+          response.cookies.set({ name, value, ...options })
         },
         remove(name: string, options: CookieOptions) {
-          response.cookies.set({ name, value: '', ...options });
+          response.cookies.set({ name, value: '', ...options })
         },
       },
     }
-  );
+  )
 
-  // Get user session to validate it
-  await supabase.auth.getUser();
+  // Refresh session to ensure current user data without using Node.js specific APIs
+  await supabase.auth.getSession()
 
-  return { supabase, response };
+  return { supabase, response }
 }
