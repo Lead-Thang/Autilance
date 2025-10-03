@@ -1,14 +1,8 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function middleware(request: NextRequest) {
-  // Create a minimal response without importing any external modules
-  const response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
-  
-  return response;
+export async function middleware() {
+  // Create a minimal response
+  return NextResponse.next();
 }
 
 export const config = {
