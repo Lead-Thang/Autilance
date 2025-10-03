@@ -1,5 +1,5 @@
 import { type NextRequest } from 'next/server';
-import { updateSession } from '@/lib/supabase/updateSession'; // Adjust path based on your project structure
+import { updateSession } from '@/lib/supabase/updateSession';
 
 export async function middleware(request: NextRequest) {
   // Use the existing updateSession function which properly handles session management
