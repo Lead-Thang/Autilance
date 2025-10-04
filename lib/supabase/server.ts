@@ -10,7 +10,29 @@ export async function createClient() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables');
+    console.warn('Missing Supabase environment variables');
+    // Return a mock client that won't work but won't crash
+    return createServerClient<Database>('', '', {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value, ...options });
+          } catch (error) {
+            console.warn('Failed to set cookie in server component:', error);
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value: '', ...options });
+          } catch (error) {
+            console.warn('Failed to remove cookie in server component:', error);
+          }
+        },
+      },
+    });
   }
 
   const supabase = createServerClient<Database>(
@@ -41,8 +63,12 @@ export async function createClient() {
     }
   );
 
-  // Optionally refresh session to ensure current user data
-  await supabase.auth.getUser();
+  try {
+    // Optionally refresh session to ensure current user data
+    await supabase.auth.getUser();
+  } catch (error) {
+    console.warn('Error getting user:', error);
+  }
 
   return supabase;
 }

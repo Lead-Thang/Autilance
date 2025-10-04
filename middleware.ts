@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 
 export async function middleware() {
-  // Create a minimal response
-  return NextResponse.next();
+  try {
+    // Create a minimal response
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Middleware error:', error);
+    // Return a basic response even if there's an error
+    return NextResponse.next();
+  }
 }
 
 export const config = {
