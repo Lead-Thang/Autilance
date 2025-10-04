@@ -8,8 +8,8 @@ export function createClient() {
   if (!supabaseUrl || !supabaseAnonKey) {
     console.warn('Missing Supabase environment variables')
     // Return a client that won't work but won't crash
-    return createBrowserClient('', '')
+    return createBrowserClient('', '', {})
   }
 
-  return createBrowserClient(supabaseUrl, supabaseAnonKey)
+  return createBrowserClient(supabaseUrl, supabaseAnonKey, {})
 }

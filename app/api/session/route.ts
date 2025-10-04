@@ -10,15 +10,16 @@ export async function GET() {
       return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 })
     }
 
-    // getSession returns { data, error }
-    const { data, error } = await supabase.auth.getSession()
+    // getSession is not available in the standard Supabase client
+    // We'll use getUser instead which returns user information
+    const { data: { user }, error } = await supabase.auth.getUser()
 
     if (error) {
-      console.error('Error getting session:', error)
+      console.error('Error getting user:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ session: data.session ?? null })
+    return NextResponse.json({ user: user ?? null })
   } catch (err) {
     console.error('Unexpected error in session route:', err)
     return NextResponse.json({ error: 'Unexpected server error' }, { status: 500 })
