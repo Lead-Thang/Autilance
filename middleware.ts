@@ -1,14 +1,9 @@
 import { NextResponse } from 'next/server';
 
 export async function middleware() {
-  try {
-    // Create a minimal response
-    return NextResponse.next();
-  } catch (error) {
-    console.error('Middleware error:', error);
-    // Return a basic response even if there's an error
-    return NextResponse.next();
-  }
+  // Only run the most basic middleware functionality
+  // Avoid any imports that might reference Node.js globals
+  return NextResponse.next();
 }
 
 export const config = {

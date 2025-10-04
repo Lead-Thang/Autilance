@@ -40,3 +40,9 @@ prisma/*.db-journal
 # Git
 .git/
 *.md
+
+# Setup and utility scripts
+setup-env.js
+test-prisma.js
+test-prisma.ts
+install.sh

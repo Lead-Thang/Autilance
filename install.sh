@@ -196,9 +196,11 @@ get_version() {
 # Download and install the CLI
 install_cli() {
     # Allow override with environment variable for local development
-    base_url="https://cli.coderabbit.ai/releases"
+    base_url="${CODERABBIT_DOWNLOAD_URL:-https://cli.coderabbit.ai/releases}"
     version=$(get_version "$base_url")
     download_url="${base_url}/${version}/coderabbit-${OS}-${ARCH}.zip"
+    …
+}
     install_path="$BIN_DIR/coderabbit"
 
     # Create secure temporary directory with restrictive permissions
