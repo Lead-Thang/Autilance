@@ -1,6 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "prisma generate && pnpm run build",
+  "buildCommand": "npx prisma generate && pnpm run build",
   "devCommand": "pnpm run dev",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "functions": {
+    "app/api/**/*": {
+      "maxDuration": 60
+    }
+  }
 }
