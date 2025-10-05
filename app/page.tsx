@@ -288,18 +288,41 @@ export default function LandingPage() {
 
             <div className="mb-8 h-32 flex items-center justify-center">
               <div className="transition-opacity duration-1000 ease-in-out">
-                <h1 className="text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  {phrases[currentPhrase].primary}
+                <h1 className="text-5xl lg:text-6xl font-bold mb-4">
+                  {currentPhrase === 0 ? (
+                    <>
+                      <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Earn</span>
+                      <span className="text-white"> remotely & locally</span>
+                    </>
+                  ) : currentPhrase === 1 ? (
+                    <>
+                      <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Buy & Sell</span>
+                      <span className="text-white"> products</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Find</span>
+                      <span className="text-white"> yourself a </span>
+                      <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Co-founder</span>
+                    </>
+                  )}
                 </h1>
-                <p className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  {phrases[currentPhrase].secondary}
+                <p className="text-5xl lg:text-6xl font-bold">
+                  {currentPhrase === 0 ? (
+                    <span className="text-white">with Autilance!</span>
+                  ) : currentPhrase === 1 ? (
+                    <span className="text-white">physical or digital</span>
+                  ) : (
+                    <>
+                      <span className="text-white">as ambitious as you are</span>
+                    </>
+                  )}
                 </p>
               </div>
             </div>
 
-            <p className="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-              Create AI-powered stores, chat with multiple AI assistants, and automate your business processes. The
-              complete platform for modern entrepreneurs.
+            <p className="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-12 mx-auto leading-relaxed readable-text">
+               Revolutionize the way you earn! Find jobs or recruit partners, be a freelancer or a client, buy & sell products,...
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">

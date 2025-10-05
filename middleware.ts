@@ -1,13 +1,25 @@
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export async function middleware() {
-  // Only run the most basic middleware functionality
-  // Avoid any imports that might reference Node.js globals
-  return NextResponse.next();
+export function middleware(request: NextRequest) {
+  try {
+    // Simple middleware with no external dependencies
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Middleware error:', error);
+    return NextResponse.next();
+  }
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };

@@ -69,6 +69,11 @@
     --emerald: 160 84% 39%;
     --emerald-foreground: 155 84% 74%;
   }
+
+  /* Add scroll padding for fixed navbar */
+  html {
+    scroll-padding-top: 4rem;
+  }
 }
 
 @layer base {
@@ -287,3 +292,8 @@
   .user-marker:hover {
     z-index: 10;
   }
+
+/* Character clamp for optimal readability */
+.readable-text {
+  max-width: clamp(45ch, 50%, 75ch);
+}

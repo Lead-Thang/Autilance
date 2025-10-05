@@ -30,13 +30,6 @@ const nextConfig = {
     '@supabase/supabase-js',
     '@supabase/ssr'
   ],
-  experimental: {
-    serverComponentsExternalPackages: [
-      '@prisma/client',
-      '@supabase/supabase-js',
-      '@supabase/ssr'
-    ]
-  }
 }
 
 export default nextConfig
