@@ -104,6 +104,40 @@ This project uses environment variables for configuration. All sensitive informa
 - `/prisma`: Database schema and migrations
 - `/public`: Static assets
 
+## Deployment
+
+### Environment Variables
+
+Before deploying, make sure to set the following environment variables:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+UPLOADTHING_SECRET=your_uploadthing_secret
+UPLOADTHING_APP_ID=your_uploadthing_app_id
+NEXT_PUBLIC_IPGEOLOCATION_API_KEY=your_ipgeolocation_api_key
+NEXTAUTH_SECRET=your_nextauth_secret
+NEXTAUTH_URL=your_domain_url
+DATABASE_URL=your_database_url
+```
+
+### Vercel Deployment
+
+1. Push your code to a GitHub repository
+2. Connect your repository to Vercel
+3. Add the required environment variables in the Vercel project settings
+4. Set the build command to: `npx prisma generate && pnpm run build`
+5. Set the output directory to: `.next`
+6. Deploy!
+
+### Local Development
+
+1. Clone the repository
+2. Install dependencies with `pnpm install`
+3. Copy `.env.example` to `.env.local` and fill in your values
+4. Run `pnpm dev` to start the development server
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
