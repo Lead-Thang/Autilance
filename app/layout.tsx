@@ -5,6 +5,7 @@ import { Toaster } from "../components/ui/toaster"
 import { Providers } from "../components/Providers"
 import { FloatingAIChat } from "../components/floating-ai-chat"
 import { metadata, viewport } from "./metadata"
+import { Analytics } from "@vercel/analytics/react"
 
 export { metadata, viewport }
 
@@ -30,6 +31,7 @@ export default function RootLayout({
           </div>
           <Toaster />
         </Providers>
+        <Analytics />
       </body>
     </html>
   )

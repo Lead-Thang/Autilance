@@ -1,4 +1,23 @@
-import { fileURLToPath } from 'url';
+import withPWA from 'next-pwa';
+
+// Configure PWA with proper settings for Next.js 15
+const withPWAConfig = withPWA({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  skipWaiting: true,
+  cacheOnFrontEndNav: true,
+  cacheStartUrl: true,
+  // Fix for build issues with Next.js 15
+  buildExcludes: ['app-build-manifest.json'],
+  // Add additional PWA assets
+  additionalManifestEntries: [
+    {
+      url: '/api/stores',
+      revision: '1'
+    }
+  ],
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -32,4 +51,6 @@ const nextConfig = {
   ],
 }
 
-export default nextConfig
+const config = withPWAConfig(nextConfig);
+
+export default config;

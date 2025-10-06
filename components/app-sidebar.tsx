@@ -129,6 +129,11 @@ const data = {
       icon: Store,
     },
     {
+      title: "Dropshipping",
+      url: "/dashboard/dropshipping",
+      icon: Store,
+    },
+    {
       title: "Certifications",
       url: "/dashboard/certifications",
       icon: Trophy,
@@ -244,7 +249,7 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <a href="/dashboard" className="flex items-center gap-2">
                 <div className="flex aspect-square bg-gradient-to-br from-blue-600 to-purple-700 size-10 items-center justify-center rounded-lg text-primary-foreground">
-                  <img src="/logo.png" className="size-6 items-center justify-between"/>
+                  <img src="/logo.png" className="size-6"/>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                   <span className="truncate font-semibold">Autilance</span>

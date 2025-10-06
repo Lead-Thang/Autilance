@@ -7,7 +7,7 @@
     "codingcopilot.modelResponseLanguage": "English",
     "codingcopilot.modelDocumentLanguage": "English",
     "Codegeex.Chat.LanguagePreference": "English",
-    "traycer.enableAutoAnalysis": true,
+    "traycer.enableAutoAnalysis": false,
     "Lingma.localMachineModel": true,
     "Lingma.aI Chat.mcpToolsInAgentMode": true
 }
