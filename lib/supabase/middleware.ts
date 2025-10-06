@@ -56,12 +56,12 @@ export async function updateSession(request: NextRequest) {
 
   // Refresh session if expired - required for Server Components
   // We handle the potential error to avoid breaking the middleware for unauthenticated users
-  try {
-    await supabase.auth.getUser()
-  } catch (error) {
-    // If there's no session, we continue with the response
-    console.warn('No authenticated session found in middleware:', error)
-  }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // User will be null if no session exists, which is fine
+  // This call automatically refreshes the session if expired
 
   return { supabase, response }
 }
