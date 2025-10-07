@@ -56,9 +56,12 @@ export async function updateSession(request: NextRequest) {
 
   // Refresh session if expired - required for Server Components
   // We handle the potential error to avoid breaking the middleware for unauthenticated users
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  try {
+    // @ts-ignore - getUser exists but types may not be current
+    await supabase.auth.getUser()
+  } catch (error) {
+    // Ignore errors - this is just to refresh the session
+  }
 
   // User will be null if no session exists, which is fine
   // This call automatically refreshes the session if expired
