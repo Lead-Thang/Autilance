@@ -107,14 +107,11 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: 1.1.6
         version: 1.1.6(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@supabase/auth-helpers-nextjs':
-        specifier: ^0.10.0
-        version: 0.10.0(@supabase/supabase-js@2.49.8)
       '@supabase/ssr':
-        specifier: ^0.7.0
-        version: 0.7.0(@supabase/supabase-js@2.49.8)
+        specifier: ^0.5.2
+        version: 0.5.2(@supabase/supabase-js@2.49.8)
       '@supabase/supabase-js':
-        specifier: 2.49.8
+        specifier: ^2.49.8
         version: 2.49.8
       '@tanstack/react-query':
         specifier: ^5.82.0
@@ -1744,18 +1741,6 @@ packages:
     peerDependencies:
       rollup: ^1.20.0||^2.0.0
 
-  '@supabase/auth-helpers-nextjs@0.10.0':
-    resolution: {integrity: sha512-2dfOGsM4yZt0oS4TPiE7bD4vf7EVz7NRz/IJrV6vLg0GP7sMUx8wndv2euLGq4BjN9lUCpu6DG/uCC8j+ylwPg==}
-    deprecated: This package is now deprecated - please use the @supabase/ssr package instead.
-    peerDependencies:
-      '@supabase/supabase-js': ^2.39.8
-
-  '@supabase/auth-helpers-shared@0.7.0':
-    resolution: {integrity: sha512-FBFf2ei2R7QC+B/5wWkthMha8Ca2bWHAndN+syfuEUUfufv4mLcAgBCcgNg5nJR8L0gZfyuaxgubtOc9aW3Cpg==}
-    deprecated: This package is now deprecated - please use the @supabase/ssr package instead.
-    peerDependencies:
-      '@supabase/supabase-js': ^2.39.8
-
   '@supabase/auth-js@2.69.1':
     resolution: {integrity: sha512-FILtt5WjCNzmReeRLq5wRs3iShwmnWgBvxHfqapC/VoljJl+W8hDAyFmf1NVw3zH+ZjZ05AKxiKxVeb0HNWRMQ==}
 
@@ -1772,8 +1757,8 @@ packages:
   '@supabase/realtime-js@2.11.2':
     resolution: {integrity: sha512-u/XeuL2Y0QEhXSoIPZZwR6wMXgB+RQbJzG9VErA3VghVt7uRfSVsjeqd7m5GhX3JR6dM/WRmLbVR8URpDWG4+w==}
 
-  '@supabase/ssr@0.7.0':
-    resolution: {integrity: sha512-G65t5EhLSJ5c8hTCcXifSL9Q/ZRXvqgXeNo+d3P56f4U1IxwTqjB64UfmfixvmMcjuxnq2yGqEWVJqUcO+AzAg==}
+  '@supabase/ssr@0.5.2':
+    resolution: {integrity: sha512-n3plRhr2Bs8Xun1o4S3k1CDv17iH5QY9YcoEvXX3bxV1/5XSasA0mNXYycFmADIdtdE6BG9MRjP5CGIs8qxC8A==}
     peerDependencies:
       '@supabase/supabase-js': ^2.43.4
 
@@ -1799,6 +1784,9 @@ packages:
     resolution: {integrity: sha512-mnk8/ofKEthFeMdhV1dV8YXRf+9HqvXAcciXkoo755d/ocfWq7N/Y9jGOzS3h7ZW9dDGwSIhs3/HANWUBsyqYg==}
     peerDependencies:
       react: ^18 || ^19
+
+  '@types/cookie@0.6.0':
+    resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
 
   '@types/d3-array@3.2.1':
     resolution: {integrity: sha512-Y2Jn2idRrLzUfAKV2LyRImR+y4oa2AntrgID95SHJxuMUrkNXmanDSed71sRNZysveJVt1hLLemQZIady0FpEg==}
@@ -2261,10 +2249,6 @@ packages:
   cookie@0.7.2:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
-
-  cookie@1.0.2:
-    resolution: {integrity: sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==}
-    engines: {node: '>=18'}
 
   core-js-compat@3.45.1:
     resolution: {integrity: sha512-tqTt5T4PzsMIZ430XGviK4vzYSoeNJ6CXODi6c/voxOT6IZqBht5/EKaSNnYiEjjRYxjVz7DQIsOsY0XNi8PIA==}
@@ -3520,9 +3504,6 @@ packages:
 
   serialize-javascript@6.0.2:
     resolution: {integrity: sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g==}
-
-  set-cookie-parser@2.7.1:
-    resolution: {integrity: sha512-IOc8uWeOZgnb3ptbCURJWNjWUPcO3ZnTTdzsurqERrP6nPyv+paC55vJM0LpOlT2ne+Ix+9+CRG1MNLlyZ4GjQ==}
 
   set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
@@ -5719,17 +5700,6 @@ snapshots:
       picomatch: 2.3.1
       rollup: 2.79.2
 
-  '@supabase/auth-helpers-nextjs@0.10.0(@supabase/supabase-js@2.49.8)':
-    dependencies:
-      '@supabase/auth-helpers-shared': 0.7.0(@supabase/supabase-js@2.49.8)
-      '@supabase/supabase-js': 2.49.8
-      set-cookie-parser: 2.7.1
-
-  '@supabase/auth-helpers-shared@0.7.0(@supabase/supabase-js@2.49.8)':
-    dependencies:
-      '@supabase/supabase-js': 2.49.8
-      jose: 4.15.9
-
   '@supabase/auth-js@2.69.1':
     dependencies:
       '@supabase/node-fetch': 2.6.15
@@ -5756,10 +5726,11 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@supabase/ssr@0.7.0(@supabase/supabase-js@2.49.8)':
+  '@supabase/ssr@0.5.2(@supabase/supabase-js@2.49.8)':
     dependencies:
       '@supabase/supabase-js': 2.49.8
-      cookie: 1.0.2
+      '@types/cookie': 0.6.0
+      cookie: 0.7.2
 
   '@supabase/storage-js@2.7.1':
     dependencies:
@@ -5796,6 +5767,8 @@ snapshots:
     dependencies:
       '@tanstack/query-core': 5.82.0
       react: 19.1.0
+
+  '@types/cookie@0.6.0': {}
 
   '@types/d3-array@3.2.1': {}
 
@@ -6269,8 +6242,6 @@ snapshots:
   convert-source-map@2.0.0: {}
 
   cookie@0.7.2: {}
-
-  cookie@1.0.2: {}
 
   core-js-compat@3.45.1:
     dependencies:
@@ -7558,8 +7529,6 @@ snapshots:
   serialize-javascript@6.0.2:
     dependencies:
       randombytes: 2.1.0
-
-  set-cookie-parser@2.7.1: {}
 
   set-function-length@1.2.2:
     dependencies:
