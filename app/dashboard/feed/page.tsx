@@ -58,7 +58,15 @@ export default function FeedPage() {
     try {
       const response = await fetch('/api/feed/posts')
       const data = await response.json()
-      
+
+      // Check if the response is an error
+      if (!response.ok || !Array.isArray(data)) {
+        console.error("Error fetching posts:", data)
+        setPosts([])
+        setLoading(false)
+        return
+      }
+
       // Transform the data to match our interface
       const transformedPosts = data.map((post: any) => ({
         id: post.id,
@@ -74,11 +82,12 @@ export default function FeedPage() {
         },
         liked: false // We would need to track this separately in a real app
       }))
-      
+
       setPosts(transformedPosts)
       setLoading(false)
     } catch (error) {
       console.error("Error fetching posts:", error)
+      setPosts([])
       setLoading(false)
     }
   }

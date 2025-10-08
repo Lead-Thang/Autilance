@@ -12,9 +12,35 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1")
     const skip = (page - 1) * limit
 
-    const where = {
+    // Filter parameters
+    const jobType = searchParams.get("jobType") // 'full-time', 'freelance', 'contract', 'part-time'
+    const budgetType = searchParams.get("budgetType") // 'fixed', 'hourly'
+    const isRemote = searchParams.get("isRemote")
+    const category = searchParams.get("category")
+    const industry = searchParams.get("industry")
+    const clientVerified = searchParams.get("clientVerified")
+    const minRating = searchParams.get("minRating")
+    const search = searchParams.get("search")
+
+    const where: any = {
       isPublic: true,
       ...(companyId ? { companyId } : {}),
+      ...(jobType ? { jobType } : {}),
+      ...(budgetType ? { budgetType } : {}),
+      ...(isRemote !== null && isRemote !== undefined ? { isRemote: isRemote === "true" } : {}),
+      ...(category ? { category } : {}),
+      ...(industry ? { industry } : {}),
+      ...(clientVerified ? { clientVerified: clientVerified === "true" } : {}),
+      ...(minRating ? { clientRating: { gte: parseFloat(minRating) } } : {}),
+    }
+
+    // Search functionality
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+        { company: { name: { contains: search, mode: "insensitive" } } },
+      ]
     }
 
     const [jobDescriptions, total] = await Promise.all([
@@ -74,6 +100,42 @@ export async function POST(req: NextRequest) {
       title: z.string().min(3, "Title must be at least 3 characters"),
       description: z.string().optional(),
       isPublic: z.boolean().default(true),
+
+      // Job Type & Classification
+      jobType: z.enum(["full-time", "freelance", "contract", "part-time"]).default("full-time"),
+      contractType: z.enum(["fixed-price", "hourly", "retainer"]).optional(),
+      category: z.string().optional(),
+      industry: z.string().optional(),
+
+      // Location & Remote
+      isRemote: z.boolean().default(true),
+      location: z.string().optional(),
+      latitude: z.number().optional(),
+      longitude: z.number().optional(),
+      timezone: z.string().optional(),
+
+      // Budget & Compensation
+      budgetType: z.enum(["fixed", "hourly"]).optional(),
+      budgetMinCents: z.number().int().positive().optional(),
+      budgetMaxCents: z.number().int().positive().optional(),
+      hourlyRateMin: z.number().int().positive().optional(),
+      hourlyRateMax: z.number().int().positive().optional(),
+      currency: z.string().default("USD"),
+
+      // Client Quality Metrics
+      clientVerified: z.boolean().default(false),
+      clientSpend: z.enum(["0-1k", "1-5k", "5-50k", "50k+"]).optional(),
+      clientHireRate: z.number().int().min(0).max(100).optional(),
+      clientRating: z.number().min(0).max(5).optional(),
+
+      // Risk Flags
+      riskFlags: z.array(z.string()).optional(),
+
+      // Project Details
+      projectType: z.enum(["new-build", "maintenance", "research", "consulting"]).optional(),
+      estimatedDuration: z.string().optional(),
+      deadline: z.string().datetime().optional(),
+
       requiredSkills: z.array(
         z.object({
           name: z.string(),
@@ -129,6 +191,42 @@ export async function POST(req: NextRequest) {
         title: validatedData.title,
         description: validatedData.description,
         isPublic: validatedData.isPublic,
+
+        // Job Type & Classification
+        jobType: validatedData.jobType,
+        contractType: validatedData.contractType,
+        category: validatedData.category,
+        industry: validatedData.industry,
+
+        // Location & Remote
+        isRemote: validatedData.isRemote,
+        location: validatedData.location,
+        latitude: validatedData.latitude,
+        longitude: validatedData.longitude,
+        timezone: validatedData.timezone,
+
+        // Budget & Compensation
+        budgetType: validatedData.budgetType,
+        budgetMinCents: validatedData.budgetMinCents,
+        budgetMaxCents: validatedData.budgetMaxCents,
+        hourlyRateMin: validatedData.hourlyRateMin,
+        hourlyRateMax: validatedData.hourlyRateMax,
+        currency: validatedData.currency,
+
+        // Client Quality Metrics
+        clientVerified: validatedData.clientVerified,
+        clientSpend: validatedData.clientSpend,
+        clientHireRate: validatedData.clientHireRate,
+        clientRating: validatedData.clientRating,
+
+        // Risk Flags
+        riskFlags: validatedData.riskFlags || [],
+
+        // Project Details
+        projectType: validatedData.projectType,
+        estimatedDuration: validatedData.estimatedDuration,
+        deadline: validatedData.deadline ? new Date(validatedData.deadline) : undefined,
+
         requiredSkills: {
           create: validatedData.requiredSkills || [],
         },

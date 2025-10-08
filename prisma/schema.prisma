@@ -49,6 +49,14 @@ model User {
   messagesSent  Message[]      @relation("Sender")
   messagesReceived Message[]   @relation("Recipient")
   disputesFiled Dispute[]      @relation("DisputeFiledBy")
+
+  // Community relations
+  topicsCreated    Topic[]          @relation("TopicAuthor")
+  topicReplies     TopicReply[]     @relation("TopicReplyAuthor")
+  topicLikes       TopicLike[]      @relation("TopicLikes")
+  topicReplyLikes  TopicReplyLike[] @relation("TopicReplyLikes")
+  eventsOrganized  CommunityEvent[] @relation("EventOrganizer")
+  eventAttendances EventAttendee[]  @relation("EventAttendees")
 }
 
 // Account model for OAuth providers
@@ -106,6 +114,42 @@ model JobDescription {
   title       String
   description String?  @db.Text
   isPublic    Boolean  @default(true)
+
+  // Job Type & Classification
+  jobType     String   @default("full-time") // 'full-time', 'freelance', 'contract', 'part-time'
+  contractType String? // 'fixed-price', 'hourly', 'retainer'
+  category    String?  // 'engineering', 'design', 'marketing', etc.
+  industry    String?  // 'saas', 'ecommerce', 'fintech', etc.
+
+  // Location & Remote
+  isRemote    Boolean  @default(true)
+  location    String?
+  latitude    Float?
+  longitude   Float?
+  timezone    String?
+
+  // Budget & Compensation
+  budgetType  String?  // 'fixed', 'hourly'
+  budgetMinCents Int?
+  budgetMaxCents Int?
+  hourlyRateMin  Int?
+  hourlyRateMax  Int?
+  currency    String   @default("USD")
+
+  // Client Quality Metrics
+  clientVerified Boolean @default(false)
+  clientSpend    String? // '0-1k', '1-5k', '5-50k', '50k+'
+  clientHireRate Int?    // Percentage 0-100
+  clientRating   Float?  // 0-5 stars
+
+  // Risk Flags
+  riskFlags   String[] // ['unpaid-test', 'scope-creep', 'extreme-nda', etc.]
+
+  // Project Details
+  projectType String?  // 'new-build', 'maintenance', 'research', 'consulting'
+  estimatedDuration String? // 'days', 'weeks', 'months'
+  deadline    DateTime?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -637,4 +681,123 @@ model Dispute {
   // Relations
   contract Contract @relation(fields: [contractId], references: [id])
   filedBy  User     @relation("DisputeFiledBy", fields: [filedById], references: [id])
+}
+
+// ================================
+// Community Hub Models
+// ================================
+
+// Forum Category model
+model ForumCategory {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  icon        String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  topics Topic[]
+}
+
+// Forum Topic model
+model Topic {
+  id          String   @id @default(cuid())
+  categoryId  String
+  authorId    String
+  title       String
+  content     String   @db.Text
+  isPinned    Boolean  @default(false)
+  isLocked    Boolean  @default(false)
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  category ForumCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  author   User          @relation("TopicAuthor", fields: [authorId], references: [id])
+  replies  TopicReply[]
+  likes    TopicLike[]
+}
+
+// Forum Topic Reply model
+model TopicReply {
+  id        String   @id @default(cuid())
+  topicId   String
+  authorId  String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  topic  Topic           @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  author User            @relation("TopicReplyAuthor", fields: [authorId], references: [id])
+  likes  TopicReplyLike[]
+}
+
+// Topic Like model
+model TopicLike {
+  id        String   @id @default(cuid())
+  topicId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  user  User  @relation("TopicLikes", fields: [userId], references: [id])
+
+  @@unique([topicId, userId])
+}
+
+// Topic Reply Like model
+model TopicReplyLike {
+  id        String   @id @default(cuid())
+  replyId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  reply TopicReply @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  user  User       @relation("TopicReplyLikes", fields: [userId], references: [id])
+
+  @@unique([replyId, userId])
+}
+
+// Community Event model
+model CommunityEvent {
+  id          String    @id @default(cuid())
+  organizerId String
+  title       String
+  description String    @db.Text
+  eventType   String    // 'webinar', 'workshop', 'meetup', 'networking'
+  startTime   DateTime
+  endTime     DateTime
+  timezone    String
+  isVirtual   Boolean   @default(true)
+  location    String?
+  meetingLink String?
+  maxAttendees Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  organizer  User                @relation("EventOrganizer", fields: [organizerId], references: [id])
+  attendees  EventAttendee[]
+}
+
+// Event Attendee model
+model EventAttendee {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  status    String   @default("registered") // 'registered', 'attended', 'cancelled'
+  joinedAt  DateTime @default(now())
+
+  // Relations
+  event CommunityEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User           @relation("EventAttendees", fields: [userId], references: [id])
+
+  @@unique([eventId, userId])
 }

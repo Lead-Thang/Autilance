@@ -160,6 +160,18 @@ export function JobFilters({ onFilterChange }: JobFiltersProps) {
     <div className="space-y-4">
       {/* Applied Filters Display */}
       <div className="flex flex-wrap gap-2">
+        {filters.jobType && (
+          <Badge variant="secondary">
+            {filters.jobType === "full-time" ? "Full-Time" :
+             filters.jobType === "freelance" ? "Freelance" :
+             filters.jobType === "contract" ? "Contract" : "Part-Time"}
+          </Badge>
+        )}
+        {filters.isRemote !== undefined && (
+          <Badge variant="secondary">
+            {filters.isRemote ? "Remote Only" : "On-site"}
+          </Badge>
+        )}
         {filters.verifiedPayment && (
           <Badge variant="secondary">Verified Payment</Badge>
         )}
@@ -205,7 +217,11 @@ export function FilterButton({ onFilterChange }: { onFilterChange?: (filters: an
   const [filters, setFilters] = useState({
     // Search
     search: "",
-    
+
+    // Job Type & Classification
+    jobType: "", // 'full-time', 'freelance', 'contract', 'part-time'
+    isRemote: undefined as boolean | undefined,
+
     // Client Quality and Reliability
     verifiedPayment: false,
     spendTier: "",
@@ -213,39 +229,39 @@ export function FilterButton({ onFilterChange }: { onFilterChange?: (filters: an
     minRating: 0,
     disputeRate: 0,
     rehireRate: 0,
-    
+
     // Budget and Scope Reality
     budgetType: "",
     budgetRealism: "",
     hourlyRate: "",
     premiumWillingness: false,
     scopeClarity: "",
-    
+
     // Decision Speed and Process
     maxTimeToHire: 0,
     maxProposals: 0,
     conversionRate: 0,
-    
+
     // Fit and Skills Alignment
     requiredSkills: [] as string[],
     industry: "",
     techStack: "",
     projectType: "",
-    
+
     // Risk and Red Flags
     revisionLimit: false,
     scopeCreepHistory: false,
     unpaidTest: false,
     extremeNDA: false,
-    
+
     // Communication and Culture
     tools: [] as string[],
     language: "",
-    
+
     // Operational Details
     projectSize: "",
     timelineFlexibility: "",
-    
+
     // Competition and Opportunity
     maxInvites: 0,
     experienceLevel: "",
@@ -365,7 +381,46 @@ export function FilterButton({ onFilterChange }: { onFilterChange?: (filters: an
               onChange={(e) => handleFilterChange("search", e.target.value)}
             />
           </div>
-          
+
+          {/* Job Type & Classification */}
+          <div className="space-y-2">
+            <Label>Job Type</Label>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <Label htmlFor="jobType">Employment Type</Label>
+                <Select value={filters.jobType} onValueChange={(value) => handleFilterChange("jobType", value)}>
+                  <SelectTrigger id="jobType">
+                    <SelectValue placeholder="All types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="full-time">Full-Time</SelectItem>
+                    <SelectItem value="freelance">Freelance</SelectItem>
+                    <SelectItem value="contract">Contract</SelectItem>
+                    <SelectItem value="part-time">Part-Time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="isRemote">Work Location</Label>
+                <Select
+                  value={filters.isRemote === undefined ? "" : filters.isRemote.toString()}
+                  onValueChange={(value) => handleFilterChange("isRemote", value === "" ? undefined : value === "true")}
+                >
+                  <SelectTrigger id="isRemote">
+                    <SelectValue placeholder="All locations" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Locations</SelectItem>
+                    <SelectItem value="true">Remote Only</SelectItem>
+                    <SelectItem value="false">On-site</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
           {/* Preset Filters */}
           <div className="space-y-2">
             <Label>Preset Filters</Label>

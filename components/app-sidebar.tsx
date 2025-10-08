@@ -15,7 +15,11 @@ import {
   User,
   Sparkles,
   DollarSign,
-  Home
+  Home,
+  Star,
+  Calendar,
+  Shield,
+  Wallet
 } from "lucide-react"
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -74,11 +78,29 @@ const data = {
         },
       ],
     },
-    // Jobs navigation item links directly to the job description (jd) page
+    // Jobs navigation with enhanced features
     {
       title: "Jobs",
       url: "/dashboard/jd",
-      icon: Briefcase
+      icon: Briefcase,
+      items: [
+        {
+          title: "Browse Jobs",
+          url: "/dashboard/jd",
+        },
+        {
+          title: "Recommended",
+          url: "/dashboard/jd/recommended",
+        },
+        {
+          title: "My Applications",
+          url: "/dashboard/jd/applications",
+        },
+        {
+          title: "Saved Jobs",
+          url: "/dashboard/jd/saved",
+        },
+      ],
     },
     {
       title: "Messages",
@@ -168,6 +190,59 @@ const data = {
         {
           title: "Team Tasks",
           url: "/dashboard/tasks/team",
+        },
+      ],
+    },
+    {
+      title: "Community",
+      url: "/dashboard/community",
+      icon: Users,
+      items: [
+        {
+          title: "Forums",
+          url: "/dashboard/community/forums",
+        },
+        {
+          title: "Events",
+          url: "/dashboard/community/events",
+        },
+        {
+          title: "Networking",
+          url: "/dashboard/community/networking",
+        },
+      ],
+    },
+    {
+      title: "Reviews",
+      url: "/dashboard/reviews",
+      icon: Star,
+      items: [
+        {
+          title: "My Reviews",
+          url: "/dashboard/reviews",
+        },
+        {
+          title: "Give Review",
+          url: "/dashboard/reviews/give",
+        },
+      ],
+    },
+    {
+      title: "Payments",
+      url: "/dashboard/payments",
+      icon: Wallet,
+      items: [
+        {
+          title: "Escrow",
+          url: "/dashboard/payments/escrow",
+        },
+        {
+          title: "Transactions",
+          url: "/dashboard/payments/transactions",
+        },
+        {
+          title: "Earnings",
+          url: "/dashboard/payments/earnings",
         },
       ],
     },
