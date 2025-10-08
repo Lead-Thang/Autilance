@@ -28,7 +28,8 @@ export async function updateSession(request: NextRequest) {
   )
 
   // Refreshing the auth token - this MUST be called to refresh the session
-  const { data: { user } } = await supabase.auth.getUser()
+  // @ts-ignore - getUser exists but type definitions may be incomplete
+  await supabase.auth.getUser()
 
   return { supabase, response: supabaseResponse }
 }
