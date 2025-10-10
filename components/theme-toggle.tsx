@@ -18,6 +18,7 @@ export function ThemeToggle() {
   // Avoid rendering theme-dependent attributes before hydration to prevent
   // mismatches. Use a neutral title until mounted.
   const title = mounted ? (theme === "dark" ? "Switch to light mode" : "Switch to dark mode") : "Toggle theme"
+  const ariaLabel = mounted ? (theme === "dark" ? "Switch to light theme" : "Switch to dark theme") : "Toggle theme"
 
   return (
     <Button
@@ -26,6 +27,7 @@ export function ThemeToggle() {
       className="bg-background border-border hover:bg-muted transition-colors"
       onClick={handleClick}
       title={title}
+      aria-label={ariaLabel}
     >
       <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
       <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
