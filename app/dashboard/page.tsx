@@ -16,6 +16,7 @@ import {
   BarChart3,
 } from "lucide-react"
 import { useCourseData } from "../../hooks/use-course-data"
+import { PageShell } from "@/components/page-shell"
 
 export default function DashboardPage() {
   const { stats, recentActivity, courses, isLoading } = useCourseData()
@@ -57,17 +58,11 @@ export default function DashboardPage() {
   ]
 
   return (
-    // Removed SidebarProvider and AppSidebar since they are already provided in the layout
-    <main className="flex-1 p-6 bg-gradient-to-br from-background via-primary/5 to-accent/5">
-      <div className="flex items-center gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gradient-primary">Welcome back!</h1>
-          <p className="text-muted-foreground">Here's what's happening with your learning journey</p>
-        </div>
-      </div>
+    <PageShell>
+      <div className="container mx-auto px-6 py-8 max-w-7xl">
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {statItems.map((stat, index) => (
           <Card key={index} className="hover-lift border-border/50 bg-card/50 backdrop-blur-sm group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -86,9 +81,9 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Learning Progress */}
-        <Card className="lg:col-span-2 border-border/50 bg-card/50 backdrop-blur-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Learning Progress */}
+              <Card className="lg:col-span-2 border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
@@ -170,9 +165,10 @@ export default function DashboardPage() {
           >
             <TrendingUp className="h-6 w-6 mb-2 text-primary" />
             <span>Analytics</span>
-          </Button>
+            </Button>
+          </div>
         </div>
       </div>
-    </main>
+    </PageShell>
   )
 }
