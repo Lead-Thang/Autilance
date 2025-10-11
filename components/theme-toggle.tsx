@@ -13,12 +13,24 @@ export function ThemeToggle() {
     setMounted(true)
   }, [])
 
-  const handleClick = () => setTheme(theme === "dark" ? "light" : "dark")
+  const handleClick = () => {
+    if (theme === "dark") setTheme("light")
+    else if (theme === "light") setTheme("system")
+    else /* theme === "system" */ setTheme("dark")
+  }
 
   // Avoid rendering theme-dependent attributes before hydration to prevent
   // mismatches. Use a neutral title until mounted.
-  const title = mounted ? (theme === "dark" ? "Switch to light mode" : "Switch to dark mode") : "Toggle theme"
-  const ariaLabel = mounted ? (theme === "dark" ? "Switch to light theme" : "Switch to dark theme") : "Toggle theme"
+  const title = mounted
+    ? (theme === "dark" ? "Switch to light mode"
+       : theme === "light" ? "Switch to system mode"
+       : "Switch to dark mode")
+    : "Toggle theme"
+  const ariaLabel = mounted
+    ? (theme === "dark" ? "Switch to light theme"
+       : theme === "light" ? "Switch to system theme"
+       : "Switch to dark theme")
+    : "Toggle theme"
 
   return (
     <Button

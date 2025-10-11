@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
 import { Button } from "../../../components/ui/button"
 import { Input } from "../../../components/ui/input"
@@ -25,8 +26,10 @@ import {
   Users,
   Globe,
   Rocket,
+  Truck,
 } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
 interface UserStore extends StoreData {
   id: string
@@ -405,41 +408,52 @@ export default function StorefrontPage() {
           {/* AI Features Grid */}
           <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-3xl mb-4">AI-Powered Store Building Features</CardTitle>
-              <CardDescription className="text-lg max-w-2xl mx-auto">
-                Our intelligent system handles everything from design to optimization, so you can focus on growing your
-                business
+              <CardTitle className="text-3xl mb-4">A True Hybrid Store Builder</CardTitle>
+              <CardDescription className="text-lg max-w-3xl mx-auto">
+                We combine the ease of AI, the flexibility of a component-based editor, and the power of integrated dropshipping to create a best-of-all-worlds platform.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[
                   {
                     icon: Wand2,
-                    title: "Smart Layout Generation",
-                    description: "AI analyzes your niche and creates optimized store layouts that convert",
+                    title: "AI-Powered Generation",
+                    description: "Get started in seconds. Describe your store and our AI builds a custom layout, just like Wix or Hostinger.",
                     color: "from-purple-500 to-pink-500",
+                  },
+                  {
+                    icon: Edit,
+                    title: "Component-Based Editor",
+                    description: "Take full control. Customize every element with a powerful editor, offering the flexibility of WordPress + Elementor.",
+                    color: "from-blue-500 to-cyan-500",
+                  },
+                  {
+                    icon: Truck,
+                    title: "Unified Dropshipping",
+                    description: "Integrate suppliers like Shopify and import products directly into your store's inventory.",
+                    color: "from-yellow-500 to-orange-500",
                   },
                   {
                     icon: Package,
                     title: "Product Intelligence",
-                    description: "Automatically generates product descriptions, pricing strategies, and catalogs",
-                    color: "from-blue-500 to-cyan-500",
+                    description: "Automatically generates product descriptions, pricing strategies, and catalogs.",
+                    color: "from-teal-500 to-lime-500",
                   },
                   {
                     icon: TrendingUp,
                     title: "Conversion Optimization",
-                    description: "AI continuously optimizes your store for maximum sales and engagement",
+                    description: "AI continuously optimizes your store for maximum sales and engagement.",
                     color: "from-green-500 to-emerald-500",
                   },
                   {
                     icon: Globe,
                     title: "SEO & Marketing",
-                    description: "Built-in SEO optimization and marketing automation powered by AI",
+                    description: "Built-in SEO optimization and marketing automation powered by AI.",
                     color: "from-orange-500 to-red-500",
                   },
                 ].map((feature, index) => (
-                  <div key={index} className="text-center group">
+                  <div key={index} className="text-center group p-4 rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors">
                     <div
                       className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}
                     >
@@ -497,8 +511,8 @@ export default function StorefrontPage() {
                           AI Generated
                         </Badge>
 
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0" title="View Store">
                             <Eye className="w-4 h-4" />
                           </Button>
                           <Button
@@ -506,10 +520,23 @@ export default function StorefrontPage() {
                             variant="ghost"
                             className="h-8 w-8 p-0"
                             onClick={() => handleEditStore(store)}
+                            title="Edit Store"
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0"
+                            title="Manage Products"
+                            onClick={() => {
+                              const router = useRouter()
+                              router.push(`/dashboard/store/${store.id}/products`)
+                            }}
+                          >
+                            <Package className="w-4 h-4" />
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0" title="Share Store">
                             <Share className="w-4 h-4" />
                           </Button>
                         </div>

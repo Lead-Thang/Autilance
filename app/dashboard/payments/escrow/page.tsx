@@ -33,6 +33,14 @@ import {
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
+// Stripe imports
+import { Elements } from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
+import CheckoutForm from '@/components/StripeCheckoutForm'
+
+// Guarded Stripe initialization
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+
 interface EscrowTransaction {
   id: string
   amountCents: number
@@ -65,6 +73,15 @@ export default function EscrowPage() {
   const [loading, setLoading] = useState(true)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+  const [pendingPayment, setPendingPayment] = useState<{
+    transactionId: string
+    clientSecret: string
+    amount: number
+    currency: string
+  } | null>(null)
+  const [stripePromise, setStripePromise] = useState<Promise<any> | null>(null)
+  const [stripeLoadError, setStripeLoadError] = useState<string | null>(null)
 
   // New escrow form
   const [newEscrow, setNewEscrow] = useState({
@@ -77,6 +94,26 @@ export default function EscrowPage() {
 
   useEffect(() => {
     fetchTransactions()
+  }, [])
+
+  useEffect(() => {
+    // Load Stripe only on the client and only if the publishable key is provided
+    if (typeof window === 'undefined') return
+
+    if (stripePublishableKey) {
+      try {
+        const p = loadStripe(stripePublishableKey)
+        setStripePromise(p)
+      } catch (e) {
+        console.error('Failed to load Stripe:', e)
+        setStripeLoadError('Failed to initialize Stripe')
+        setStripePromise(null)
+      }
+    } else {
+      // No publishable key provided
+      setStripePromise(null)
+      setStripeLoadError('Stripe publishable key not configured')
+    }
   }, [])
 
   const fetchTransactions = async () => {
@@ -103,6 +140,8 @@ export default function EscrowPage() {
       return
     }
 
+    setIsProcessingPayment(true)
+
     try {
       const response = await fetch('/api/escrow', {
         method: 'POST',
@@ -110,8 +149,21 @@ export default function EscrowPage() {
         body: JSON.stringify(newEscrow)
       })
 
+      const data = await response.json()
+
       if (response.ok) {
         setShowCreateDialog(false)
+        setIsProcessingPayment(false)
+
+        // Show Stripe payment form
+        setPendingPayment({
+          transactionId: data.transaction.id,
+          clientSecret: data.stripe.clientSecret,
+          amount: newEscrow.amountCents,
+          currency: newEscrow.currency,
+        })
+
+        // Reset form
         setNewEscrow({
           freelancerId: "",
           amountCents: 0,
@@ -119,13 +171,13 @@ export default function EscrowPage() {
           contractId: "",
           milestoneId: ""
         })
-        fetchTransactions()
       } else {
-        const data = await response.json()
+        setIsProcessingPayment(false)
         alert(data.error || "Failed to create escrow")
       }
     } catch (error) {
       console.error("Error creating escrow:", error)
+      setIsProcessingPayment(false)
       alert("An error occurred")
     }
   }
@@ -151,6 +203,18 @@ export default function EscrowPage() {
       console.error("Error releasing escrow:", error)
       alert("An error occurred")
     }
+  }
+
+  const handlePaymentSuccess = () => {
+    setPendingPayment(null)
+    // Refresh transactions to show the new escrow
+    fetchTransactions()
+  }
+
+  const handlePaymentCancel = () => {
+    setPendingPayment(null)
+    // Refresh to show the cancelled escrow if needed
+    fetchTransactions()
   }
 
   const getStatusBadge = (status: string) => {
@@ -439,6 +503,35 @@ export default function EscrowPage() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Stripe Payment Overlay */}
+      {pendingPayment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
+            {stripePromise ? (
+              <Elements stripe={stripePromise}>
+                <CheckoutForm
+                  clientSecret={pendingPayment.clientSecret}
+                  amount={pendingPayment.amount}
+                  currency={pendingPayment.currency}
+                  onSuccess={handlePaymentSuccess}
+                  onCancel={handlePaymentCancel}
+                />
+              </Elements>
+            ) : (
+              <div className="space-y-4 text-center">
+                <p className="text-gray-700">Payments are currently unavailable.</p>
+                <p className="text-sm text-gray-500">{stripeLoadError || 'Stripe is not configured.'}</p>
+                <div className="flex justify-center">
+                  <Button variant="outline" onClick={() => { setPendingPayment(null); fetchTransactions() }}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

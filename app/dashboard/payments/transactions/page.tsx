@@ -46,98 +46,51 @@ export default function TransactionsPage() {
   const [filterType, setFilterType] = useState("all")
   const [filterStatus, setFilterStatus] = useState("all")
 
+  // Debounced fetch on searchQuery changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchTransactions()
+    }, 300)
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery])
+
+  // Fetch when filters change
   useEffect(() => {
     fetchTransactions()
-  }, [])
+  }, [filterType, filterStatus])
 
   const fetchTransactions = async () => {
     try {
       setLoading(true)
-      // Mock data - would fetch from actual API
-      setTransactions([
-        {
-          id: "1",
-          type: "incoming",
-          amount: 2500,
-          currency: "USD",
-          status: "completed",
-          description: "Payment for Website Redesign Project",
-          date: "2024-01-15T10:30:00Z",
-          counterparty: {
-            name: "Tech Corp Inc",
-            image: "/avatars/techcorp.jpg"
-          },
-          category: "escrow"
-        },
-        {
-          id: "2",
-          type: "outgoing",
-          amount: 1200,
-          currency: "USD",
-          status: "completed",
-          description: "Payment to freelancer - Mobile App",
-          date: "2024-01-14T14:20:00Z",
-          counterparty: {
-            name: "John Doe",
-            image: "/avatars/john.jpg"
-          },
-          category: "escrow"
-        },
-        {
-          id: "3",
-          type: "incoming",
-          amount: 500,
-          currency: "USD",
-          status: "pending",
-          description: "Milestone payment - API Integration",
-          date: "2024-01-13T09:15:00Z",
-          counterparty: {
-            name: "StartupXYZ",
-            image: "/avatars/startup.jpg"
-          },
-          category: "milestone"
-        },
-        {
-          id: "4",
-          type: "outgoing",
-          amount: 50,
-          currency: "USD",
-          status: "completed",
-          description: "Platform fee",
-          date: "2024-01-12T16:45:00Z",
-          counterparty: {
-            name: "Autilance",
-            image: "/logo.png"
-          },
-          category: "fee"
-        },
-        {
-          id: "5",
-          type: "incoming",
-          amount: 3200,
-          currency: "USD",
-          status: "completed",
-          description: "Full project payment - E-commerce Site",
-          date: "2024-01-10T11:00:00Z",
-          counterparty: {
-            name: "Retail Pro LLC",
-            image: "/avatars/retail.jpg"
-          },
-          category: "project"
-        }
-      ])
+
+      // Build query parameters for filtering
+      const params = new URLSearchParams()
+      if (searchQuery) params.set("search", searchQuery)
+      if (filterType !== "all") params.set("type", filterType)
+      if (filterStatus !== "all") params.set("status", filterStatus)
+
+      const response = await fetch(`/api/transactions?${params.toString()}`)
+      const data = await response.json()
+
+      if (response.ok) {
+        setTransactions(data.transactions)
+      } else {
+        console.error("Error fetching transactions:", data.error)
+        setTransactions([])
+      }
     } catch (error) {
       console.error("Error fetching transactions:", error)
+      setTransactions([])
     } finally {
       setLoading(false)
     }
   }
 
-  const formatAmount = (amount: number, currency: string) => {
+  const formatAmount = (amountCents: number, currency: string) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency
-    }).format(amount)
+    }).format(amountCents / 100)
   }
 
   const getStatusBadge = (status: string) => {
@@ -164,7 +117,7 @@ export default function TransactionsPage() {
     return matchesSearch && matchesType && matchesStatus
   })
 
-  // Calculate stats
+  // Calculate stats (amount is already in cents from API)
   const totalIncoming = transactions
     .filter(t => t.type === "incoming" && t.status === "completed")
     .reduce((sum, t) => sum + t.amount, 0)

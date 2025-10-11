@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
-import { db } from "@/lib/db"
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
+import { releaseEscrowFunds } from "@/lib/stripe";
 
 /**
  * POST release escrow funds to freelancer
@@ -51,8 +52,28 @@ export async function POST(
       )
     }
 
+    // Release funds from Stripe escrow
+    if (!transaction.stripePaymentIntentId) {
+      return NextResponse.json(
+        { error: "No payment intent found for this escrow" },
+        { status: 400 }
+      )
+    }
+
+    try {
+      await releaseEscrowFunds(transaction.stripePaymentIntentId)
+    } catch (stripeError: unknown) {
+      const errorMessage = stripeError instanceof Error
+        ? stripeError.message
+        : 'Unknown error'
+
+      return NextResponse.json(
+        { error: `Failed to release funds: ${errorMessage}` },
+        { status: 500 }
+      )
+    }
+
     // Update the transaction status to 'released'
-    // In a real implementation, this would trigger the actual payment to the freelancer
     const updatedTransaction = await db.escrowTransaction.update({
       where: { id: transactionId },
       data: {

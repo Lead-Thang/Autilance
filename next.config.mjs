@@ -3,7 +3,7 @@ import withPWA from 'next-pwa';
 // Configure PWA with proper settings for Next.js 15
 const withPWAConfig = withPWA({
   dest: 'public',
-  disable: false,
+  disable: process.env.NODE_ENV === 'development',
   register: true,
   skipWaiting: true,
   cacheOnFrontEndNav: true,
@@ -51,6 +51,4 @@ const nextConfig = {
   ],
 }
 
-const config = withPWAConfig(nextConfig);
-
-export default config;
+export default withPWAConfig(nextConfig);

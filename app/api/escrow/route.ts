@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { db } from "@/lib/db"
 import { z } from "zod"
+import { createEscrowPayment } from "@/lib/stripe"
+
+// Make sure createEscrowPayment returns the correct type:
+// export async function createEscrowPayment(amountCents: number, currency: string, platformFeeCents: number): Promise<{ paymentIntentId: string; clientSecret: string }> { ... }
 
 /**
  * GET escrow transactions
@@ -187,9 +191,37 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Create the escrow transaction
-    // Note: In a real implementation, this would integrate with a payment processor
-    // like Stripe, PayPal, or a blockchain escrow smart contract
+    // Create Stripe escrow payment intent
+    const platformFeeCents = Math.round(validatedData.amountCents * 0.05) // 5% platform fee
+    let stripeEscrow: { paymentIntentId: string; clientSecret: string | null }
+    try {
+      stripeEscrow = await createEscrowPayment(
+        validatedData.amountCents,
+        validatedData.currency,
+        { applicationFeeAmount: platformFeeCents }
+      )
+      
+      // Check if clientSecret is null and handle appropriately
+      if (!stripeEscrow.clientSecret) {
+        return NextResponse.json(
+          { error: "Payment setup failed: Missing client secret" },
+          { status: 400 }
+        )
+      }
+    } catch (stripeError) {
+      const errorMessage =
+        typeof stripeError === "object" &&
+        stripeError !== null &&
+        "message" in stripeError
+          ? (stripeError as { message: string }).message
+          : String(stripeError)
+      return NextResponse.json(
+        { error: `Payment setup failed: ${errorMessage}` },
+        { status: 400 }
+      )
+    }
+
+    // Create the escrow transaction in database
     const transaction = await db.escrowTransaction.create({
       data: {
         clientId: session.user.id,
@@ -198,7 +230,8 @@ export async function POST(req: NextRequest) {
         currency: validatedData.currency,
         contractId: validatedData.contractId,
         milestoneId: validatedData.milestoneId,
-        status: "pending", // Would be 'held' after payment confirmation
+        stripePaymentIntentId: stripeEscrow.paymentIntentId,
+        status: "pending", // Will be 'held' after successful payment
       },
       include: {
         client: {
@@ -230,7 +263,13 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    return NextResponse.json(transaction, { status: 201 })
+    return NextResponse.json({
+      transaction,
+      stripe: {
+        clientSecret: stripeEscrow.clientSecret,
+        paymentIntentId: stripeEscrow.paymentIntentId,
+      }
+    }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 })

@@ -4,36 +4,57 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    /* Deep Indigo (#4A3AFF) as primary color */
+    /* HSL Color System - Systematic base colors with automatic light/dark conversion */
+    /* Concept: Define light theme values, automatically invert L (100% - L) for dark */
+
+    /* Light Theme Base HSL Values - These will be systematically inverted for dark mode */
+  --hsl-base-bg-light: 98%;      /* Near white: ~98% lightness */
+  --hsl-base-fg-light: 10%;      /* Dark text: ~10% lightness */
+  --hsl-base-card-light: 100%;   /* Pure white cards: ~100% lightness */
+  --hsl-base-card-fg-light: 9%;  /* Dark card text: ~9% lightness */
+  --hsl-base-muted-light: 96%;   /* Light gray: ~96% lightness */
+  --hsl-base-muted-fg-light: 45%; /* Medium gray text: ~45% lightness */
+  --hsl-base-border-light: 90%;   /* Light borders: ~90% lightness */
+  --hsl-base-input-light: 95%;    /* Light inputs: ~95% lightness */
+
+    /* Automatic Dark Mode Conversion: Calculate by subtracting base light values from 100% */
+    /* So 100% - 98% = 2% for dark background, creating perfect harmonious inversion */
+
+    /* Light Mode: Uses the base light values */
+    --background: 0 0% var(--hsl-base-bg-light);
+    --foreground: 0 0% var(--hsl-base-fg-light);
+    --card: 0 0% var(--hsl-base-card-light);
+    --card-foreground: 0 0% var(--hsl-base-card-fg-light);
+    --popover: 0 0% var(--hsl-base-card-light);
+    --popover-foreground: 0 0% var(--hsl-base-card-fg-light);
+
+    /* Primary color - Deep Indigo (maintains vibrancy in both modes) */
     --primary: 240 100% 65%;
     --primary-foreground: 0 0% 98%;
-    /* Warm Silver (#E0E0E0) as secondary color */
+    /* Secondary color - Warm Silver */
     --secondary: 0 0% 88%;
     --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    /* Electric Cyan (#00D8FF) as accent color */
+
+    --muted: 0 0% var(--hsl-base-muted-light);
+    --muted-foreground: 0 0% var(--hsl-base-muted-fg-light);
     --accent: 195 100% 50%;
     --accent-foreground: 0 0% 9%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
+    --destructive-foreground: 0 0% var(--hsl-base-fg-light);
+    --border: 0 0% var(--hsl-base-border-light);
+    --input: 0 0% var(--hsl-base-input-light);
+    --ring: 0 0% var(--hsl-base-fg-light);
+
     --radius: 0.75rem;
+
+    /* Chart colors - Vibrant and theme-independent */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    /* Custom theme colors */
+    /* Custom colors - Theme-independent vibrant hues */
     --gold: 45 93% 58%;
     --gold-foreground: 26 83% 14%;
     --emerald: 160 84% 39%;
@@ -41,36 +62,39 @@
   }
 
   .dark {
-    /* In dark mode, we'll keep Deep Indigo as primary */
-    --background: 240 17% 12%;
-    --foreground: 0 0% 98%;
-    --card: 240 17% 15%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 17% 15%;
-    --popover-foreground: 0 0% 98%;
-    /* Deep Indigo (#4A3AFF) as primary color */
+    /* Dark Mode: Automatic HSL Lightness Inversion */
+    /* Principle: For harmonious themes, subtract light L value from 100% */
+    --background: 0 0% calc(100% - var(--hsl-base-bg-light));
+    --foreground: 0 0% calc(100% - var(--hsl-base-fg-light));
+    --card: 0 0% calc(100% - var(--hsl-base-card-light));
+    --card-foreground: 0 0% calc(100% - var(--hsl-base-card-fg-light));
+    --popover: 0 0% calc(100% - var(--hsl-base-card-light));
+    --popover-foreground: 0 0% calc(100% - var(--hsl-base-card-fg-light));
+
+    /* Maintain same primary/secondary vibrancy */
     --primary: 240 100% 65%;
     --primary-foreground: 0 0% 98%;
-    /* Warm Silver (#E0E0E0) as secondary color */
     --secondary: 0 0% 88%;
     --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    /* Electric Cyan (#00D8FF) as accent color */
-    --accent: 195 100% 50%;
-    --accent-foreground: 0 0% 9%;
+
+    --muted: 0 0% calc(100% - var(--hsl-base-muted-light));
+    --muted-foreground: 0 0% calc(100% - var(--hsl-base-muted-fg-light));
+  --accent: 195 100% 50%;
+  --accent-foreground: 0 0% calc(100% - 9%);
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --destructive-foreground: 0 0% calc(100% - var(--hsl-base-fg-light));
+    --border: 0 0% calc(100% - var(--hsl-base-border-light));
+    --input: 0 0% calc(100% - var(--hsl-base-input-light));
+    --ring: 0 0% calc(100% - var(--hsl-base-fg-light));
+
+    /* Chart colors adapted for dark backgrounds */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
 
-    /* Dark theme custom colors */
+    /* Custom colors maintain vibrancy */
     --gold: 45 93% 58%;
     --gold-foreground: 20 14.3% 4.1%;
     --emerald: 160 84% 39%;
@@ -80,6 +104,12 @@
   /* Add scroll padding for fixed navbar */
   html {
     scroll-padding-top: 4rem;
+  }
+
+  /* Make outline buttons have gray border in dark mode */
+  .dark button[data-variant="outline"],
+  .dark .border-input {
+    border-color: hsl(0 0% 60%); /* Medium gray border in dark mode */
   }
 }
 

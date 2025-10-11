@@ -38,6 +38,7 @@ Autilance is a reverse job board where companies list the skills, knowledge, beh
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: Supabase
 - **File Storage**: UploadThing
+- **AI Integration**: Google Gemini via API or OpenRouter
 - **UI Components**: Shadcn UI
 
 ## Getting Started
@@ -63,9 +64,20 @@ This project uses environment variables for configuration. All sensitive informa
    - IP Geolocation API key (for location services)
    - Email service configuration
    - NextAuth configuration (if used)
+   - AI API key (either GEMINI_API_KEY or OPENROUTER_API_KEY)
    - Any other service keys you might need
 
 **Important**: The `.env*` files are included in `.gitignore` and will not be committed to the repository for security reasons.
+
+### AI Integration Setup
+
+Autilance includes an AI assistant powered by Google Gemini. You can connect to Gemini in two ways:
+
+1. **Direct Google Access**: Get an API key from Google AI Studio and set it as `GEMINI_API_KEY` in your environment variables.
+
+2. **Via OpenRouter**: Get an API key from OpenRouter (which provides access to multiple models including Gemini) and set it as `OPENROUTER_API_KEY` in your environment variables.
+
+Choose one method - if both are set, OpenRouter will be used by default.
 
 ### Installation
 
@@ -120,6 +132,10 @@ NEXT_PUBLIC_IPGEOLOCATION_API_KEY=your_ipgeolocation_api_key
 NEXTAUTH_SECRET=your_nextauth_secret
 NEXTAUTH_URL=your_domain_url
 DATABASE_URL=your_database_url
+# Choose one:
+GEMINI_API_KEY=your_gemini_api_key
+# OR
+OPENROUTER_API_KEY=your_openrouter_api_key
 ```
 
 ### Vercel Deployment

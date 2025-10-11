@@ -7,12 +7,12 @@ import { Button } from "../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
 import { Badge } from "../components/ui/badge"
 import { Input } from "../components/ui/input"
-import { ThemeToggle } from "../components/theme-toggle"
 import { createClient } from "@/lib/supabase/client"
 import { Session } from "@supabase/supabase-js"
 import Link from "next/link"
 import Image from "next/image"
 import { ThemeAwareLogo } from "@/components/theme-aware-logo"
+import { AnimatedStatsCard } from "@/components/animated-stats-card"
 import {
   ArrowRight,
   Sparkles,
@@ -197,10 +197,24 @@ export default function LandingPage() {
     return () => clearInterval(interval);
   }, []);
 
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900">
+      <style>{`
+        @keyframes orbit {
+          0% {
+            transform: rotate(0deg) translateX(100px) rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg) translateX(100px) rotate(-360deg);
+          }
+        }
+        .animate-orbit {
+          animation: orbit 3s linear infinite;
+        }
+      `}</style>
       {/* Navigation */}
-      <nav className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+      <nav className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -211,7 +225,6 @@ export default function LandingPage() {
             </div>
 
             <div className="flex items-center gap-4">
-              <ThemeToggle />
               {session ? (
                 <Link href="/dashboard">
                   <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
@@ -328,24 +341,28 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               {session ? (
                 <Link href="/dashboard">
-                  <Button
-                    size="lg"
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-4 text-lg"
-                  >
-                    <Rocket className="w-6 h-6 mr-3" />
-                    Go to Dashboard
-                  </Button>
+                  <div className="relative inline-block rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 p-0.5 transition-all duration-300 hover:from-blue-700 hover:to-purple-700 hover:shadow-2xl hover:shadow-purple-500/30">
+                    <Button
+                      size="lg"
+                      className="bg-slate-900 text-white shadow-xl transition-all duration-300 px-8 py-4 text-lg rounded-md relative z-10"
+                    >
+                      <Rocket className="w-6 h-6 mr-3" />
+                      Go to Dashboard
+                    </Button>
+                  </div>
                 </Link>
               ) : (
                 <>
                   <Link href="/auth/signup">
-                    <Button
-                      size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-4 text-lg"
-                    >
-                      <Rocket className="w-6 h-6 mr-3" />
-                      Start Now!
-                    </Button>
+                    <div className="relative inline-block rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 p-0.5 transition-all duration-300 hover:from-blue-700 hover:to-purple-700 hover:shadow-2xl hover:shadow-purple-500/30">
+                      <Button
+                        size="lg"
+                        className="bg-slate-900 text-white shadow-xl transition-all duration-300 px-8 py-4 text-lg rounded-md relative z-10"
+                      >
+                        <Rocket className="w-6 h-6 mr-3" />
+                        Start Now!
+                      </Button>
+                    </div>
                   </Link>
                   <Link href="#features">
                     <Button
@@ -363,20 +380,11 @@ export default function LandingPage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
             {stats.map((stat, index) => (
-              <Card
-                key={index}
-                className="text-center border-0 shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm"
-              >
-                <CardContent className="p-6">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold mb-2">{stat.value}</div>
-                  <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
-                </CardContent>
-              </Card>
+              <div key={index} className="h-36 flex items-center justify-center">
+                <AnimatedStatsCard stat={stat} />
+              </div>
             ))}
           </div>
         </div>

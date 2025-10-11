@@ -18,7 +18,8 @@ import {
   Filter,
   Upload,
   ExternalLink,
-  AlertCircle
+  AlertCircle,
+  Store
 } from "lucide-react"
 
 interface Supplier {
@@ -161,17 +162,25 @@ export default function DropshippingHubPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-              <Truck className="w-5 h-5 text-white" />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                  <Truck className="w-5 h-5 text-white" />
+                </div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  Unified Dropshipping Hub
+                </h1>
+              </div>
+              <p className="text-lg text-gray-600 dark:text-gray-300">
+                Connect suppliers, import products, and sell them on your custom storefront.
+              </p>
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              Unified Dropshipping Hub
-            </h1>
+            <Button variant="outline" onClick={() => window.location.href = '/dashboard/storefront'}>
+              <Store className="w-4 h-4 mr-2" />
+              Manage Storefront
+            </Button>
           </div>
-          <p className="text-lg text-gray-600 dark:text-gray-300">
-            Connect and manage multiple suppliers in one place
-          </p>
         </div>
 
         {/* Stats Overview */}
@@ -394,11 +403,11 @@ export default function DropshippingHubPage() {
                       </div>
                       
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" title="Import to your store">
                           <Upload className="w-4 h-4 mr-1" />
-                          Import
+                          Import to Store
                         </Button>
-                        <Button size="sm">
+                        <Button size="sm" title="View on supplier's website">
                           <ExternalLink className="w-4 h-4" />
                         </Button>
                       </div>

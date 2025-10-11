@@ -1,35 +1,15 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+
+// IMPORTANT: This helper runs inside Next.js middleware which executes in the
+// Edge runtime. Avoid importing Node-only modules (like server-side Supabase
+// clients) at the top level here. If you need server-side session validation
+// use a separate-server route (e.g. `app/api/session/route.ts`).
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  // Return a minimal response that is safe for the Edge runtime. We intentionally
+  // avoid creating any Supabase server client here to prevent Node-only module
+  // imports from leaking into the Edge bundle.
+  const response = NextResponse.next({ request })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
-
-  // Refreshing the auth token - this MUST be called to refresh the session
-  // @ts-ignore - getUser exists but type definitions may be incomplete
-  await supabase.auth.getUser()
-
-  return { supabase, response: supabaseResponse }
+  return { supabase: null, response }
 }

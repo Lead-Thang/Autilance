@@ -1,3 +1,5 @@
+import { GeminiAI } from "./gemini"
+
 export interface AIProvider {
   id: string
   name: string
@@ -56,6 +58,11 @@ export async function generateAIResponse(
     throw new Error("Provider not found")
   }
 
+  // Use the server-side API route for Gemini
+  if (providerId === "gemini") {
+    return generateGeminiResponse(message, context, history)
+  }
+
   // Simulate AI response based on provider personality
   await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 2000))
 
@@ -81,4 +88,45 @@ export async function generateAIResponse(
   const randomResponse = providerResponses[Math.floor(Math.random() * providerResponses.length)]
 
   return randomResponse
+}
+
+async function generateGeminiResponse(
+  message: string,
+  context?: any,
+  history?: any[]
+): Promise<string> {
+  try {
+    // Create the request to our API route
+    const response = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message,
+        context,
+        history,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`)
+    }
+
+    const data = await response.json()
+    if (!data || typeof data.response !== 'string') {
+      throw new Error('Invalid response structure from Gemini API')
+    }
+    return data.response
+  } catch (error) {
+    console.error('Gemini API error:', error)
+    // Fallback to simulated response
+    const fallbackResponses = [
+      `I'm currently experiencing issues with the Gemini API. As an alternative, here's my analysis of your question: "${message}". Gemini would typically provide a comprehensive response with detailed breakdowns of the key factors involved.`,
+      `I apologize, but I'm having trouble connecting to the Gemini API at the moment. Regarding your question about "${message}", Gemini would normally offer a thorough analysis with multi-faceted insights.`,
+      `There seems to be a temporary issue with the Gemini API. In the meantime, I can tell you that your question about "${message}" would typically be addressed by Gemini with a detailed examination of various analytical dimensions.`
+    ]
+    
+    return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)]
+  }
 }
