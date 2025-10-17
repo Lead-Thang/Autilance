@@ -9,7 +9,7 @@ const withPWAConfig = withPWA({
   cacheOnFrontEndNav: true,
   cacheStartUrl: true,
   // Fix for build issues with Next.js 15
-  buildExcludes: [/^.*\.map$/],
+  buildExcludes: ['**/node_modules/**/*'],
   // Add additional PWA assets
   additionalManifestEntries: [
     {

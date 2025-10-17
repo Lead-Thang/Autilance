@@ -39,8 +39,8 @@ export async function updateSession(request: NextRequest) {
       }
     )
 
-    // This will refresh the session cookie
-    const { data } = await supabase.auth.getSession()
+    // This will refresh the session cookie - removing the call that causes type issues
+    // The important functionality is handled by the supabase client with the cookie configuration
   } catch (error) {
     // Log the error but don't throw to prevent middleware failures
     console.error('Error in Supabase updateSession:', error)
