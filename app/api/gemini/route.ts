@@ -64,11 +64,11 @@ export async function POST(request: NextRequest) {
 
     // Add history if provided (simplified to avoid type issues)
     if (history && Array.isArray(history)) {
-      // Currently only include user messages from history to avoid complex role mapping
+      // Include both user and assistant messages from history
       const historyMessages = history
-        .filter(msg => msg.role === "user")
+        .filter(msg => msg.role === "user" || msg.role === "assistant")
         .map(msg => ({
-          role: "user" as const,
+          role: msg.role === "assistant" ? "model" : msg.role,
           parts: [
             {
               text: msg.content

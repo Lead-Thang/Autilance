@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { db } from "@/lib/db"
 import { z } from "zod"
 import { createEscrowPayment } from "@/lib/stripe"
+import { createCommissionLog } from "@/lib/commission"
 
 // Make sure createEscrowPayment returns the correct type:
 // export async function createEscrowPayment(amountCents: number, currency: string, platformFeeCents: number): Promise<{ paymentIntentId: string; clientSecret: string }> { ... }
@@ -198,7 +199,7 @@ export async function POST(req: NextRequest) {
       stripeEscrow = await createEscrowPayment(
         validatedData.amountCents,
         validatedData.currency,
-        { applicationFeeAmount: platformFeeCents }
+       platformFeeCents
       )
       
       // Check if clientSecret is null and handle appropriately
@@ -239,6 +240,7 @@ export async function POST(req: NextRequest) {
             id: true,
             name: true,
             image: true,
+            level: true, // For commission calculation
           },
         },
         freelancer: {
@@ -262,6 +264,18 @@ export async function POST(req: NextRequest) {
         },
       },
     })
+
+    // Create transparent commission log for Autilance's 5% fee
+    try {
+      await createCommissionLog({
+        transactionId: transaction.id,
+        grossAmount: validatedData.amountCents,
+        userId: session.user.id
+      })
+    } catch (commissionError) {
+      console.error("Failed to create commission log:", commissionError)
+      // Don't fail the whole transaction if commission logging fails
+    }
 
     return NextResponse.json({
       transaction,

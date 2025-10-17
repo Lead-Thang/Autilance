@@ -16,7 +16,6 @@ import {
   BarChart3,
 } from "lucide-react"
 import { useCourseData } from "../../hooks/use-course-data"
-import { PageShell } from "@/components/page-shell"
 
 export default function DashboardPage() {
   const { stats, recentActivity, courses, isLoading } = useCourseData()
@@ -58,8 +57,7 @@ export default function DashboardPage() {
   ]
 
   return (
-    <PageShell>
-      <div className="container mx-auto px-6 py-8 max-w-7xl">
+    <div className="container mx-auto px-6 py-8 max-w-7xl">
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -169,6 +167,5 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </PageShell>
   )
 }

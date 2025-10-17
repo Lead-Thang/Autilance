@@ -9,5 +9,7 @@
     "Codegeex.Chat.LanguagePreference": "English",
     "traycer.enableAutoAnalysis": false,
     "Lingma.localMachineModel": true,
-    "Lingma.aI Chat.mcpToolsInAgentMode": true
+    "Lingma.aI Chat.mcpToolsInAgentMode": true,
+    "coderabbit.agentType": "opencode",
+    "coderabbit.autoReviewMode": "auto"
 }

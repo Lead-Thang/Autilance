@@ -26,6 +26,7 @@ interface RecommendationResponse {
   recommendations: Product[];
   userId: string;
   timestamp: string;
+  error?: string;
 }
 
 class RecommendationEngine {

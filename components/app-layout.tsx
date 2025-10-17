@@ -37,6 +37,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar"
 
 const data = {
@@ -283,7 +285,14 @@ const data = {
   ],
 }
 
-export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
+type Props = {
+  children: React.ReactNode
+}
+
+export function AppLayout({ children }: Props) {
+  const { state: sidebarState } = useSidebar()
+  const isSidebarCollapsed = sidebarState === "collapsed"
+  
   const [user, setUser] = useState({
     name: "Autilance User",
     email: "user@autilance.com",
@@ -317,39 +326,82 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
   }, [])
 
   return (
-    <Sidebar {...props} collapsible="icon">
-      <SidebarHeader className="border-b border-border/50 bg-background/50">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="/dashboard" className="flex items-center gap-2">
-                <div className="flex aspect-square bg-gradient-to-br from-blue-600 to-purple-700 size-10 items-center justify-center rounded-lg text-primary-foreground">
-                  <img src="/logo.png" className="size-6"/>
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                  <span className="truncate font-semibold">Autilance</span>
-                  <span className="truncate text-xs text-muted-foreground">Platform</span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
+    <div className="flex min-h-screen flex-col">
+      {/* Global Top Header (outer wrapper) */}
+      <header
+        className={`sticky top-0 z-40 w-full border-b border-border/50 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-[height,padding] duration-300 ease-in-out ${
+          isSidebarCollapsed ? 'h-12' : 'h-14'
+        }`}
+      >
+        <div className={`flex items-center justify-between h-full w-full max-w-full px-4 ${isSidebarCollapsed ? 'gap-2' : 'gap-4'}`}>
+          {/* Left: Sidebar Trigger and Brand */}
+          <div className="flex items-center gap-2">
+            <a href="/dashboard" className="flex items-center gap-2">
+              <div className="flex aspect-square bg-gradient-to-br from-blue-600 to-purple-700 size-8 items-center justify-center rounded-md text-primary-foreground">
+                <img src="/logo.png" className="size-5" />
+              </div>
+              <div className={`text-sm leading-tight ${isSidebarCollapsed ? 'hidden sm:block' : 'block'}`}>
+                <span className="truncate font-semibold">Autilance</span>
+              </div>
+            </a>
+          </div>
 
-      <SidebarContent className="bg-background/30">
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
-      </SidebarContent>
+          {/* Center: Placeholder for search or page switcher (optional) */}
+          <div className="flex-1 px-2 hidden md:block">
+            {/* Add search input or breadcrumbs here if needed */}
+          </div>
 
-      <SidebarFooter className="border-t border-border/50 bg-background/50">
-        <div className="flex items-start justify-start p-2 pl-0">
-          <NavUser user={user} />
-          <div className="group-data-[collapsible=icon]:hidden">
+          {/* Right: Theme toggle + user menu */}
+          <div className="flex items-center gap-2">
             <ThemeToggle />
+            <NavUser user={user} />
           </div>
         </div>
-      </SidebarFooter>
-    </Sidebar>
+      </header>
+
+      {/* Page body with sidebar + content. Add top padding equal to header height */}
+      <div className={`flex flex-1 w-full min-w-0 ${isSidebarCollapsed ? 'pt-0' : 'pt-0'}`}>
+        <Sidebar collapsible="icon">
+          {/* Keep sidebar minimal header or remove to avoid duplication */}
+          <SidebarHeader className="border-b border-border/50 bg-background/50">
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton size="lg" asChild>
+                  <a href="/dashboard" className="flex items-center gap-2">
+                    <div className="flex aspect-square bg-gradient-to-br from-blue-600 to-purple-700 size-10 items-center justify-center rounded-lg text-primary-foreground">
+                      <img src="/logo.png" className="size-6" />
+                    </div>
+                    <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+                      <span className="truncate font-semibold">Autilance</span>
+                      <span className="truncate text-xs text-muted-foreground">Platform</span>
+                    </div>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarHeader>
+
+          <SidebarContent className="bg-background/30">
+            <NavMain items={data.navMain} />
+            <NavProjects projects={data.projects} />
+            <NavSecondary items={data.navSecondary} className="mt-auto" />
+          </SidebarContent>
+
+          <SidebarFooter className="border-t border-border/50 bg-background/50">
+            <div className={`flex ${isSidebarCollapsed ? 'flex-col items-start' : 'items-center justify-between'} p-2 pl-0 gap-2`}>
+              <NavUser user={user} />
+              <SidebarTrigger />
+            </div>
+          </SidebarFooter>
+        </Sidebar>
+
+        <main className={`${isSidebarCollapsed ? 'p-4 ' : 'p-622'} transition-all duration-300 ease-in-out`}>
+          {/* Main header section responsive to sidebar state (optional) */}
+          <div className="flex items-center justify-between mb-8">
+          </div>
+          <div>{children}</div>
+        </main>
+      </div>
+    </div>
   )
 }

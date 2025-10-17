@@ -25,6 +25,7 @@ import {
 import dynamic from "next/dynamic"
 import { JobFilters, FilterButton } from "@/components/job-filters"
 import { calculateClientFitScore, getFitReasons, getRiskFactors } from "@/lib/client-fit-score"
+import { calculateAIFitScore } from "@/lib/ai-matching"
 
 // Dynamically import JobMap to prevent SSR issues with Leaflet
 const JobMap = dynamic(() => import("@/components/job-map"), { 
@@ -130,7 +131,7 @@ type VerificationStatus = {
   verifiedAt?: string;
 }
 
-type Badge = {
+type UserBadge = {
   id: string;
   name: string;
   jobTitle: string;
@@ -139,18 +140,28 @@ type Badge = {
 }
 
 export default function JobDescriptionsPage() {
-  const [activeTab, setActiveTab] = useState("browse")
+  const [activeTab, setActiveTab] = useState("browse");
   // State for job data
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [myJobs, setMyJobs] = useState<Job[]>([]);
   const [myVerifications, setMyVerifications] = useState<VerificationStatus[]>([]);
-  const [badges, setBadges] = useState<Badge[]>([]);
+  const [badges, setBadges] = useState<UserBadge[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMyJobs, setLoadingMyJobs] = useState(true);
   const [loadingVerifications, setLoadingVerifications] = useState(true);
   const [loadingBadges, setLoadingBadges] = useState(true);
   const [filters, setFilters] = useState<JobFilters>({});
+  // Define a proper type for AI fit score responses
+  type AIFitScore = {
+    totalScore: number;
+    reasoning: string[];
+    // Add other expected properties from calculateAIFitScore
+  }
+
+  // AI Fit Score states
+  const [aiFitScores, setAiFitScores] = useState<Record<string, AIFitScore>>({});
+  const [calculatingFit, setCalculatingFit] = useState<Record<string, boolean>>({});
 
   // Load data from API
   useEffect(() => {
@@ -356,12 +367,51 @@ export default function JobDescriptionsPage() {
     setFilters(newFilters);
   };
 
+  // Calculate AI fit score for a specific job
+  const calculateAIFit = async (job: Job) => {
+    const mockFreelancer = {
+      skills: [{ name: "Sample Skill", level: "intermediate" as const }], // In production, get from user's profile
+      xp: 500, // Mock XP
+      trustScore: 5 // Mock trust score
+    };
+
+    // Define job requirements from the job object
+    const jobRequirements = {
+      title: job.title,
+      skills: job.skills,
+      behaviors: job.behaviors,
+      certifications: job.certifications || []
+    };
+
+    const fitScore = calculateAIFitScore({
+      freelancerId: "current-user", // Should be actual user ID
+      freelancerSkills: mockFreelancer.skills,
+      freelancerXp: mockFreelancer.xp,
+      freelancerTrust: mockFreelancer.trustScore,
+      job: jobRequirements,
+      jobBudget: job.price ?? 0,
+      jobClientRating: job.clientRating ?? 0,
+      jobRiskFlags: job.riskFlags ?? []
+    });
+
+    return fitScore;
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Jobs</h1>
           <p className="text-gray-600">Browse company requirements or create your own JD</p>
+          <div className="mt-3 flex items-center gap-2">
+            <div className="flex items-center text-xs bg-gradient-to-r from-green-100 to-blue-100 text-green-800 px-3 py-1.5 rounded-full font-medium">
+              <span className="text-green-600 font-bold text-sm mr-1">5%</span>
+              Commission - Lowest in Industry! ✨
+            </div>
+            <Badge className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5">
+              AI-Powered Matching
+            </Badge>
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -387,8 +437,8 @@ export default function JobDescriptionsPage() {
           
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Job Listings - Left side */}
-            <div className="w-full lg:w-2/3">
-              <div className="grid grid-cols-1 gap-4 max-h-[600px] overflow-y-auto pr-2">
+            <div className="w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 max-h-[600px] overflow-y-auto pr-2">
                 {loading ? (
                   <div className="flex justify-center items-center h-60">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
@@ -404,7 +454,7 @@ export default function JobDescriptionsPage() {
                     const riskFactors = getRiskFactors(job);
                     
                     return (
-                      <Card key={job.id} className="hover:shadow-md transition-shadow">
+                      <Card key={job.id} className="hover:shadow-md transition-all duration-300">
                         <CardHeader className="p-4">
                           <div className="flex items-center justify-between">
                             <Badge className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5">{job.category}</Badge>
@@ -438,7 +488,7 @@ export default function JobDescriptionsPage() {
                           </div>
                         </CardHeader>
                         <CardContent className="p-4 pt-0">
-                          <div className="space-y-3">
+                          <div className="flex flex-col justify-evenly gap-3 min-h-[200px] md:min-h-[250px] lg:min-h-[300px] transition-all duration-300">
                             <div className="space-y-1">
                               <div className="text-xs font-medium">Required Skills</div>
                               <div className="flex flex-wrap gap-1">
@@ -507,11 +557,49 @@ export default function JobDescriptionsPage() {
                                 </Badge>
                               ))}
                             </div>
-                            
-                            <Button className="w-full h-8 text-sm">
-                              <Eye className="w-3 h-3 mr-1" />
-                              View Requirements
-                            </Button>
+
+                            <div className="flex justify-end gap-2">
+                              {!aiFitScores[job.id] ? (
+                                <Button
+                                  variant="outline"
+                                  className="flex-1 h-8 text-sm"
+                                  onClick={async () => {
+                                    setCalculatingFit(prev => ({ ...prev, [job.id]: true }))
+                                    try {
+                                      const fitScore = await calculateAIFit(job)
+                                      setAiFitScores(prev => ({ ...prev, [job.id]: fitScore }))
+                                    } catch (error) {
+                                      console.error("Failed to calculate AI fit:", error)
+                                    } finally {
+                                      setCalculatingFit(prev => ({ ...prev, [job.id]: false }))
+                                    }
+                                  }}
+                                  disabled={calculatingFit[job.id]}
+                                >
+                                  <Star className="w-3 h-3 mr-1" />
+                                  {calculatingFit[job.id] ? 'Analyzing...' : 'AI Fit Score'}
+                                </Button>
+                              ) : (
+                                <div className="flex-1 flex items-center gap-2 p-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded-md border">
+                                  <div className="flex items-center gap-1">
+                                    <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                                    <span className="text-sm font-semibold text-gray-800">
+                                      {aiFitScores[job.id].totalScore}/100
+                                    </span>
+                                  </div>
+                                  {aiFitScores[job.id].reasoning.length > 0 && (
+                                    <span className="text-xs text-gray-600 truncate">
+                                      {aiFitScores[job.id].reasoning[0]}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+
+                              <Button variant="outline" className="flex-1 h-8 text-sm">
+                                <Eye className="w-3 h-3 mr-1" />
+                                View Requirements
+                              </Button>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -522,7 +610,7 @@ export default function JobDescriptionsPage() {
             </div>
             
             {/* Map - Right side */}
-            <div className="w-full lg:w-1/3">
+            <div className="w-full">
               <JobMap jobs={filteredJobs.map(job => ({
                 id: job.id,
                 creator: job.company,
@@ -546,7 +634,7 @@ export default function JobDescriptionsPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="my-jds" className="space-y-6">
+        <TabsContent value="my-jds" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Your Job Descriptions</CardTitle>
@@ -590,7 +678,7 @@ export default function JobDescriptionsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="verifications" className="space-y-6">
+        <TabsContent value="verifications" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Your Verification Status</CardTitle>
@@ -672,7 +760,7 @@ export default function JobDescriptionsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="create" className="space-y-6">
+        <TabsContent value="create" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Create New Job Description</CardTitle>

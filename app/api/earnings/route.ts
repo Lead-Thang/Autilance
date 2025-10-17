@@ -135,6 +135,7 @@ export async function GET(req: NextRequest) {
     // Recent transactions (last 10)
     stats.recentTransactions = escrowTransactions
       .filter(t => t.status === "released")
+      .sort((a, b) => (b.releasedAt ?? b.createdAt).getTime() - (a.releasedAt ?? a.createdAt).getTime())
       .slice(0, 10)
       .map(transaction => ({
         id: transaction.id,

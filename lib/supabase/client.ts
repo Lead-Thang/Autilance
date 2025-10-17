@@ -11,5 +11,12 @@ export function createClient() {
     return createBrowserClient('', '', {})
   }
 
-  return createBrowserClient(supabaseUrl, supabaseAnonKey, {})
+  return createBrowserClient(supabaseUrl, supabaseAnonKey, {
+    // Add additional configuration options to handle edge cases
+    auth: {
+      flowType: 'pkce',
+      persistSession: true,
+      detectSessionInUrl: true,
+    }
+  })
 }

@@ -150,10 +150,10 @@ export default function LandingPage() {
       const seed4 = i * 10 + 3;
       
       return {
-        left: seededRandom(seed1) * 100,
-        delay: seededRandom(seed2) * 5,
-        duration: seededRandom(seed3) * 3 + 3,
-        starSize: seededRandom(seed4) * 2 + 1,
+        left: (seededRandom(seed1) * 100).toFixed(10), // Ensure consistent precision
+        delay: (seededRandom(seed2) * 5).toFixed(10), // Ensure consistent precision
+        duration: (seededRandom(seed3) * 3 + 3).toFixed(10), // Ensure consistent precision
+        starSize: (seededRandom(seed4) * 2 + 1).toFixed(10), // Ensure consistent precision
         trails: Array.from({ length: 5 }, (_, j) => {
           const trailSeed1 = (i * 100) + (j * 10);
           const trailSeed2 = (i * 100) + (j * 10) + 1;
@@ -161,10 +161,10 @@ export default function LandingPage() {
           const trailSeed4 = (i * 100) + (j * 10) + 3;
           
           return {
-            size: seededRandom(trailSeed1) * 1.5 + 0.5,
-            opacity: 1 - (j * 0.2),
-            top: -j * 10,
-            trailDelay: j * 0.1
+            size: (seededRandom(trailSeed1) * 1.5 + 0.5).toFixed(10), // Ensure consistent precision
+            opacity: (1 - (j * 0.2)).toFixed(10), // Ensure consistent precision
+            top: (-j * 10).toFixed(10), // Ensure consistent precision
+            trailDelay: (j * 0.1).toFixed(10), // Ensure consistent precision
           }
         })
       }
@@ -282,7 +282,7 @@ export default function LandingPage() {
                   style={
                     {
                       '--trail-size': `${trail.size}px`,
-                      '--trail-opacity': trail.opacity,
+                      '--trail-opacity': parseFloat(trail.opacity),
                       '--trail-top': `${trail.top}px`,
                       '--trail-delay': `${trail.trailDelay}s`,
                     } as React.CSSProperties

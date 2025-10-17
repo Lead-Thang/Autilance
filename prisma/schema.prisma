@@ -11,6 +11,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ================================
+// Autilance Enums
+// ================================
+
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+  SUPPORT
+  MODERATOR
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EscrowStatus {
+  PENDING
+  HELD
+  RELEASED
+  REFUNDED
+}
+
 // User model
 model User {
   id            String    @id @default(cuid())
@@ -43,12 +68,15 @@ model User {
   contractsAsClient     Contract[] @relation("ClientContracts")
   transactionsAsClient  EscrowTransaction[] @relation("ClientTransactions")
   transactionsAsFreelancer EscrowTransaction[] @relation("FreelancerTransactions")
+  transactionsFrom Transaction[] @relation("TransactionFrom")
+  transactionsTo   Transaction[] @relation("TransactionTo")
   orders        Order[]        @relation("ClientOrders")
   reviewsGiven  Review[]       @relation("Reviewer")
   reviewsReceived Review[]     @relation("Reviewee")
   messagesSent  Message[]      @relation("Sender")
   messagesReceived Message[]   @relation("Recipient")
   disputesFiled Dispute[]      @relation("DisputeFiledBy")
+  auditLogs     AuditLog[]
 
   // Community relations
   topicsCreated    Topic[]          @relation("TopicAuthor")
@@ -57,6 +85,37 @@ model User {
   topicReplyLikes  TopicReplyLike[] @relation("TopicReplyLikes")
   eventsOrganized  CommunityEvent[] @relation("EventOrganizer")
   eventAttendances EventAttendee[]  @relation("EventAttendees")
+
+  // ================================
+  // Autilance Enhancements
+  // ================================
+
+  // Role-based permissions (BUYER, SELLER, ADMIN, SUPPORT)
+  role           UserRole              @default(BUYER)
+
+  // Gamification System
+  xp             Int                   @default(0)
+  level          Int                   @default(1)
+  credibilityScore Int                 @default(0)
+  lastActivityAt DateTime?
+
+  // AI Preferences & Trust Score
+  aiMatchingEnabled Boolean            @default(true)
+  aiAssistantTier   String             @default("basic") // 'basic', 'pro', 'enterprise'
+  trustScore       Float               @default(0.5) // 0-1 scale
+  scamReports      Int                 @default(0)
+  verifiedTrades   Int                 @default(0)
+
+  // Enhanced Relations
+  reputationEvents ReputationEvent[]
+  fraudAlerts      FraudAlert[]
+  aiAnalyses       AIAnalysis[]
+  disputeResolutions DisputeResolution[]
+
+  // Freelance system additions
+  kycStatus       KycStatus     @default(PENDING)
+  verifiedBadges  String[]      @default([])
+  walletBalance   Int           @default(0) // in cents
 }
 
 // Account model for OAuth providers
@@ -439,6 +498,9 @@ model Profile {
   website           String?
   vettingTier       String     @default("open") // 'open', 'verified', 'expert'
   verificationStatus String    @default("pending") // 'pending', 'approved', 'rejected'
+  portfolioLinks    String[]   @default([])
+  ratingMetrics     Json?      // e.g., { averageRating: 4.5, totalReviews: 10 }
+  disputeRate       Float      @default(0.0) // percentage of disputes
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
@@ -526,6 +588,10 @@ model Project {
   isRemote          Boolean   @default(true)
   location          String?
   status            String    @default("open") // 'open', 'in_progress', 'completed', 'cancelled'
+  type              String    @default("fixed") // 'fixed', 'milestone', 'results'
+  kpiSpec           String?
+  evaluationWindowDays Int     @default(7)
+  escrowStatus      EscrowStatus @default(PENDING)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -534,6 +600,7 @@ model Project {
   category  Category? @relation(fields: [categoryId], references: [id])
   proposals Proposal[]
   contracts Contract[]
+  aiBriefs  JobBrief[] // AI-generated job briefs
 }
 
 // Project proposals
@@ -545,6 +612,8 @@ model Proposal {
   estimatedPriceCents Int?
   estimatedDuration   String?   // 'days', 'weeks', 'months'
   status              String    @default("submitted") // 'submitted', 'accepted', 'rejected'
+  price               Int?      // in cents
+  terms               String?   @db.Text
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -576,6 +645,7 @@ model Contract {
   reviews    Review[]
   messages   Message[]
   disputes   Dispute[]
+  aiAssistant ProjectAssistant? // AI project assistance
 }
 
 // Milestone model
@@ -593,6 +663,22 @@ model Milestone {
   // Relations
   contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
   escrowTransaction EscrowTransaction?
+  deliveries Delivery[]
+}
+
+// Delivery model
+model Delivery {
+  id          String    @id @default(cuid())
+  milestoneId String
+  fileUrl     String?
+  fileHash    String?   // SHA256 hash
+  deliveredAt DateTime  @default(now())
+  notified    Boolean   @default(false)
+
+   // Relations
+   milestone Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+
+   @@index([milestoneId])
 }
 
 // EscrowTransaction model
@@ -615,6 +701,7 @@ model EscrowTransaction {
   freelancer User     @relation("FreelancerTransactions", fields: [freelancerId], references: [id])
   contract   Contract? @relation(fields: [contractId], references: [id])
   milestone  Milestone? @relation(fields: [milestoneId], references: [id])
+  commissionLog CommissionLog? // Autilance 5% commission
 }
 
 // Order model
@@ -647,6 +734,17 @@ model Review {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
+  // ================================
+  // Autilance Enhancements
+  // ================================
+  visible              Boolean    @default(false)
+  aiGenerated          Boolean    @default(false)
+  verifiedDelivery     Boolean    @default(false)
+  deliverySpeed        Int?       // 1-5 scale
+  communicationQuality Int?       // 1-5 scale
+  technicalSkill       Int?       // 1-5 scale
+  paymentTimeliness    Boolean    @default(true)
+
   // Relations
   reviewer User     @relation("Reviewer", fields: [reviewerId], references: [id])
   reviewee User     @relation("Reviewee", fields: [revieweeId], references: [id])
@@ -660,6 +758,8 @@ model Message {
   recipientId String
   contractId String?
   content    String    @db.Text
+  attachments String[] @default([])
+  signed     Boolean   @default(false)
   isRead     Boolean   @default(false)
   createdAt  DateTime  @default(now())
 
@@ -676,14 +776,23 @@ model Dispute {
   filedById   String
   subject     String
   description String    @db.Text
+  evidence    String[]  @default([])
+  aiSummary   String?   @db.Text
   status      String    @default("open") // 'open', 'in_review', 'resolved'
   resolution  String?   @db.Text
   createdAt   DateTime  @default(now())
   resolvedAt  DateTime?
 
+  // ================================
+  // Autilance AI Resolution
+  // ================================
+  confidence      Float?     // AI confidence score
+  evidenceUrls    String[]   @default([]) // Links to chat logs, files, etc.
+  aiAnalysis      Json?      // AI reasoning and recommendations
   // Relations
   contract Contract @relation(fields: [contractId], references: [id])
   filedBy  User     @relation("DisputeFiledBy", fields: [filedById], references: [id])
+  resolutions DisputeResolution[]
 }
 
 // ================================
@@ -820,4 +929,157 @@ model Product {
 
   // Relations
   store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+}
+
+// ================================
+// Autilance Enhancement Models
+// ================================
+
+// Reputation & Gamification System
+model ReputationEvent {
+  id          String   @id @default(cuid())
+  userId      String
+  eventType   String   // 'project_completed', 'review_received', 'verification_passed'
+  xpGained    Int
+  description String
+  metadata    Json?    // Additional context
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([eventType])
+}
+
+// AI Analysis system
+model AIAnalysis {
+  id          String   @id @default(cuid())
+  userId      String
+  analysisType String  // 'skill_matching', 'client_fit', 'fraud_detection', 'conflict_resolution'
+  modelUsed   String   // 'claude-3.5-sonnet', 'embedding-ada', 'bert-classifier'
+  confidence  Float
+  metadata    Json     // Analysis results, reasoning
+  costCents   Int      // API usage cost
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([analysisType])
+}
+
+// Conflict Resolution with AI
+model DisputeResolution {
+  id           String    @id @default(cuid())
+  disputeId    String
+  userId       String
+  resolutionType String  // 'ai_suggestion', 'moderator_override', 'user_accepted'
+  confidence   Float
+  rationale    String    @db.Text
+  evidence     Json      // Chat analysis, file timestamps, etc.
+  acceptedAt   DateTime?
+
+  dispute Dispute @relation(fields: [disputeId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([disputeId, userId])
+}
+
+// AI-powered job briefs
+model JobBrief {
+  id                String           @id @default(cuid())
+  projectId         String
+  generatedByAI     Boolean          @default(true)
+  clarityScore      Float            // 0-1 scale
+  industryAlignment Float
+  titleOptimization Json             // AI suggestions for improvement
+  contentAnalysis   Json             // Skill requirements, complexity
+  riskFlags         String[]         // AI-detected risks
+  createdAt         DateTime         @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+}
+
+// Fraud Detection & Trust
+model FraudAlert {
+  id              String           @id @default(cuid())
+  userId          String
+  alertType       String           // 'suspicious_pattern', 'unusual_activity', 'phishing_attempt'
+  severity        String           @default("medium") // 'low', 'medium', 'high', 'critical'
+  confidence      Float
+  details         Json             // Evidence, patterns detected
+  resolved        Boolean          @default(false)
+  resolvedAt      DateTime?
+  actionTaken     String?
+  createdAt       DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([alertType])
+  @@index([severity])
+}
+
+// AI Project Assistant
+model ProjectAssistant {
+  id                  String   @id @default(cuid())
+  contractId          String   @unique
+  assistantTier       String   @default("basic") // 'basic', 'pro'
+  promptCount         Int      @default(0)
+  priceSuggestions    Int      @default(0)
+  milestoneDrafting   Int      @default(0)
+  riskAssessments     Int      @default(0)
+  totalCost           Int      @default(0) // API costs in cents
+  createdAt           DateTime @default(now())
+
+  contract Contract @relation(fields: [contractId], references: [id])
+
+  @@index([contractId])
+}
+
+// Commission Tracking (5% rate)
+model CommissionLog {
+  id                  String   @id @default(cuid())
+  transactionId       String   @unique
+  transaction         EscrowTransaction @relation(fields: [transactionId], references: [id])
+  grossAmount         Int      // Amount before commission (cents)
+  commissionRate      Float    @default(0.05) // 5% = 0.05
+  commissionAmount    Int      // Amount taken (cents)
+  netAmount           Int      // Amount to freelancer (cents)
+  processingFee       Int      // Stripe/other fees (cents)
+  levelDiscount       Float    @default(0) // XP level discount (e.g., 0.01 = 1% off)
+  finalCommission     Int      // After discount (cents)
+  createdAt           DateTime @default(now())
+
+  @@index([transactionId])
+}
+
+// AuditLog model
+model AuditLog {
+  id        String    @id @default(cuid())
+  action    String    // 'user_login', 'job_created', 'milestone_delivered', etc.
+  actorId   String?
+  payload   Json?     // additional data
+  timestamp DateTime  @default(now())
+
+  // Relations
+  actor User? @relation(fields: [actorId], references: [id])
+}
+
+// Transaction model for general transactions
+model Transaction {
+  id        String    @id @default(cuid())
+  type      String    // 'escrow_hold', 'escrow_release', 'commission', 'payout'
+  amount    Int       // in cents
+  fromId    String?
+  toId      String?
+  status    String    @default("pending") // 'pending', 'completed', 'failed'
+  metadata  Json?
+  createdAt DateTime  @default(now())
+
+  // Relations
+  from User? @relation("TransactionFrom", fields: [fromId], references: [id])
+  to   User? @relation("TransactionTo", fields: [toId], references: [id])
 }

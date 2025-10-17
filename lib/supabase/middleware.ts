@@ -1,15 +1,50 @@
 import { type NextRequest, NextResponse } from 'next/server'
-
-// IMPORTANT: This helper runs inside Next.js middleware which executes in the
-// Edge runtime. Avoid importing Node-only modules (like server-side Supabase
-// clients) at the top level here. If you need server-side session validation
-// use a separate-server route (e.g. `app/api/session/route.ts`).
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 export async function updateSession(request: NextRequest) {
-  // Return a minimal response that is safe for the Edge runtime. We intentionally
-  // avoid creating any Supabase server client here to prevent Node-only module
-  // imports from leaking into the Edge bundle.
-  const response = NextResponse.next({ request })
+  let response = NextResponse.next({ request })
+
+  try {
+    // Create a Supabase server client with the right configuration for Edge runtime
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return request.cookies.get(name)?.value
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            request.cookies.set({
+              name,
+              value,
+              ...options,
+            })
+            response = NextResponse.next({ request })
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            })
+          },
+          remove(name: string, options: CookieOptions) {
+            request.cookies.delete(name)
+            response = NextResponse.next({ request })
+            response.cookies.delete({
+              name,
+              ...options,
+            })
+          },
+        },
+      }
+    )
+
+    // This will refresh the session cookie
+    await supabase.auth.getUser()
+  } catch (error) {
+    // Log the error but don't throw to prevent middleware failures
+    console.error('Error in Supabase updateSession:', error)
+  }
 
   return { supabase: null, response }
 }

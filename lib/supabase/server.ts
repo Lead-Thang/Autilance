@@ -13,7 +13,11 @@ export async function createClient() {
     return createSupabaseClient<Database>('', '', {});
   }
 
-  const supabase = createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey, {});
+  const supabase = createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+    }
+  });
 
   try {
     // Optionally refresh session to ensure current user data
