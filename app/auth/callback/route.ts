@@ -12,7 +12,13 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
     
     // Exchange the code for a session
-    await supabase.auth.exchangeCodeForSession(code)
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    
+    if (error) {
+      console.error('OAuth callback error:', error)
+      // Redirect to sign-up page with error message
+      return NextResponse.redirect(`${requestUrl.origin}/auth/signup?error=oauth_error`)
+    }
   }
 
   // URL to redirect to after sign in process completes

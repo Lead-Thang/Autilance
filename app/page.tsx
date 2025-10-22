@@ -371,11 +371,10 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-16 bg-gradient-to-b from-slate-900/50 via-slate-900 to-slate-950">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-600/5 to-indigo-600/10 pointer-events-none"></div>
+      <section id="features" className="py-16 bg-white dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-6 relative">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl text-white font-bold mb-6">
+            <h2 className="text-4xl lg:text-5xl text-black font-bold mb-6">
               Everything You Need to
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 {" "}
@@ -397,10 +396,10 @@ export default function LandingPage() {
                     >
                       <feature.icon className="w-7 h-7 text-white" />
                     </div>
-                    <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
+                    <CardTitle className="text-xl mb-2 text-black">{feature.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <CardDescription className="text-base leading-relaxed">{feature.description}</CardDescription>
+                    <CardDescription className="text-base leading-relaxed text-black">{feature.description}</CardDescription>
                   </CardContent>
                 </Card>
               </Link>
@@ -539,13 +538,19 @@ export default function LandingPage() {
                   </div>
                   <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">"{testimonial.content}"</p>
                   <div className="flex items-center gap-3">
-                    <Image
-                      src={testimonial.avatar || "/placeholder.svg"}
-                      alt={testimonial.name}
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                    />
+                    {typeof testimonial.avatar === 'string' || !testimonial.avatar ? (
+                      <Image
+                        src={testimonial.avatar || "/placeholder.svg"}
+                        alt={testimonial.name}
+                        width={40}
+                        height={40}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <div className="rounded-full">
+                        {testimonial.avatar}
+                      </div>
+                    )}
                     <div>
                       <div className="font-semibold">{testimonial.name}</div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
