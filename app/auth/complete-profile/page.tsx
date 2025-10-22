@@ -19,6 +19,7 @@ export default function CompleteProfilePage() {
   const [displayName, setDisplayName] = useState("")
   const [userHandle, setUserHandle] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const [error, setError] = useState("")
   const router = useRouter()
   const supabase = createClient()
@@ -26,26 +27,48 @@ export default function CompleteProfilePage() {
   // Check if user is authenticated
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push("/auth/signup")
-      } else {
+      setIsCheckingAuth(true)
+      try {
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError) {
+          console.error("Auth error:", authError)
+          router.push("/auth/signup")
+          return
+        }
+
+        if (!user) {
+          router.push("/auth/signup")
+          return
+        }
+
         // Check if user has already completed their profile
-        const { data: userData } = await supabase
+        const { data: userData, error: userError } = await supabase
           .from('users')
           .select('display_name')
           .eq('id', user.id)
           .single()
 
+        if (userError) {
+          console.error("User query error:", userError)
+          // If there's an error checking profile, allow them to complete it
+          return
+        }
+
         if (userData?.display_name) {
           // If user already has a display name, redirect to dashboard
           router.push("/dashboard")
         }
+      } catch (err) {
+        console.error("Unexpected error during auth check:", err)
+        router.push("/auth/signup")
+      } finally {
+        setIsCheckingAuth(false)
       }
     }
 
     checkUser()
-  }, [router, supabase])
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,7 +89,7 @@ export default function CompleteProfilePage() {
         .from('users')
         .update({
           display_name: displayName,
-          handle: userHandle ? `@${userHandle.replace('@', '')}` : null
+          handle: userHandle ? `@${userHandle.replaceAll('@', '')}` : null
         })
         .eq('id', user.id)
 
@@ -81,6 +104,17 @@ export default function CompleteProfilePage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-primary/5 to-accent/5">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span className="text-lg">Checking authentication...</span>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -122,9 +156,21 @@ export default function CompleteProfilePage() {
               </div>
             </div>
 
-
-
-
+            <div className="space-y-2">
+              <Label htmlFor="userHandle">Handle</Label>
+              <div className="relative">
+                <AtSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="userHandle"
+                  placeholder="@yourhandle"
+                  value={userHandle}
+                  onChange={(e) => setUserHandle(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="pl-10"
+                />
+              </div>
+            </div>
 
             <Button
               type="submit"

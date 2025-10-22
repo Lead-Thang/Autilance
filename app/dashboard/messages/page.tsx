@@ -124,7 +124,7 @@ export default function MessagesPage() {
     }
 
     if (user?.id) fetchConversations()
-  }, [user?.id])
+  }, [user?.id, supabase])
 
   // Fetch messages for active conversation
   useEffect(() => {
@@ -189,7 +189,7 @@ export default function MessagesPage() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [activeConversation])
+  }, [activeConversation, user])
 
   const handleSendMessage = async () => {
     if (newMessage.trim() === "" || !activeConversation || !user) {
@@ -421,8 +421,11 @@ export default function MessagesPage() {
               
               <Separator />
               
-              <div className="p-4">
-                <div className="flex items-center space-x-2">
+               <div className="p-4">
+                 {sendMessageError && (
+                   <div className="text-sm text-red-500 mb-2">{sendMessageError}</div>
+                 )}
+                 <div className="flex items-center space-x-2">
                   <Button variant="ghost" size="icon" aria-label="Attach file">
                     <Paperclip className="h-4 w-4" />
                   </Button>

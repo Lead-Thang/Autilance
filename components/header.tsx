@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { NavUser } from "@/components/nav-user"
@@ -29,14 +30,17 @@ export function Header({
   }, [onUserUpdate])
 
   React.useEffect(() => {
+    const mounted = { current: true }
     const supabase = createClient()
 
     const fetchUser = async () => {
       try {
         const { data: { user: supabaseUser }, error } = await supabase.auth.getUser()
 
+        if (!mounted.current) return
+
         if (error) {
-          console.error("Error fetching user:", error)
+          console.error("Error fetching user")
           return
         }
 
@@ -48,11 +52,15 @@ export function Header({
           })
         }
       } catch (error) {
-        console.error("Error loading user:", error)
+        console.error("Error updating session")
       }
     }
 
     fetchUser()
+
+    return () => {
+      mounted.current = false
+    }
   }, [])
 
   return (
@@ -64,14 +72,14 @@ export function Header({
       <div className={`flex items-center justify-between h-full w-full max-w-full px-4 ${isSidebarCollapsed ? 'gap-2' : 'gap-4'}`}>
         {/* Left: Sidebar Trigger and Brand */}
         <div className="flex items-center gap-2">
-          <a href="/dashboard" className="flex items-center gap-2">
+          <Link href="/dashboard" className="flex items-center gap-2">
             <div className="flex aspect-square bg-gradient-to-br from-blue-600 to-purple-700 size-8 items-center justify-center rounded-md text-primary-foreground">
               <img src="/logo.png" alt="Autilance logo" className="size-5" />
             </div>
             <div className={`text-sm leading-tight ${isSidebarCollapsed ? 'hidden sm:block' : 'block'}`}>
               <span className="truncate font-semibold">Autilance</span>
             </div>
-          </a>
+          </Link>
         </div>
 
         {/* Center: Placeholder for search or page switcher (optional) */}

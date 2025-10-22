@@ -1,14 +1,18 @@
-/* Component monitoring styles for debugging layout */
-/* This file helps visualize different components in your app */
+/*
+ * Development-only visual debugging CSS
+ * To enable debugging: Add data-debug-mode="true" to the <html> or <body> element
+ * Example: <body data-debug-mode="true">
+ * This will activate component outlines, labels, and layout debugging tools
+ */
 
-/* Header component monitoring */
-.app-header {
+/* Component monitoring styles for debugging layout - only active when data-debug-mode="true" */
+[data-debug-mode="true"] .app-header {
   outline: 2px solid #3b82f6; /* Blue outline */
   background-color: rgba(59, 130, 246, 0.1);
   position: relative;
 }
 
-.app-header::after {
+[data-debug-mode="true"] .app-header::after {
   content: "Header";
   position: absolute;
   top: 4px;
@@ -21,14 +25,13 @@
   opacity: 0.9;
 }
 
-/* Footer component monitoring */
-.app-footer {
+[data-debug-mode="true"] .app-footer {
   outline: 2px solid #10b981; /* Green outline */
   background-color: rgba(16, 185, 129, 0.1);
   position: relative;
 }
 
-.app-footer::after {
+[data-debug-mode="true"] .app-footer::after {
   content: "Footer";
   position: absolute;
   top: 4px;
@@ -41,14 +44,13 @@
   opacity: 0.9;
 }
 
-/* Sidebar component monitoring */
-.app-sidebar {
+[data-debug-mode="true"] .app-sidebar {
   outline: 2px solid #8b5cf6; /* Violet outline */
   background-color: rgba(139, 92, 246, 0.1);
   position: relative;
 }
 
-.app-sidebar::after {
+[data-debug-mode="true"] .app-sidebar::after {
   content: "Sidebar";
   position: absolute;
   top: 4px;
@@ -61,14 +63,13 @@
   opacity: 0.9;
 }
 
-/* Main content area monitoring */
-.app-main {
+[data-debug-mode="true"] .app-main {
   outline: 2px solid #f59e0b; /* Amber outline */
   background-color: rgba(245, 158, 11, 0.1);
   position: relative;
 }
 
-.app-main::after {
+[data-debug-mode="true"] .app-main::after {
   content: "Main";
   position: absolute;
   top: 4px;
@@ -81,14 +82,13 @@
   opacity: 0.9;
 }
 
-/* Navigation component monitoring */
-.app-nav {
+[data-debug-mode="true"] .app-nav {
   outline: 2px solid #ef4444; /* Red outline */
   background-color: rgba(239, 68, 68, 0.1);
   position: relative;
 }
 
-.app-nav::after {
+[data-debug-mode="true"] .app-nav::after {
   content: "Nav";
   position: absolute;
   top: 4px;
@@ -101,14 +101,13 @@
   opacity: 0.9;
 }
 
-/* Card component monitoring */
-.app-card {
+[data-debug-mode="true"] .app-card {
   outline: 2px solid #ec4899; /* Pink outline */
   background-color: rgba(236, 72, 153, 0.1);
   position: relative;
 }
 
-.app-card::after {
+[data-debug-mode="true"] .app-card::after {
   content: "Card";
   position: absolute;
   top: 4px;
@@ -121,14 +120,13 @@
   opacity: 0.9;
 }
 
-/* Section component monitoring */
-.app-section {
+[data-debug-mode="true"] .app-section {
   outline: 2px solid #06b6d4; /* Cyan outline */
   background-color: rgba(6, 182, 212, 0.1);
   position: relative;
 }
 
-.app-section::after {
+[data-debug-mode="true"] .app-section::after {
   content: "Section";
   position: absolute;
   top: 4px;
@@ -141,31 +139,28 @@
   opacity: 0.9;
 }
 
-/* Utility classes for debugging layout */
-.debug-layout {
+/* Utility classes for debugging layout - only active when data-debug-mode="true" */
+[data-debug-mode="true"] .debug-layout {
   border: 1px dashed #94a3b8;
 }
 
-.debug-flex-container {
+[data-debug-mode="true"] .debug-flex-container {
   border: 1px dashed #4f46e5;
   background-color: rgba(79, 70, 229, 0.05);
 }
 
-.debug-grid-container {
+[data-debug-mode="true"] .debug-grid-container {
   border: 1px dashed #0d9488;
   background-color: rgba(13, 148, 136, 0.05);
 }
 
-/* Component highlight on hover */
-[class*="app-"]:hover {
-  outline-width: 3px !important;
-  outline-offset: 1px;
-  z-index: 1000;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9);
+/* Component highlight on hover - only active when data-debug-mode="true" */
+[data-debug-mode="true"] [class*="app-"].highlightable:hover {
+  box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.5);
 }
 
-/* Responsive debugging - show screen size */
-body::before {
+/* Responsive debugging - show screen size - only active when data-debug-mode="true" */
+[data-debug-mode="true"] body::before {
   content: "Screen Size: " attr(data-screen-size);
   position: fixed;
   bottom: 10px;
@@ -175,37 +170,42 @@ body::before {
   padding: 4px 8px;
   font-size: 14px;
   border-radius: 4px;
-  z-index: 9999;
+  z-index: 10;
   opacity: 0.8;
+  pointer-events: none;
 }
 
-/* Add screen size indicators */
+/* Add screen size indicators - only active when data-debug-mode="true" */
+[data-debug-mode="true"] {
+  /* Media queries for screen size indicators - only active when debug mode is true */
+}
+
 @media (max-width: 639px) {
-  body::before {
+  [data-debug-mode="true"] body::before {
     content: "Screen Size: xs (mobile)";
   }
 }
 
 @media (min-width: 640px) and (max-width: 767px) {
-  body::before {
+  [data-debug-mode="true"] body::before {
     content: "Screen Size: sm (tablet)";
   }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
-  body::before {
+  [data-debug-mode="true"] body::before {
     content: "Screen Size: md (small desktop)";
   }
 }
 
 @media (min-width: 1024px) and (max-width: 1279px) {
-  body::before {
+  [data-debug-mode="true"] body::before {
     content: "Screen Size: lg (desktop)";
   }
 }
 
 @media (min-width: 1280px) {
-  body::before {
+  [data-debug-mode="true"] body::before {
     content: "Screen Size: xl (large desktop)";
   }
 }

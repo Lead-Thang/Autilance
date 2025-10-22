@@ -99,12 +99,9 @@ const handleGoogleSignUp = async () => {
         timestamp: new Date().toISOString()
       })
 
-      // Set user-facing error message
-      setError("Failed to sign up with Google. Please check your connection and try again.")
-
-      // Optionally rethrow for any calling code that might need to handle it
-      throw error
-    } finally {
+       // Set user-facing error message
+       setError("Failed to sign up with Google. Please check your connection and try again.")
+     } finally {
      setIsLoading(false);
    }
 }

@@ -75,31 +75,30 @@ const features = [
 
 const testimonials = [
   {
-    name: "Sarah Chen",
-    role: "E-commerce Founder",
-    company: "TechStyle Co.",
+    name: "WhereMaMcDonald",
+    role: "Burden",
+    company: "Mom's house",
     content:
-      "Autilance transformed my business. The AI store builder created a professional site in minutes, and sales increased by 300%!",
+      "The food's great🍔🍕🍟",
+    rating: 5,
+  },
+  {
+    name: "AnybodyGot10Bucks",
+    role: "Beggar",
+    company: "The Streets",
+    content:
+      "I don't give af about ur app, just gimme money😡",
     rating: 5,
     avatar: "/placeholder.svg?height=40&width=40",
   },
   {
-    name: "Marcus Rodriguez",
-    role: "Marketing Director",
-    company: "GrowthLab",
+    name: "Autilance Founder",
+    role: "Founder & CEO",
+    company: "Autilance",
     content:
-      "The multi-AI assistant is incredible. Having Mistral, Grok, and Gemini in one platform gives me diverse perspectives for every challenge.",
+      "I made ts so...😁",
     rating: 5,
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    name: "Emily Watson",
-    role: "Startup CEO",
-    company: "InnovateCorp",
-    content:
-      "The analytics insights helped us identify key growth opportunities we never would have found manually. Game-changing platform!",
-    rating: 5,
-    avatar: "/placeholder.svg?height=40&width=40",
+    avatar: <Image src="/logo.png" alt="Autilance Founder" width={40} height={40} />,
   },
 ]
 
@@ -367,9 +366,8 @@ export default function LandingPage() {
                 </>
               )}
             </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-200 justify-center items-center"></div>
-          </div>
+           </div>
+           </div>
       </section>
 
       {/* Features Section */}
@@ -515,7 +513,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-white/50 dark:bg-slate-800/50">
+      <section className="py-20 bg-white dark:bg-slate-800/60">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">
