@@ -16,11 +16,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const { proposalId, milestones } = body // milestones: [{ title, amountCents, dueDate }]
 
     // Validate request body to prevent runtime errors
-    if (!proposalId || !Array.isArray(milestones) || milestones.length === 0) {
-      return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
-    }
-
-    // Validate request body
     if (!proposalId || typeof proposalId !== 'string') {
       return NextResponse.json({ error: "Proposal ID is required and must be a string" }, { status: 400 })
     }

@@ -63,14 +63,15 @@ export default function SignUpPage() {
 
       if (error) {
         setError(error.message || "Account creation failed. Please try again.")
-      } else if (data.user) {
-        router.push("/dashboard")
-      }
-    } catch (error) {
-      setError("An error occurred. Please try again.")
-    } finally {
-      setIsLoading(false)
-    }
+        } else if (data.user) {
+          router.push("/auth/complete-profile")
+        }
+     } catch (error) {
+       console.error("Signup error:", error instanceof Error ? error.message : String(error), error instanceof Error ? error.stack : undefined)
+       setError("An unexpected error occurred during signup. Please try again.")
+     } finally {
+       setIsLoading(false)
+     }
   }
 
 const handleGoogleSignUp = async () => {
@@ -80,22 +81,32 @@ const handleGoogleSignUp = async () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/auth/complete-profile`
         }
       });
 
     if (error) {
       console.error("Google sign-up error:", error);
       setError(error.message || "Google sign-up failed");
-    } else if (data.url) {
-      router.push(data.url);
-    }
-  } catch (error) {
-    console.error("Google sign-up error:", error);
-    setError("An error occurred while connecting to Google. Please try again.");
-  } finally {
-    setIsLoading(false);
-  }
+      } else if (data.url) {
+        router.push(data.url);
+      }
+    } catch (error) {
+      // Log the error for debugging
+      console.error("Google OAuth signup failed:", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        timestamp: new Date().toISOString()
+      })
+
+      // Set user-facing error message
+      setError("Failed to sign up with Google. Please check your connection and try again.")
+
+      // Optionally rethrow for any calling code that might need to handle it
+      throw error
+    } finally {
+     setIsLoading(false);
+   }
 }
 
   const [showPassword, setShowPassword] = useState(false); // 新增状态管理

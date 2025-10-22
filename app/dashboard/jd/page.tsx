@@ -139,6 +139,12 @@ type UserBadge = {
   verified: boolean;
 }
 
+type AIFitScore = {
+  totalScore: number;
+  reasoning: string[];
+  // Add other expected properties from calculateAIFitScore
+};
+
 export default function JobDescriptionsPage() {
   const [activeTab, setActiveTab] = useState("browse");
   // State for job data
@@ -152,12 +158,6 @@ export default function JobDescriptionsPage() {
   const [loadingVerifications, setLoadingVerifications] = useState(true);
   const [loadingBadges, setLoadingBadges] = useState(true);
   const [filters, setFilters] = useState<JobFilters>({});
-  // Define a proper type for AI fit score responses
-  type AIFitScore = {
-    totalScore: number;
-    reasoning: string[];
-    // Add other expected properties from calculateAIFitScore
-  }
 
   // AI Fit Score states
   const [aiFitScores, setAiFitScores] = useState<Record<string, AIFitScore>>({});
@@ -244,10 +244,46 @@ export default function JobDescriptionsPage() {
           projectType: "maintenance",
           industry: "fintech",
           riskFlags: ["unpaid-test", "extreme-nda"]
+        }, {
+          id: "4",
+          title: "Full Stack Engineer",
+          company: "Innovation Labs",
+          category: "Engineering",
+          description: "Join our team to build cutting-edge web applications using modern technologies. You'll work on both frontend and backend components of our platform.",
+          skills: [
+            { name: "TypeScript", level: "expert" },
+            { name: "React", level: "advanced" },
+            { name: "Node.js", level: "advanced" },
+            { name: "PostgreSQL", level: "intermediate" }
+          ],
+          behaviors: [
+            { name: "Communication", description: "Effectively communicate technical concepts to team members", priority: "high" },
+            { name: "Problem Solving", description: "Identify and solve complex technical problems", priority: "critical" },
+            { name: "Adaptability", description: "Quickly learn and implement new technologies as needed", priority: "medium" }
+          ],
+          certifications: [
+            { name: "AWS Certified Developer", required: false },
+            { name: "Google Cloud Professional", required: false }
+          ],
+          verifiedCount: 15,
+          verifiedUsers: 28,
+          updatedAt: "2023-04-22",
+          creator: "Innovation Labs",
+          location: "Remote",
+          remote: true,
+          clientSpend: "50k+",
+          clientHireRate: 72,
+          clientRating: 4.9,
+          clientVerified: true,
+          budgetType: "hourly",
+          hourlyRate: "60-100",
+          projectType: "new-build",
+          industry: "saas",
+          status: "open",
+          deadline: "2023-06-30"
         }];
-        // setJobs(mockJobs);
-        setJobs([]); // Keep as empty array for now
-        setFilteredJobs([]); // Keep as empty array for now
+        setJobs(mockJobs);
+        setFilteredJobs(mockJobs);
       } catch (error) {
         console.error('Error fetching jobs:', error);
         // Set to an empty array to avoid undefined issues
@@ -398,498 +434,500 @@ export default function JobDescriptionsPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Jobs</h1>
-          <p className="text-gray-600">Browse company requirements or create your own JD</p>
-          <div className="mt-3 flex items-center gap-2">
-            <div className="flex items-center text-xs bg-gradient-to-r from-green-100 to-blue-100 text-green-800 px-3 py-1.5 rounded-full font-medium">
-              <span className="text-green-600 font-bold text-sm mr-1">5%</span>
-              Commission - Lowest in Industry! ✨
+    <div className="flex justify-center w-full">
+      <div className="flex w-full items-start justify-center p-2 pt-6">
+        <div className="w-full max-w-7xl">
+          <div className="flex w-full items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Jobs</h1>
+              <p className="text-gray-600">Browse company requirements or create your own JD</p>
+              <div className="mt-3 flex items-center gap-2">
+                <div className="flex items-center text-xs bg-gradient-to-r from-green-100 to-blue-100 text-green-800 px-3 py-1.5 rounded-full font-medium">
+                  <span className="text-green-600 font-bold text-sm mr-1">5%</span>
+                  Commission - Lowest in Industry! ✨
+                </div>
+                <Badge className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5">
+                  AI-Powered Matching
+                </Badge>
+              </div>
             </div>
-            <Badge className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5">
-              AI-Powered Matching
-            </Badge>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[300px]">
-              <TabsList className="grid grid-cols-4 h-9 p-1 bg-muted rounded-lg">
-                <TabsTrigger value="browse" className="h-7 text-xs">Browse</TabsTrigger>
-                <TabsTrigger value="my-jds" className="h-7 text-xs">My Jobs</TabsTrigger>
-                <TabsTrigger value="verifications" className="h-7 text-xs">Verifications</TabsTrigger>
-                <TabsTrigger value="create" className="h-7 text-xs">Create</TabsTrigger>
-              </TabsList>
-            </Tabs>
-            {activeTab === "browse" && <FilterButton onFilterChange={handleFilterChange} />}
-          </div>
-          <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
-            <Plus className="w-4 h-4 mr-2" />
-            Create JD
-          </Button>
-        </div>
-      </div>
+            <div className="ml-auto flex items-end gap-5">
+               <div className="flex items-end gap-2">
+                 {activeTab === "browse" && <FilterButton onFilterChange={handleFilterChange} />}
+               </div>
+              <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
+                <Plus className="w-4 h-4 mr-2" />
+                Create JD
+              </Button>
+            </div>
+           </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsContent value="browse" className="space-y-4">
-          
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Job Listings - Left side */}
-            <div className="w-full">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 max-h-[600px] overflow-y-auto pr-2">
-                {loading ? (
-                  <div className="flex justify-center items-center h-60">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                  </div>
-                ) : filteredJobs.length === 0 ? (
-                  <div className="text-center py-10 text-gray-500">
-                    No jobs found. Try adjusting your search criteria.
-                  </div>
-                ) : (
-                  filteredJobs.map((job) => {
-                    const fitScore = calculateClientFitScore(job);
-                    const fitReasons = getFitReasons(job);
-                    const riskFactors = getRiskFactors(job);
-                    
-                    return (
-                      <Card key={job.id} className="hover:shadow-md transition-all duration-300">
-                        <CardHeader className="p-4">
-                          <div className="flex items-center justify-between">
-                            <Badge className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5">{job.category}</Badge>
-                            <div className="flex items-center space-x-2">
-                              <Badge 
-                                className={`text-xs px-2 py-0.5 ${
-                                  fitScore >= 70 
-                                    ? "bg-green-100 text-green-800" 
-                                    : fitScore >= 40 
-                                      ? "bg-yellow-100 text-yellow-800" 
-                                      : "bg-red-100 text-red-800"
-                                }`}
-                              >
-                                {fitScore}/100 fit
-                              </Badge>
-                              <div className="flex items-center space-x-1">
-                                <CheckCircle className="w-3 h-3 text-green-600" />
-                                <span className="text-xs text-gray-600">Verified: {job.verifiedCount}</span>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-4 h-9 p-1 bg-muted rounded-lg w-fit">
+            <TabsTrigger value="browse" className="h-7 text-xs">Browse</TabsTrigger>
+            <TabsTrigger value="my-jds" className="h-7 text-xs">My Jobs</TabsTrigger>
+            <TabsTrigger value="verifications" className="h-7 text-xs">Verifications</TabsTrigger>
+            <TabsTrigger value="create" className="h-7 text-xs">Create</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="browse" className="space-y-4">
+            <div className="flex flex-col lg:flex-row gap-6 mt-6">
+              {/* Job Listings - Left side */}
+              <div className="w-full lg:w-3/5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 max-h-[600px] overflow-y-auto pr-2">
+                  {loading ? (
+                    <div className="flex justify-center items-center h-60">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                    </div>
+                  ) : filteredJobs.length === 0 ? (
+                    <div className="text-center py-10 text-gray-500">
+                      No jobs found. Try adjusting your search criteria.
+                    </div>
+                  ) : (
+                    filteredJobs.map((job) => {
+                      const fitScore = calculateClientFitScore(job)
+                      const fitReasons = getFitReasons(job)
+                      const riskFactors = getRiskFactors(job)
+
+                      return (
+                        <Card key={job.id} className="hover:shadow-md transition-all duration-300">
+                          <CardHeader className="p-4">
+                            <div className="flex items-center justify-between">
+                              <Badge className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5">{job.category}</Badge>
+                              <div className="flex items-center space-x-2">
+                                <Badge
+                                  className={`text-xs px-2 py-0.5 ${
+                                    fitScore >= 70
+                                      ? "bg-green-100 text-green-800"
+                                      : fitScore >= 40
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : "bg-red-100 text-red-800"
+                                  }`}
+                                >
+                                  {fitScore}/100 fit
+                                </Badge>
+                                <div className="flex items-center space-x-1">
+                                  <CheckCircle className="w-3 h-3 text-green-600" />
+                                  <span className="text-xs text-gray-600">Verified: {job.verifiedCount}</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="flex items-center space-x-2 mt-2">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                              <AvatarFallback className="text-xs">{job.company.substring(0, 2)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <CardTitle className="text-base">{job.company}</CardTitle>
-                              <CardDescription className="text-sm">{job.title}</CardDescription>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src="/placeholder.svg?height=32&width=32" />
+                                <AvatarFallback className="text-xs">{job.company.substring(0, 2)}</AvatarFallback>
+                              </Avatar>
+
+                              <div>
+                                <CardTitle className="text-base">{job.company}</CardTitle>
+                                <CardDescription className="text-sm">{job.title}</CardDescription>
+                              </div>
                             </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="p-4 pt-0">
-                          <div className="flex flex-col justify-evenly gap-3 min-h-[200px] md:min-h-[250px] lg:min-h-[300px] transition-all duration-300">
-                            <div className="space-y-1">
-                              <div className="text-xs font-medium">Required Skills</div>
+                          </CardHeader>
+                          <CardContent className="p-4 pt-0">
+                            <div className="flex flex-col justify-evenly gap-3 min-h-[200px] md:min-h-[250px] lg:min-h-[300px] transition-all duration-300">
+                              <div className="space-y-1">
+                                <div className="text-xs font-medium">Required Skills</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {job.skills.map((skill: JobSkill, index: number) => (
+                                    <Badge key={index} variant="outline" className="bg-slate-100 text-xs px-1.5 py-0.5">
+                                      {skill.name}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between text-xs">
+                                <div className="flex items-center text-gray-600">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  Updated {job.updatedAt}
+                                </div>
+                                <div className="flex items-center text-gray-600">
+                                  <Users className="w-3 h-3 mr-1" />
+                                  {job.verifiedUsers} verified users
+                                </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                {fitReasons.length > 0 && (
+                                  <div>
+                                    <div className="text-xs font-medium text-green-700">Why it's a fit:</div>
+                                    <ul className="text-xs text-green-600 list-disc list-inside">
+                                      {fitReasons.map((reason, index) => (
+                                        <li key={index}>{reason}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+
+                                {riskFactors.length > 0 && (
+                                  <div>
+                                    <div className="text-xs font-medium text-red-700">Risks to watch:</div>
+                                    <ul className="text-xs text-red-600 list-disc list-inside">
+                                      {riskFactors.map((risk, index) => (
+                                        <li key={index}>{risk}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+
                               <div className="flex flex-wrap gap-1">
-                                {job.skills.map((skill: JobSkill, index: number) => (
-                                  <Badge key={index} variant="outline" className="bg-slate-100 text-xs px-1.5 py-0.5">
-                                    {skill.name}
+                                {job.clientVerified && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Verified Client
+                                  </Badge>
+                                )}
+                                {job.clientSpend && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    ${job.clientSpend} spent
+                                  </Badge>
+                                )}
+                                {job.clientHireRate && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {job.clientHireRate}% hire rate
+                                  </Badge>
+                                )}
+                                {job.riskFlags && job.riskFlags.map((flag, index) => (
+                                  <Badge key={index} variant="destructive" className="text-xs">
+                                    {flag.replace('-', ' ')}
                                   </Badge>
                                 ))}
                               </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between text-xs">
-                              <div className="flex items-center text-gray-600">
-                                <Clock className="w-3 h-3 mr-1" />
-                                Updated {job.updatedAt}
-                              </div>
-                              <div className="flex items-center text-gray-600">
-                                <Users className="w-3 h-3 mr-1" />
-                                {job.verifiedUsers} verified users
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              {fitReasons.length > 0 && (
-                                <div>
-                                  <div className="text-xs font-medium text-green-700">Why it's a fit:</div>
-                                  <ul className="text-xs text-green-600 list-disc list-inside">
-                                    {fitReasons.map((reason, index) => (
-                                      <li key={index}>{reason}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                              
-                              {riskFactors.length > 0 && (
-                                <div>
-                                  <div className="text-xs font-medium text-red-700">Risks to watch:</div>
-                                  <ul className="text-xs text-red-600 list-disc list-inside">
-                                    {riskFactors.map((risk, index) => (
-                                      <li key={index}>{risk}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
-                            
-                            <div className="flex flex-wrap gap-1">
-                              {job.clientVerified && (
-                                <Badge variant="secondary" className="text-xs">
-                                  Verified Client
-                                </Badge>
-                              )}
-                              {job.clientSpend && (
-                                <Badge variant="secondary" className="text-xs">
-                                  ${job.clientSpend} spent
-                                </Badge>
-                              )}
-                              {job.clientHireRate && (
-                                <Badge variant="secondary" className="text-xs">
-                                  {job.clientHireRate}% hire rate
-                                </Badge>
-                              )}
-                              {job.riskFlags && job.riskFlags.map((flag, index) => (
-                                <Badge key={index} variant="destructive" className="text-xs">
-                                  {flag.replace('-', ' ')}
-                                </Badge>
-                              ))}
-                            </div>
 
-                            <div className="flex justify-end gap-2">
-                              {!aiFitScores[job.id] ? (
-                                <Button
-                                  variant="outline"
-                                  className="flex-1 h-8 text-sm"
-                                  onClick={async () => {
-                                    setCalculatingFit(prev => ({ ...prev, [job.id]: true }))
-                                    try {
-                                      const fitScore = await calculateAIFit(job)
-                                      setAiFitScores(prev => ({ ...prev, [job.id]: fitScore }))
-                                    } catch (error) {
-                                      console.error("Failed to calculate AI fit:", error)
-                                    } finally {
-                                      setCalculatingFit(prev => ({ ...prev, [job.id]: false }))
-                                    }
-                                  }}
-                                  disabled={calculatingFit[job.id]}
-                                >
-                                  <Star className="w-3 h-3 mr-1" />
-                                  {calculatingFit[job.id] ? 'Analyzing...' : 'AI Fit Score'}
-                                </Button>
-                              ) : (
-                                <div className="flex-1 flex items-center gap-2 p-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded-md border">
-                                  <div className="flex items-center gap-1">
-                                    <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                                    <span className="text-sm font-semibold text-gray-800">
-                                      {aiFitScores[job.id].totalScore}/100
-                                    </span>
+                              <div className="flex justify-end gap-2">
+                                {!aiFitScores[job.id] ? (
+                                  <Button
+                                    variant="outline"
+                                    className="flex-1 h-8 text-sm"
+                                    onClick={async () => {
+                                      setCalculatingFit(prev => ({ ...prev, [job.id]: true }))
+                                      try {
+                                        const fitScore = await calculateAIFit(job)
+                                        setAiFitScores(prev => ({ ...prev, [job.id]: fitScore }))
+                                      } catch (error) {
+                                        console.error("Failed to calculate AI fit:", error)
+                                      } finally {
+                                        setCalculatingFit(prev => ({ ...prev, [job.id]: false }))
+                                      }
+                                    }}
+                                    disabled={calculatingFit[job.id]}
+                                  >
+                                    <Star className="w-3 h-3 mr-1" />
+                                    {calculatingFit[job.id] ? 'Analyzing...' : 'AI Fit Score'}
+                                  </Button>
+                                ) : (
+                                  <div className="flex-1 flex items-center gap-2 p-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded-md border">
+                                    <div className="flex items-center gap-1">
+                                      <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                                      <span className="text-sm font-semibold text-gray-800">
+                                        {aiFitScores[job.id].totalScore}/100
+                                      </span>
+                                    </div>
+                                    {aiFitScores[job.id].reasoning.length > 0 && (
+                                      <span className="text-xs text-gray-600 truncate">
+                                        {aiFitScores[job.id].reasoning[0]}
+                                      </span>
+                                    )}
                                   </div>
-                                  {aiFitScores[job.id].reasoning.length > 0 && (
-                                    <span className="text-xs text-gray-600 truncate">
-                                      {aiFitScores[job.id].reasoning[0]}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
+                                )}
 
-                              <Button variant="outline" className="flex-1 h-8 text-sm">
-                                <Eye className="w-3 h-3 mr-1" />
-                                View Requirements
-                              </Button>
+                                <Button variant="outline" className="flex-1 h-8 text-sm">
+                                  <Eye className="w-3 h-3 mr-1" />
+                                  View Requirements
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })
-                )}
+                          </CardContent>
+                        </Card>
+                      )
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Job Map - Right side */}
+              <div className="w-full lg:w-2/5">
+                <JobMap jobs={filteredJobs.map(job => ({
+                  id: job.id,
+                  creator: job.company,
+                  title: job.title,
+                  category: job.category,
+                  verifiedCount: job.verifiedCount,
+                  skills: job.skills,
+                  updatedAt: job.updatedAt,
+                  verifiedUsers: job.verifiedUsers,
+                  location: job.coordinates
+                    ? `${job.coordinates.lat}, ${job.coordinates.lng}`
+                    : "Location not specified",
+                  latitude: job.coordinates?.lat,
+                  longitude: job.coordinates?.lng,
+                  company: job.company,
+                  description: job.description,
+                  behaviors: job.behaviors
+                }))} />
               </div>
             </div>
-            
-            {/* Map - Right side */}
-            <div className="w-full">
-              <JobMap jobs={filteredJobs.map(job => ({
-                id: job.id,
-                creator: job.company,
-                title: job.title,
-                category: job.category,
-                verifiedCount: job.verifiedCount,
-                skills: job.skills, // Keep the original skills array instead of mapping to strings
-                updatedAt: job.updatedAt,
-                verifiedUsers: job.verifiedUsers,
-                location: job.coordinates 
-                  ? `${job.coordinates.lat}, ${job.coordinates.lng}` 
-                  : "Location not specified",
-                latitude: job.coordinates?.lat,
-                longitude: job.coordinates?.lng,
-                // Adding missing properties to satisfy the Job type
-                company: job.company,
-                description: job.description,
-                behaviors: job.behaviors
-              }))} />
-            </div>
-          </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="my-jds" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Job Descriptions</CardTitle>
-              <CardDescription>Manage your company's job descriptions and requirements</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {loadingMyJobs ? (
-                <div className="flex justify-center items-center h-40">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                </div>
-              ) : myJobs.length === 0 ? (
-                <div className="text-center py-10 text-gray-500">
-                  You haven't created any job descriptions yet.
-                </div>
-              ) : (
-                myJobs.map((job) => (
-                  <div key={job.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <Briefcase className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{job.title}</h3>
-                        <p className="text-sm text-gray-600">Created recently • {job.verifiedUsers} verified users</p>
-                      </div>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button size="sm" variant="outline">
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <FileText className="w-4 h-4 mr-1" />
-                        Edit
-                      </Button>
-                    </div>
+          <TabsContent value="my-jds" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Job Descriptions</CardTitle>
+                <CardDescription>Manage your company's job descriptions and requirements</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {loadingMyJobs ? (
+                  <div className="flex justify-center items-center h-40">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
                   </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="verifications" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Verification Status</CardTitle>
-              <CardDescription>Track your verification submissions and badges</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {loadingVerifications ? (
-                <div className="flex justify-center items-center h-40">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                </div>
-              ) : myVerifications.length === 0 ? (
-                <div className="text-center py-10 text-gray-500">
-                  You don't have any verification submissions yet.
-                </div>
-              ) : (
-                myVerifications.map((verification) => (
-                  <div key={verification.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                        <AvatarFallback className="text-xs">{verification.company.substring(0, 2)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h3 className="font-semibold">{verification.company} - {verification.jobTitle}</h3>
-                        <p className="text-sm text-gray-600">Submitted {verification.submittedAt}</p>
+                ) : myJobs.length === 0 ? (
+                  <div className="text-center py-10 text-gray-500">
+                    You haven't created any job descriptions yet.
+                  </div>
+                ) : (
+                  myJobs.map((job) => (
+                    <div key={job.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <Briefcase className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{job.title}</h3>
+                          <p className="text-sm text-gray-600">Created recently • {job.verifiedUsers} verified users</p>
+                        </div>
                       </div>
-                    </div>
-                    {verification.status === 'pending' ? (
-                      <Badge className="bg-yellow-100 text-yellow-800">Pending Review</Badge>
-                    ) : verification.status === 'verified' ? (
-                      <div className="flex items-center space-x-2">
-                        <Badge className="bg-green-100 text-green-800">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          Verified
-                        </Badge>
+                      <div className="flex space-x-2">
                         <Button size="sm" variant="outline">
-                          <Star className="w-4 h-4 mr-1" />
-                          View Badge
+                          <Eye className="w-4 h-4 mr-1" />
+                          View
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <FileText className="w-4 h-4 mr-1" />
+                          Edit
                         </Button>
                       </div>
-                    ) : (
-                      <Badge className="bg-red-100 text-red-800">Rejected</Badge>
-                    )}
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Badges</CardTitle>
-              <CardDescription>Showcase your verified skills and qualifications</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingBadges ? (
-                <div className="flex justify-center items-center h-40">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                </div>
-              ) : badges.length === 0 ? (
-                <div className="text-center py-10 text-gray-500">
-                  You don't have any badges yet. Complete verifications to earn badges.
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {badges.map((badge) => (
-                    <div key={badge.id} className="border rounded-lg p-4 text-center">
-                      <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Code className="w-8 h-8 text-white" />
-                      </div>
-                      <h3 className="font-semibold">{badge.name}</h3>
-                      <p className="text-sm text-gray-600 mb-3">{badge.company}</p>
-                      <Badge className="bg-green-100 text-green-800">Verified</Badge>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="create" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Create New Job Description</CardTitle>
-              <CardDescription>Define the skills, behaviors, and knowledge required for your role</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Job Title</label>
-                  <Input placeholder="e.g., Full Stack Developer" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Company</label>
-                  <Input placeholder="Your company name" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
-                <textarea 
-                  className="w-full min-h-[100px] p-3 border rounded-md" 
-                  placeholder="Describe the role and your company..."
-                ></textarea>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Required Skills</label>
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <Input placeholder="Add a skill (e.g., React)" className="flex-1" />
-                    <select className="border rounded-md p-2">
-                      <option>Beginner</option>
-                      <option>Intermediate</option>
-                      <option>Advanced</option>
-                      <option>Expert</option>
-                    </select>
-                    <Button size="sm">Add</Button>
+          <TabsContent value="verifications" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Verification Status</CardTitle>
+                <CardDescription>Track your verification submissions and badges</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {loadingVerifications ? (
+                  <div className="flex justify-center items-center h-40">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge className="flex items-center gap-1 px-3 py-1">
-                      React
-                      <span className="text-xs bg-blue-200 text-blue-800 rounded px-1">Advanced</span>
-                      <button className="ml-1 text-gray-500 hover:text-gray-700">×</button>
-                    </Badge>
-                    <Badge className="flex items-center gap-1 px-3 py-1">
-                      Node.js
-                      <span className="text-xs bg-blue-200 text-blue-800 rounded px-1">Intermediate</span>
-                      <button className="ml-1 text-gray-500 hover:text-gray-700">×</button>
-                    </Badge>
+                ) : myVerifications.length === 0 ? (
+                  <div className="text-center py-10 text-gray-500">
+                    You don't have any verification submissions yet.
                   </div>
-                </div>
-              </div>
+                ) : (
+                  myVerifications.map((verification) => (
+                    <div key={verification.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                          <AvatarFallback className="text-xs">{verification.company.substring(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h3 className="font-semibold">{verification.company} - {verification.jobTitle}</h3>
+                          <p className="text-sm text-gray-600">Submitted {verification.submittedAt}</p>
+                        </div>
+                      </div>
+                      {verification.status === 'pending' ? (
+                        <Badge className="bg-yellow-100 text-yellow-800">Pending Review</Badge>
+                      ) : verification.status === 'verified' ? (
+                        <div className="flex items-center space-x-2">
+                          <Badge className="bg-green-100 text-green-800">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Verified
+                          </Badge>
+                          <Button size="sm" variant="outline">
+                            <Star className="w-4 h-4 mr-1" />
+                            View Badge
+                          </Button>
+                        </div>
+                      ) : (
+                        <Badge className="bg-red-100 text-red-800">Rejected</Badge>
+                      )}
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Required Behaviors</label>
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <Input placeholder="Add a behavior (e.g., Team Communication)" className="flex-1" />
-                    <select className="border rounded-md p-2">
-                      <option>Low</option>
-                      <option>Medium</option>
-                      <option>High</option>
-                      <option>Critical</option>
-                    </select>
-                    <Button size="sm">Add</Button>
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Badges</CardTitle>
+                <CardDescription>Showcase your verified skills and qualifications</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingBadges ? (
+                  <div className="flex justify-center items-center h-40">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                  </div>
+                ) : badges.length === 0 ? (
+                  <div className="text-center py-10 text-gray-500">
+                    You don't have any badges yet. Complete verifications to earn badges.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {badges.map((badge) => (
+                      <div key={badge.id} className="border rounded-lg p-4 text-center">
+                        <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <Code className="w-8 h-8 text-white" />
+                        </div>
+                        <h3 className="font-semibold">{badge.name}</h3>
+                        <p className="text-sm text-gray-600 mb-3">{badge.company}</p>
+                        <Badge className="bg-green-100 text-green-800">Verified</Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="create" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Create New Job Description</CardTitle>
+                <CardDescription>Define the skills, behaviors, and knowledge required for your role</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Job Title</label>
+                    <Input placeholder="e.g., Full Stack Developer" />
                   </div>
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                      <div>
-                        <p className="font-medium">Team Communication</p>
-                        <p className="text-xs text-gray-600">Must be responsive in team chats and meetings</p>
-                      </div>
-                      <Badge className="bg-red-100 text-red-800">Critical</Badge>
+                    <label className="text-sm font-medium">Company</label>
+                    <Input placeholder="Your company name" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Description</label>
+                  <textarea 
+                    className="w-full min-h-[100px] p-3 border rounded-md" 
+                    placeholder="Describe the role and your company..."
+                  ></textarea>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Required Skills</label>
+                  <div className="border rounded-md p-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <Input placeholder="Add a skill (e.g., React)" className="flex-1" />
+                      <select className="border rounded-md p-2">
+                        <option>Beginner</option>
+                        <option>Intermediate</option>
+                        <option>Advanced</option>
+                        <option>Expert</option>
+                      </select>
+                      <Button size="sm">Add</Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge className="flex items-center gap-1 px-3 py-1">
+                        React
+                        <span className="text-xs bg-blue-200 text-blue-800 rounded px-1">Advanced</span>
+                        <button className="ml-1 text-gray-500 hover:text-gray-700">×</button>
+                      </Badge>
+                      <Badge className="flex items-center gap-1 px-3 py-1">
+                        Node.js
+                        <span className="text-xs bg-blue-200 text-blue-800 rounded px-1">Intermediate</span>
+                        <button className="ml-1 text-gray-500 hover:text-gray-700">×</button>
+                      </Badge>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Required Certifications</label>
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <Input placeholder="Add a certification (e.g., AWS Certified Developer)" className="flex-1" />
-                    <Button size="sm">Add</Button>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Required Behaviors</label>
+                  <div className="border rounded-md p-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <Input placeholder="Add a behavior (e.g., Team Communication)" className="flex-1" />
+                      <select className="border rounded-md p-2">
+                        <option>Low</option>
+                        <option>Medium</option>
+                        <option>High</option>
+                        <option>Critical</option>
+                      </select>
+                      <Button size="sm">Add</Button>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
+                        <div>
+                          <p className="font-medium">Team Communication</p>
+                          <p className="text-xs text-gray-600">Must be responsive in team chats and meetings</p>
+                        </div>
+                        <Badge className="bg-red-100 text-red-800">Critical</Badge>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Documents & Resources</label>
-                <div className="border rounded-md p-4">
-                  <Button variant="outline" className="w-full h-24 border-dashed">
-                    <Plus className="w-6 h-6 mr-2" />
-                    Upload Documents
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Required Certifications</label>
+                  <div className="border rounded-md p-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <Input placeholder="Add a certification (e.g., AWS Certified Developer)" className="flex-1" />
+                      <Button size="sm">Add</Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Documents & Resources</label>
+                  <div className="border rounded-md p-4">
+                    <Button variant="outline" className="w-full h-24 border-dashed">
+                      <Plus className="w-6 h-6 mr-2" />
+                      Upload Documents
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">External Links</label>
+                  <div className="border rounded-md p-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <Input placeholder="Title (e.g., Company Handbook)" className="flex-1" />
+                      <Input placeholder="URL (https://...)" className="flex-1" />
+                      <Button size="sm">Add</Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Company Rules & Culture</label>
+                  <div className="border rounded-md p-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <Input placeholder="Add a rule (e.g., Camera On Policy)" className="flex-1" />
+                      <Button size="sm">Add</Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <Button variant="outline">Save as Draft</Button>
+                  <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
+                    Publish Job Description
                   </Button>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">External Links</label>
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <Input placeholder="Title (e.g., Company Handbook)" className="flex-1" />
-                    <Input placeholder="URL (https://...)" className="flex-1" />
-                    <Button size="sm">Add</Button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Company Rules & Culture</label>
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <Input placeholder="Add a rule (e.g., Camera On Policy)" className="flex-1" />
-                    <Button size="sm">Add</Button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-3">
-                <Button variant="outline">Save as Draft</Button>
-                <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
-                  Publish Job Description
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+         </Tabs>
+         </div>
+       </div>
+     </div>
   )
 }

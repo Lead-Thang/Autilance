@@ -87,7 +87,7 @@ export const navMain = [
     ],
   },
   {
-    title: "Make Money",
+    title: "Earn",
     url: "/dashboard/make-money",
     icon: DollarSign,
     items: [
@@ -140,6 +140,7 @@ export const navMain = [
 
 export function NavMain({
   items = navMain,
+  className,
 }: {
   items?: {
     title: string
@@ -151,11 +152,12 @@ export function NavMain({
       url: string
     }[]
   }[]
+  className?: string
 }) {
   const pathname = usePathname()
 
   return (
-    <SidebarGroup>
+    <SidebarGroup className={className}>
       <SidebarMenu>
         {items.map((item) => {
           const isActive = pathname === item.url || (pathname !== null && pathname.startsWith(item.url + "/"))
@@ -164,7 +166,7 @@ export function NavMain({
             <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
               <SidebarMenuItem>
                 <div className="flex items-center">
-                  <SidebarMenuButton asChild tooltip={item.title} className="flex-1 justify-start">
+                  <SidebarMenuButton asChild tooltip={item.title} className="flex-1 justify-start hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors">
                     <Link href={item.url} className={isActive ? "bg-sidebar-accent" : ""}>
                       {item.icon && <item.icon className="shrink-0" />}
                       <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
@@ -173,7 +175,7 @@ export function NavMain({
                   {item.items?.length ? (
                     <div className="ml-auto pl-4 group-data-[collapsible=icon]:hidden">
                       <CollapsibleTrigger asChild>
-                        <SidebarMenuButton className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground px-2">
+                        <SidebarMenuButton className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground px-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors">
                           <ChevronRight className="transition-transform duration-200 data-[state=open]:rotate-90" />
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
@@ -186,7 +188,7 @@ export function NavMain({
                       {item.items.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
-                            <Link href={subItem.url} className={pathname === subItem.url ? "bg-sidebar-accent" : ""}>
+                            <Link href={subItem.url} className={`hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors ${pathname === subItem.url ? "bg-sidebar-accent" : ""}`}>
                               <span>{subItem.title}</span>
                             </Link>
                           </SidebarMenuSubButton>

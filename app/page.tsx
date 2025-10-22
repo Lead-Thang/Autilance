@@ -103,13 +103,6 @@ const testimonials = [
   },
 ]
 
-const stats = [
-  { label: "On Marketplace", value: "Buy & Sell", icon: Store },
-  { label: "Stores Created", value: "25,000+", icon: Users },
-  { label: "AI Conversations", value: "1M+", icon: MessageSquare },
-  { label: "Apply or Employ", value: "Job & Task", icon: Briefcase },
-]
-
 export default function LandingPage() {
   const supabase = createClient()
   const [session, setSession] = useState<Session | null>(null)
@@ -199,7 +192,7 @@ export default function LandingPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950">
       <style>{`
         @keyframes orbit {
           0% {
@@ -250,8 +243,8 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-indigo-600/10" />
+      <section className="relative overflow-hidden py-10 lg:py-100">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-600/20 via-purple-600/10 to-transparent" />
         {/* Raining Stars Effect with Trails */}
         <div className="absolute inset-0 overflow-hidden">
           {starValues.map((star, i) => (
@@ -294,14 +287,11 @@ export default function LandingPage() {
         </div>
         <div className="relative max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <Badge className="mb-6 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 border-blue-300 dark:border-blue-600 px-4 py-2">
-              <Sparkles className="w-4 h-4 mr-2" />
-              Powered by Advanced AI
-            </Badge>
+            <Image src="/logo.png" alt="Autilance Logo" width={85} height={85} className="mx-auto mb-14 mt-6" />
 
-            <div className="mb-8 h-32 flex items-center justify-center">
+            <div className="mb-12 h-32 flex items-center justify-center">
               <div className="transition-opacity duration-1000 ease-in-out">
-                <h1 className="text-5xl lg:text-6xl font-bold mb-4">
+                <h1 className="text-[50px] lg:text-[60px] font-bold">
                   {currentPhrase === 0 ? (
                     <>
                       <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Earn</span>
@@ -320,7 +310,7 @@ export default function LandingPage() {
                     </>
                   )}
                 </h1>
-                <p className="text-5xl lg:text-6xl font-bold">
+                <p className="text-[50px] lg:text-[60px] font-bold">
                   {currentPhrase === 0 ? (
                     <span className="text-white">with Autilance!</span>
                   ) : currentPhrase === 1 ? (
@@ -334,7 +324,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <p className="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-12 mx-auto leading-relaxed readable-text">
+            <p className="text-[16px] lg:text-2xl text-gray-600 dark:text-gray-300 mb-8 mx-auto leading-relaxed readable-text">
                Revolutionize the way you earn! Find jobs or recruit partners, be a freelancer or a client, buy & sell products,...
             </p>
 
@@ -378,23 +368,16 @@ export default function LandingPage() {
               )}
             </div>
           </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-            {stats.map((stat, index) => (
-              <div key={index} className="h-36 flex items-center justify-center">
-                <AnimatedStatsCard stat={stat} />
-              </div>
-            ))}
+          <div className="flex flex-col sm:flex-row gap-200 justify-center items-center"></div>
           </div>
-        </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-white/50 dark:bg-slate-800/50">
-        <div className="max-w-7xl mx-auto px-6">
+      <section id="features" className="py-16 bg-gradient-to-b from-slate-900/50 via-slate-900 to-slate-950">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-600/5 to-indigo-600/10 pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto px-6 relative">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+            <h2 className="text-4xl lg:text-5xl text-white font-bold mb-6">
               Everything You Need to
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 {" "}

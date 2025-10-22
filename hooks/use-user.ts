@@ -29,7 +29,8 @@ export function useUser() {
         const { data: { user: supabaseUser }, error } = await supabase.auth.getUser()
         
         if (error) {
-          console.error("Error fetching user:", error)
+          console.error("Error fetching user:", error.message || error)
+          setIsLoading(false)
           return
         }
         
@@ -42,7 +43,7 @@ export function useUser() {
             .single()
           
           if (userError) {
-            console.error("Error fetching user data:", userError)
+            console.error("Error fetching user data:", userError.message || userError)
           }
           
           setUser({
@@ -52,15 +53,15 @@ export function useUser() {
             avatar: userData?.avatar || supabaseUser.user_metadata?.avatar_url || undefined,
             role: userData?.role || "Professional",
             joinDate: new Date(userData?.created_at || supabaseUser.created_at),
-            displayName: userData?.display_name || supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0],
+            displayName: userData?.display_name || supabaseUser.email?.split('@')[0],
             provider: supabaseUser.app_metadata?.provider || "email",
             bio: userData?.bio || undefined,
             location: userData?.location || undefined,
             website: userData?.website || undefined
           })
         }
-      } catch (error) {
-        console.error("Error loading user:", error)
+      } catch (error: any) {
+        console.error("Error loading user:", error.message || "Unknown error occurred")
       } finally {
         setIsLoading(false)
       }
@@ -78,7 +79,7 @@ export function useUser() {
           avatar: session.user.user_metadata?.avatar_url || undefined,
           role: "Professional",
           joinDate: new Date(session.user.created_at),
-          displayName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
+           displayName: session.user.email?.split('@')[0],
           provider: session.user.app_metadata?.provider || "email",
           bio: undefined,
           location: undefined,

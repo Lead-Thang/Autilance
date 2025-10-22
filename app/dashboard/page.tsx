@@ -57,44 +57,44 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="container mx-auto px-6 py-8 max-w-7xl">
+    <div className="flex justify-center w-full">
+      <div className="container mx-auto px-6 py-8 w-full max-w-7xl">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {statItems.map((stat, index) => (
+            <Card key={index} className="hover-lift border-border/50 bg-card/50 backdrop-blur-sm group">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                <div
+                  className={`p-2 ${stat.bgColor} rounded-lg group-hover:scale-110 transition-transform duration-200`}
+                >
+                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-gradient-primary">{stat.value}</div>
+                <p className="text-xs text-muted-foreground">{stat.change}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {statItems.map((stat, index) => (
-          <Card key={index} className="hover-lift border-border/50 bg-card/50 backdrop-blur-sm group">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-              <div
-                className={`p-2 ${stat.bgColor} rounded-lg group-hover:scale-110 transition-transform duration-200`}
-              >
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Learning Progress */}
+          <Card className="lg:col-span-2 border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-primary" />
+                Learning Progress
+              </CardTitle>
+              <CardDescription>Your current course progress and goals</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gradient-primary">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">{stat.change}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Learning Progress */}
-              <Card className="lg:col-span-2 border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
-              Learning Progress
-            </CardTitle>
-            <CardDescription>Your current course progress and goals</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {courses.map((course) => (
-              <div key={course.id} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">{course.title}</span>
-                  <span className="text-sm text-muted-foreground">{course.progress}%</span>
+            <CardContent className="space-y-6">
+              {courses.map((course) => (
+                <div key={course.id} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">{course.title}</span>
+                    <span className="text-sm text-muted-foreground">{course.progress}%</span>
                 </div>
                 <Progress value={course.progress} className="h-2" />
               </div>
@@ -163,9 +163,10 @@ export default function DashboardPage() {
           >
             <TrendingUp className="h-6 w-6 mb-2 text-primary" />
             <span>Analytics</span>
-            </Button>
-          </div>
+          </Button>
         </div>
       </div>
+    </div>
+  </div>
   )
 }

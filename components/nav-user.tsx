@@ -73,9 +73,9 @@ export function NavUser({
             <SidebarMenuButton
               id="nav-user-trigger"
               size="lg"
-              className="data-[state=open]:bg-primary/10 hover:bg-primary/10 transition-all duration-200 animate-lift"
+              className="w-auto inline-flex data-[state=open]:bg-primary/10 hover:bg-primary/10 transition-all duration-200 animate-lift"
             >
-              <div className="flex items-left gap-2">
+              <div className="flex items-start gap-2">
                 <Avatar className="h-8 w-8 rounded-lg border-2 border-primary/20">
                   <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
                   <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-semibold">

@@ -22,13 +22,12 @@ import {
   Wallet
 } from "lucide-react"
 import { useState } from "react"
-import { createClient } from "@/lib/supabase/client"
 
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { Header } from "@/components/header"
 import {
   Sidebar,
   SidebarContent,
@@ -40,6 +39,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { Search } from "@/components/search"
 
 const data = {
   teams: [
@@ -129,7 +129,7 @@ const data = {
       ],
     },
     {
-      title: "Make Money",
+      title: "Earn",
       url: "/dashboard/make-money",
       icon: DollarSign,
       items: [
@@ -298,104 +298,29 @@ export function AppLayout({ children }: Props) {
     email: "user@autilance.com",
     avatar: "/avatars/shadcn.jpg",
   })
-  const supabase = createClient()
-
-  React.useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const { data: { user: supabaseUser }, error } = await supabase.auth.getUser()
-        
-        if (error) {
-          console.error("Error fetching user:", error)
-          return
-        }
-        
-        if (supabaseUser) {
-          setUser({
-            name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || "User",
-            email: supabaseUser.email || "",
-            avatar: supabaseUser.user_metadata?.avatar_url || "/avatars/shadcn.jpg",
-          })
-        }
-      } catch (error) {
-        console.error("Error loading user:", error)
-      }
-    }
-
-    fetchUser()
-  }, [])
 
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Global Top Header (outer wrapper) */}
-      <header
-        className={`sticky top-0 z-40 w-full border-b border-border/50 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-[height,padding] duration-300 ease-in-out ${
-          isSidebarCollapsed ? 'h-12' : 'h-14'
-        }`}
-      >
-        <div className={`flex items-center justify-between h-full w-full max-w-full px-4 ${isSidebarCollapsed ? 'gap-2' : 'gap-4'}`}>
-          {/* Left: Sidebar Trigger and Brand */}
-          <div className="flex items-center gap-2">
-            <a href="/dashboard" className="flex items-center gap-2">
-              <div className="flex aspect-square bg-gradient-to-br from-blue-600 to-purple-700 size-8 items-center justify-center rounded-md text-primary-foreground">
-                <img src="/logo.png" className="size-5" />
-              </div>
-              <div className={`text-sm leading-tight ${isSidebarCollapsed ? 'hidden sm:block' : 'block'}`}>
-                <span className="truncate font-semibold">Autilance</span>
-              </div>
-            </a>
-          </div>
-
-          {/* Center: Placeholder for search or page switcher (optional) */}
-          <div className="flex-1 px-2 hidden md:block">
-            {/* Add search input or breadcrumbs here if needed */}
-          </div>
-
-          {/* Right: Theme toggle + user menu */}
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <NavUser user={user} />
-          </div>
-        </div>
-      </header>
+    <div className="flex flex-col w-full max-h-screen">
+      <Header user={user} onUserUpdate={setUser} />
 
       {/* Page body with sidebar + content. Add top padding equal to header height */}
-      <div className={`flex flex-1 w-full min-w-0 ${isSidebarCollapsed ? 'pt-0' : 'pt-0'}`}>
+      <div className="flex flex-1 w-full min-w-0">
         <Sidebar collapsible="icon">
-          {/* Keep sidebar minimal header or remove to avoid duplication */}
-          <SidebarHeader className="border-b border-border/50 bg-background/50">
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton size="lg" asChild>
-                  <a href="/dashboard" className="flex items-center gap-2">
-                    <div className="flex aspect-square bg-gradient-to-br from-blue-600 to-purple-700 size-10 items-center justify-center rounded-lg text-primary-foreground">
-                      <img src="/logo.png" className="size-6" />
-                    </div>
-                    <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                      <span className="truncate font-semibold">Autilance</span>
-                      <span className="truncate text-xs text-muted-foreground">Platform</span>
-                    </div>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarHeader>
-
           <SidebarContent className="bg-background/30">
-            <NavMain items={data.navMain} />
-            <NavProjects projects={data.projects} />
+            <NavMain items={data.navMain} className="mt-12" />
+            <NavProjects projects={data.projects}  />
             <NavSecondary items={data.navSecondary} className="mt-auto" />
           </SidebarContent>
 
           <SidebarFooter className="border-t border-border/50 bg-background/50">
-            <div className={`flex ${isSidebarCollapsed ? 'flex-col items-start' : 'items-center justify-between'} p-2 pl-0 gap-2`}>
+            <div className={`flex ${isSidebarCollapsed ? 'flex-col items-center' : 'items-center justify-evenly'} p-2 pl-0 gap-2`}>
               <NavUser user={user} />
               <SidebarTrigger />
             </div>
           </SidebarFooter>
         </Sidebar>
 
-        <main className={`${isSidebarCollapsed ? 'p-4 ' : 'p-622'} transition-all duration-300 ease-in-out`}>
+        <main className={`transition-all duration-300 ease-in-out flex-1 overflow-auto ${isSidebarCollapsed ? 'p-4' : 'p-6'}`}>
           {/* Main header section responsive to sidebar state (optional) */}
           <div className="flex items-center justify-between mb-8">
           </div>

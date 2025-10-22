@@ -27,6 +27,12 @@ import {
   Eye,
   EyeOff,
   Plus,
+  Facebook,
+  Twitter,
+  Instagram,
+  Youtube,
+  Linkedin,
+  Music
 } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useUser } from "../../../hooks/use-user"
@@ -42,6 +48,12 @@ interface UserProfile {
   bio: string
   website: string
   avatar: string
+  facebook?: string
+  twitter?: string
+  instagram?: string
+  youtube?: string
+  linkedin?: string
+  tiktok?: string
 }
 
 interface CompanyProfile {
@@ -108,7 +120,7 @@ export default function SettingsPage() {
     try {
       const { data, error } = await supabase
         .from('users')
-        .select('first_name, last_name, display_name, phone, location, bio, website, avatar')
+        .select('first_name, last_name, display_name, phone, location, bio, website, avatar, facebook, twitter, instagram, youtube, linkedin, tiktok')
         .eq('id', user.id)
         .single()
 
@@ -117,16 +129,22 @@ export default function SettingsPage() {
         return
       }
 
-      setUserProfile({
-        firstName: data.first_name || user.name?.split(' ')[0] || "",
-        lastName: data.last_name || user.name?.split(' ')[1] || "",
-        displayName: data.display_name || user.displayName || user.name || "",
-        email: user.email || "",
+       setUserProfile({
+         firstName: data.first_name || user?.name?.split(' ')[0] || "",
+         lastName: data.last_name || user?.name?.split(' ')[1] || "",
+         displayName: data.display_name || "",
+         email: user?.email || "",
         phone: data.phone || "",
         location: data.location || "",
         bio: data.bio || "",
         website: data.website || "",
-        avatar: data.avatar || user.avatar || ""
+        avatar: data.avatar || user?.avatar || "",
+        facebook: data.facebook || "",
+        twitter: data.twitter || "",
+        instagram: data.instagram || "",
+        youtube: data.youtube || "",
+        linkedin: data.linkedin || "",
+        tiktok: data.tiktok || ""
       })
     } catch (error) {
       console.error("Error fetching user profile:", error)
@@ -162,7 +180,7 @@ export default function SettingsPage() {
     }
   }
 
-  const handleSaveProfile = async () => {
+   const handleSaveProfile = async () => {
     if (!user?.id) return
 
     try {
@@ -176,7 +194,13 @@ export default function SettingsPage() {
           location: userProfile.location,
           bio: userProfile.bio,
           website: userProfile.website,
-          avatar: userProfile.avatar
+          avatar: userProfile.avatar,
+          facebook: userProfile.facebook,
+          twitter: userProfile.twitter,
+          instagram: userProfile.instagram,
+          youtube: userProfile.youtube,
+          linkedin: userProfile.linkedin,
+          tiktok: userProfile.tiktok
         })
         .eq('id', user.id)
 
@@ -396,6 +420,117 @@ export default function SettingsPage() {
                     value={userProfile.website} 
                     onChange={(e) => setUserProfile({...userProfile, website: e.target.value})} 
                   />
+                </div>
+              </div>
+
+              <Separator />
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Social Media Handles</h3>
+                <p className="text-sm text-gray-600">
+                  Add your social media handles to help others find and connect with you
+                </p>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="facebook" className="flex items-center">
+                    <Facebook className="w-4 h-4 mr-2 text-blue-600" />
+                    Facebook
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-3 h-4 w-4 text-gray-400">@</span>
+                    <Input 
+                      id="facebook" 
+                      placeholder="username" 
+                      className="pl-10" 
+                      value={userProfile.facebook || ""} 
+                      onChange={(e) => setUserProfile({...userProfile, facebook: e.target.value})} 
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="twitter" className="flex items-center">
+                    <Twitter className="w-4 h-4 mr-2 text-blue-400" />
+                    Twitter
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-3 h-4 w-4 text-gray-400">@</span>
+                    <Input 
+                      id="twitter" 
+                      placeholder="username" 
+                      className="pl-10" 
+                      value={userProfile.twitter || ""} 
+                      onChange={(e) => setUserProfile({...userProfile, twitter: e.target.value})} 
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="instagram" className="flex items-center">
+                    <Instagram className="w-4 h-4 mr-2 text-pink-500" />
+                    Instagram
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-3 h-4 w-4 text-gray-400">@</span>
+                    <Input 
+                      id="instagram" 
+                      placeholder="username" 
+                      className="pl-10" 
+                      value={userProfile.instagram || ""} 
+                      onChange={(e) => setUserProfile({...userProfile, instagram: e.target.value})} 
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="youtube" className="flex items-center">
+                    <Youtube className="w-4 h-4 mr-2 text-red-600" />
+                    YouTube
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-3 h-4 w-4 text-gray-400">@</span>
+                    <Input 
+                      id="youtube" 
+                      placeholder="channelname" 
+                      className="pl-10" 
+                      value={userProfile.youtube || ""} 
+                      onChange={(e) => setUserProfile({...userProfile, youtube: e.target.value})} 
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="linkedin" className="flex items-center">
+                    <Linkedin className="w-4 h-4 mr-2 text-blue-700" />
+                    LinkedIn
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-3 h-4 w-4 text-gray-400">@</span>
+                    <Input 
+                      id="linkedin" 
+                      placeholder="username" 
+                      className="pl-10" 
+                      value={userProfile.linkedin || ""} 
+                      onChange={(e) => setUserProfile({...userProfile, linkedin: e.target.value})} 
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="tiktok" className="flex items-center">
+                    <Music className="w-4 h-4 mr-2 text-black dark:text-white" />
+                    TikTok
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-3 h-4 w-4 text-gray-400">@</span>
+                    <Input 
+                      id="tiktok" 
+                      placeholder="username" 
+                      className="pl-10" 
+                      value={userProfile.tiktok || ""} 
+                      onChange={(e) => setUserProfile({...userProfile, tiktok: e.target.value})} 
+                    />
+                  </div>
                 </div>
               </div>
 
